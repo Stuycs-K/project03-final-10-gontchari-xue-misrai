@@ -11,4 +11,9 @@
 #define UNIVERSAL_H
 #define WKP "mario"
 
+struct server {
+    int num_channels;
+    char *channels[];
+}
+
 #endif
