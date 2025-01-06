@@ -99,7 +99,9 @@ void handle_resize(int sig) {
 
     delwin(input_win);
     input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
-    box(input_win, 0, 0);  // Draw border around input window
+    box(input_win, 0, 0);                     // Draw border around input window
+    mvwprintw(input_win, 1, 1, "%s", input);  // Display input buffer
+
     wrefresh(input_win);
   }
 }
