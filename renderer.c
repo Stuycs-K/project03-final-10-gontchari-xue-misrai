@@ -1,6 +1,7 @@
 #include <locale.h>
 #include <ncurses.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 
 // gcc sigma.c -o sigma -lncurses
@@ -13,6 +14,8 @@ WINDOW *input_win, *chat_win;
 int LINES, COLS, chat_open = 1;  // Default window size
 
 int main() {
+  setlocale(LC_ALL, "");
+
   initscr();  // Initialize ncurses
   noecho();   // Disable automatic echoing of typed characters
   cbreak();   // Disable line buffering
@@ -25,6 +28,10 @@ int main() {
 
   input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
   box(input_win, 0, 0);                       // Draw border around input window
+  mvwaddch(input_win, 0, 0, L'╭');            // Top-left corner
+  mvwaddch(input_win, 0, COLS - 1, L'╮');     // Top-right corner
+  mvwaddch(input_win, 2, 0, L'╰');            // Bottom-left corner
+  mvwaddch(input_win, 2, COLS - 1, L'╯');     // Bottom-right corner
 
   chat_win = newwin(LINES - 4, COLS, 1, 0);
   box(chat_win, 0, 0);  // Draw border around input window
@@ -54,7 +61,6 @@ int main() {
   mvprintw(0, 0, "You entered: %s", input);
   refresh();
 
-  getch();   // Wait for key press before exiting
   endwin();  // Close ncurses mode
   return 0;
 }
@@ -99,11 +105,17 @@ void handle_resize(int sig) {
 
     delwin(input_win);
     input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
-    box(input_win, 0, 0);                     // Draw border around input window
-    mvwprintw(input_win, 1, 1, "%s", input);  // Display input buffer
+    box(input_win, 0, 0);                    // Draw border around input window
+    mvwaddch(input_win, 0, 0, L'╭');         // Top-left corner
+    mvwaddch(input_win, 0, COLS - 1, L'╮');  // Top-right corner
+    mvwaddch(input_win, 2, 0, L'╰');         // Bottom-left corner
+    mvwaddch(input_win, 2, COLS - 1, L'╯');  // Bottom-right corner
 
     wrefresh(input_win);
   }
 }
 
-void handle_sigint(int sig) { endwin(); }
+void handle_sigint(int sig) {
+  endwin();
+  exit(0);
+}
