@@ -16,8 +16,9 @@ This document must be updated daily by EACH group member.
 - Created and worked on universal.h file for the project
 - General setup and cleaning of initial project elements
 
-### 2024-01-07 - Brief description
-Expanded description including how much time was spent on task.
+### 2024-01-07 - Client server interaction
+- Worked on implementing client, server, relationship code to establish a handshake/connection
+- ...
 
 ## Player 3
 
