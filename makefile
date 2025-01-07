@@ -8,13 +8,13 @@ server: serv
 client: cli
 	@./cli
 
-client.o: client.c networking.h colors.h
+client.o: client.c universal.h colors.h
 	@gcc -c client.c
 
-server.o: server.c networking.h colors.h
+server.o: server.c universal.h colors.h
 	@gcc -c server.c
 
-pipe_networking.o: networking.c networking.h colors.h
+networking.o: networking.c universal.h colors.h
 	@gcc -c networking.c
 
 clean:
