@@ -6,6 +6,7 @@
 
 // gcc sigma.c -o sigma -lncurses
 #include "renderer.h"
+#include <curses.h>
 
 #define MAX_INPUT 50
 
@@ -28,11 +29,6 @@ int main() {
 
   input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
   box(input_win, 0, 0);                       // Draw border around input window
-  mvwaddch(input_win, 0, 0, L'╭');            // Top-left corner
-  mvwaddch(input_win, 0, COLS - 1, L'╮');     // Top-right corner
-  mvwaddch(input_win, 2, 0, L'╰');            // Bottom-left corner
-  mvwaddch(input_win, 2, COLS - 1, L'╯');     // Bottom-right corner
-
   chat_win = newwin(LINES - 4, COLS, 1, 0);
   box(chat_win, 0, 0);  // Draw border around input window
 
@@ -106,11 +102,6 @@ void handle_resize(int sig) {
     delwin(input_win);
     input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
     box(input_win, 0, 0);                    // Draw border around input window
-    mvwaddch(input_win, 0, 0, L'╭');         // Top-left corner
-    mvwaddch(input_win, 0, COLS - 1, L'╮');  // Top-right corner
-    mvwaddch(input_win, 2, 0, L'╰');         // Bottom-left corner
-    mvwaddch(input_win, 2, COLS - 1, L'╯');  // Bottom-right corner
-
     wrefresh(input_win);
   }
 }
