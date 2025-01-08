@@ -6,10 +6,26 @@ int to_client, from_client;
 
 pid_t a = -1;
 
+/*=========================
+  handle_sigpipe
+  args: int sig
+
+  handles and prints a notifying message if it catches a SIGPIPE signal, usually from a child disconnect
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_sigpipe(int sig) {
   printf("(" HRED "SERVER" reset "): Caught SIGPIPE, client disconnected\n");
 }
 
+/*=========================
+  handle_sigint
+  args: int sig
+
+  handles and prints a notifying message if it catches a SIGINT signal, usually from server disconnect
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_sigint(int sig) {
   if (a != 0) {
     if (unlink(WKP) != 0) err();
@@ -27,7 +43,7 @@ void handle_sigint(int sig) {
 
 int main() {
   signal(SIGPIPE, handle_sigpipe);  // Set up signal handler for SIGPIPE
-  signal(SIGINT, handle_sigint);
+  signal(SIGINT, handle_sigint);  // Set up signal handler for SIGINT
   while (1) {
     if (a != 0) {
       from_client = server_handshake(&to_client);  // initial handshake
