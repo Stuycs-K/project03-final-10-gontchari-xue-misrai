@@ -10,10 +10,10 @@ This document must be updated daily by EACH group member.
 - Make the individial files and the makefile targets
 - Created a basic renderer in renderer.c and simplified placement through renderer.h
 
-## 2025-01-08 - ___
-- ___
-- ___
-- ___
+## 2025-01-08 
+
+- Updated the client so that the frontend scrolls and also added *COLORS*. 
+- Made sure input worked in the chatbox
 
 ## 2025-01-09 - ___
 - ___
