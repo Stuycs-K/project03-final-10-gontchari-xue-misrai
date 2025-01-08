@@ -52,3 +52,6 @@ Mkfile.old
 dkms.conf
 
 *.swp
+
+cli
+serv
