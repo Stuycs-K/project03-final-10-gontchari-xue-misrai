@@ -10,6 +10,55 @@ This document must be updated daily by EACH group member.
 - Make the individial files and the makefile targets
 - Created a basic renderer in renderer.c and simplified placement through renderer.h
 
+## 2025-01-08 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-09 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-10 to 2025-01-12 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-13 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-14 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-15 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-16 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-17 to 2025-01-19 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-20 - ___
+- ___
+- ___
+- ___
+
+
+
+
+
 ## Ivan Gontchar
 
 ### 2025-01-06 - Setup
@@ -20,15 +69,101 @@ This document must be updated daily by EACH group member.
 - Worked on implementing client, server, relationship code to establish a handshake/connection
 - For now it's just functionally pretty much the same as the lab, and will be further customized as needed
 
-## Player 3
+## 2025-01-08 - ___
+- ___
+- ___
+- ___
 
-### 2025-01-06 - Brief description
-Expanded description including how much time was spent on task.
+## 2025-01-09 - ___
+- ___
+- ___
+- ___
 
-### 2025-01-07 - Brief description
-Expanded description including how much time was spent on task.
+## 2025-01-10 to 2025-01-12 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-13 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-14 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-15 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-16 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-17 to 2025-01-19 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-20 - ___
+- ___
+- ___
+- ___
+
+
+
+
 
 ## Ishaana Misra
 
 ### 2025-01-6
-- start server struct 
+- start server struct
+
+## 2025-01-08 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-09 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-10 to 2025-01-12 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-13 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-14 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-15 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-16 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-17 to 2025-01-19 - ___
+- ___
+- ___
+- ___
+
+## 2025-01-20 - ___
+- ___
+- ___
+- ___
