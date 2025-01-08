@@ -18,7 +18,7 @@ This document must be updated daily by EACH group member.
 
 ### 2024-01-07 - Client server interaction
 - Worked on implementing client, server, relationship code to establish a handshake/connection
-- ...
+- For now it's just functionally pretty much the same as the lab, and will be further customized as needed
 
 ## Player 3
 
