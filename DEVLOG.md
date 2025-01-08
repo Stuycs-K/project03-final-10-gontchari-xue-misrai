@@ -69,9 +69,9 @@ This document must be updated daily by EACH group member.
 - Worked on implementing client, server, relationship code to establish a handshake/connection
 - For now it's just functionally pretty much the same as the lab, and will be further customized as needed
 
-## 2025-01-08 - ___
-- ___
-- ___
+## 2025-01-08 - Documentation points
+- Added documentation for basically all functions in all .c files we have
+- Updated Devlog for all future dates
 - ___
 
 ## 2025-01-09 - ___
