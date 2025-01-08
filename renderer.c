@@ -23,6 +23,7 @@ int main() {
   setlocale(LC_ALL, "");
   initscr();  // Initialize ncurses
 
+ // COLORS
   start_color();
   init_pair(1, COLOR_RED, COLOR_GREEN);   // chat box
   init_pair(2, COLOR_CYAN, COLOR_BLACK);  // prompt
