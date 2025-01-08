@@ -123,10 +123,8 @@ This document must be updated daily by EACH group member.
 ### 2025-01-6
 - start server struct
 
-## 2025-01-08 - ___
-- ___
-- ___
-- ___
+## 2025-01-08 - updating server struct
+- have server create semaphore
 
 ## 2025-01-09 - ___
 - ___
