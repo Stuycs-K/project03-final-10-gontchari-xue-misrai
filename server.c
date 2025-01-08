@@ -20,8 +20,8 @@ void handle_sigint(int sig) {
     printf("(" HRED "SERVER" reset "): Closing child processes\n");
     int close_num = -1;
     if (write(to_client, &close_num, sizeof(close_num)) == -1) err();
-    close(to_client);
   }
+  server_close();
   exit(0);
 }
 

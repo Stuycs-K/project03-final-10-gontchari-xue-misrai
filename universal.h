@@ -12,6 +12,15 @@
 #define UNIVERSAL_H
 #define WKP "mario"
 
+#define KEY 39682
+
+union semun { 
+    int  val;    /* Value for SETVAL */
+    struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET */
+    unsigned short  *array;  /* Array for GETALL, SETALL */
+    struct seminfo  *__buf;  /* Buffer for IPC_INFO */
+};
+
 struct server {
     int num_channels;
     char *channels[];
@@ -25,6 +34,9 @@ int server_connect(int from_client);
 
 // for forking server
 int server_setup();
+
+// for closing server
+void server_close();
 
 // for error handling
 int err();
