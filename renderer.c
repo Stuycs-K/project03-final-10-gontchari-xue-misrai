@@ -5,12 +5,16 @@
 #include <string.h>
 
 // gcc sigma.c -o sigma -lncurses
-#include "renderer.h"
 #include <curses.h>
 
+#include "renderer.h"
+
 #define MAX_INPUT 50
+#define MAX_CHAT 30000
 
 char input[MAX_INPUT] = {0};  // Input buffer
+char chat[MAX_CHAT] = "READY PLAYER 1";
+
 WINDOW *input_win, *chat_win;
 int LINES, COLS, chat_open = 1;  // Default window size
 
@@ -35,11 +39,13 @@ int main() {
   mvprintw(0, 0, "Type something (Backspace to delete, Enter to submit):");
   refresh();  // Refresh main screen
 
+  mvwprintw(chat_win, 2, 3, "%s", chat);
   mvwprintw(input_win, 1, 1, "%s", input);  // Display input buffer
 
   while (1) {
     wrefresh(chat_win);
     wrefresh(input_win);
+
     int ch = getch();  // Capture user input
 
     if (ch == '\n') {
@@ -50,6 +56,15 @@ int main() {
     } else if (pos < MAX_INPUT - 1 && ch >= 32 && ch <= 126) {
       handle_normal_characters(input, &pos, ch);
     }
+
+    delwin(chat_win);
+    chat_win = newwin(LINES - 4, COLS, 1, 0);
+    char *chat_add = "READY PLAYER 1";
+    box(chat_win, 0, 0);  // Draw border around input window
+    strcat(chat, chat_add);
+    mvwprintw(chat_win, 3, 3, "%s", chat);
+    wrefresh(chat_win);
+    refresh();
   }
 
   // Final output after exiting input
@@ -101,7 +116,7 @@ void handle_resize(int sig) {
 
     delwin(input_win);
     input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
-    box(input_win, 0, 0);                    // Draw border around input window
+    box(input_win, 0, 0);  // Draw border around input window
     wrefresh(input_win);
   }
 }
