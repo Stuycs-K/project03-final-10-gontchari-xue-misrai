@@ -5,10 +5,17 @@
 
 int to_server, from_server;
 
+/*=========================
+  handle_sigint
+  args: int sig
+
+  handles and prints a notifying message if it catches a SIGINT signal, and closes client
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_sigint(int sig) {
   close(to_server);
   close(from_server);
-  // ??? remove fifo is disconnected? idk
   char fifo_name[PIPE_SIZING] = {"\0"};
   sprintf(fifo_name, "%d", getpid());
   char *fifo_ending = ".fifo";
@@ -18,6 +25,13 @@ void handle_sigint(int sig) {
   exit(0);
 }
 
+/*=========================
+  main
+
+  handles client side pipe processing
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 int main() {
   signal(SIGINT, handle_sigint);
 
