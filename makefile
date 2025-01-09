@@ -12,7 +12,7 @@ client.o: client.c universal.h colors.h
 	@gcc -c client.c
 
 server.o: server.c universal.h colors.h
-	@gcc -c server.c
+	@gcc -c server.c -lncurses
 
 networking.o: networking.c universal.h colors.h
 	@gcc -c networking.c
