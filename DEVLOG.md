@@ -126,10 +126,8 @@ This document must be updated daily by EACH group member.
 ## 2025-01-08 - updating server struct
 - have server create semaphore
 
-## 2025-01-09 - ___
-- ___
-- ___
-- ___
+## 2025-01-09 - shared memory
+- have server create shared memory
 
 ## 2025-01-10 to 2025-01-12 - ___
 - ___
