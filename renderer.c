@@ -147,6 +147,8 @@ void handle_resize(int sig) {
   }
 }
 
+
+
 void handle_sigint(int sig) {
   endwin();
   exit(0);
