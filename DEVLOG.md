@@ -15,10 +15,10 @@ This document must be updated daily by EACH group member.
 - Updated the client so that the frontend scrolls and also added *COLORS*. 
 - Made sure input worked in the chatbox
 
-## 2025-01-09 - ___
-- ___
-- ___
-- ___
+## 2025-01-09 
+
+- Add documentation for renderer and make a pr
+
 
 ## 2025-01-10 to 2025-01-12 - ___
 - ___
