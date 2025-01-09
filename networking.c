@@ -149,12 +149,28 @@ int server_connect(int from_client) {
   return to_client;
 }
 
+/*=========================
+  err()
+  args: none
+
+  prints error messages if we ever encounter something
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 int err() {
   printf("\x1b[31m errno %d\x1b[0m\n", errno);
   printf("%s\n", strerror(errno));
   exit(1);
 }
 
+/*=========================
+  random_random()
+  args: none
+
+  gets a random integer from dev/random to be used in code
+
+  returns random int
+  =========================*/
 int random_random() {
   int r_file = open("/dev/random", O_RDONLY, 0);
   if (r_file == -1) err();
@@ -164,6 +180,14 @@ int random_random() {
   return bytes;
 }
 
+/*=========================
+  random_urandom()
+  args: none
+
+  gets a random integer from dev/urandom to be used in code
+
+  returns random int
+  =========================*/
 int random_urandom() {
   int r_file = open("/dev/urandom", O_RDONLY, 0);
   if (r_file == -1) err();
