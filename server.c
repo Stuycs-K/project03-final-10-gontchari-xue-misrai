@@ -32,6 +32,12 @@ void handle_sigint(int sig) {
     printf("(" HRED "SERVER" reset "): Closing down server due to " HRED
            "SIGINT" reset "\n");
     close(from_client);
+    // remove shared memory
+    int shmid;
+    int *server;
+    shmid = shmget(KEY, sizeof(int), 0);
+    server = shmat(shmid, 0, 0);
+    shmdt(server);
   } else {
     printf("(" HRED "SERVER" reset "): Closing child processes\n");
     int close_num = -1;
