@@ -7,9 +7,14 @@ Ivan Gontchar, Elias Xu, Ishaana Misra
 
 ### Project Description:
 
-Explain what is this project.
+We are going to simulate a chat app. Users will be able to type and read messages in different channels, which can be read by other users in those channels.
 
 ### Instructions:
 
-How does the user install/compile/run the program.
+How does the user install/compile/run the program?
+- In the repo, any user should run the command "make compile".
+- After this, the first user should run the command "./serv", which will launch the server end of the program.
+ - Subsequent users who are running the program in other terminals should run the command "./cli" which will launch the client end of the program.
+- This will cause the app to launch in the terminal, and thus the user should follow on-screen prompts.
+
 How does the user interact with this program?
