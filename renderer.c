@@ -23,7 +23,7 @@ int main() {
   setlocale(LC_ALL, "");
   initscr();  // Initialize ncurses
 
- // COLORS
+  // COLORS
   start_color();
   init_pair(1, COLOR_RED, COLOR_GREEN);   // chat box
   init_pair(2, COLOR_CYAN, COLOR_BLACK);  // prompt
@@ -94,8 +94,31 @@ int main() {
   return 0;
 }
 
+/*=========================
+  handle_input
+  args: int * chat_open
+
+  Sets the chat_window to open.
+  This is used for handling resizing – you don't want to resize windows if they
+  aren't there
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_input(int *chat_open) { *chat_open = -1; }
 
+/*=========================
+  handle_backspace
+  args:
+    WINDOW *input_win,
+    WINDOW *chat_win,
+    int *pos,
+    char *input
+
+  handles backspaces by removing the characters, refreshing the input box,
+   and then adding the refreshed code to the input box
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_backspace(WINDOW *input_win, WINDOW *chat_win, int *pos,
                       char *input) {
   (*pos)--;              // Move cursor back
@@ -108,6 +131,17 @@ void handle_backspace(WINDOW *input_win, WINDOW *chat_win, int *pos,
   wrefresh(input_win);
 }
 
+/*=========================
+  handle_normal_characters
+  args:
+   char *input
+   int *pos
+   char ch
+
+  handles normal characters but adding to the input char
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_normal_characters(char *input, int *pos, char ch) {
   input[(*pos)++] = ch;  // Append character
   input[(*pos)] = '\0';  // Null-terminate string
@@ -116,6 +150,16 @@ void handle_normal_characters(char *input, int *pos, char ch) {
   wrefresh(input_win);
 }
 
+/*=========================
+  handle_resize
+  args:
+    int sig
+
+  handers resizing by recalibrating the windows and displaying them to the
+  screen
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_resize(int sig) {
   if (chat_open == 1) {
     endwin();
@@ -141,14 +185,21 @@ void handle_resize(int sig) {
 
     delwin(input_win);
     input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
-    box(input_win, 0, 0);  // Draw border around input window
+    box(input_win, 0, 0);                     // Draw border around input window
     mvwprintw(input_win, 1, 1, "%s", input);  // Display input buffer
     wrefresh(input_win);
   }
 }
 
+/*=========================
+  handle_sigint
+  args:
+    int sizes
 
+  handles sigints by closing ncurses
 
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_sigint(int sig) {
   endwin();
   exit(0);
