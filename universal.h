@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/shm.h>
 #include <string.h>
 #include <errno.h>
 
@@ -11,6 +12,8 @@
 #ifndef UNIVERSAL_H
 #define UNIVERSAL_H
 #define WKP "mario"
+
+#define KEY 39682
 
 struct server {
     int num_channels;

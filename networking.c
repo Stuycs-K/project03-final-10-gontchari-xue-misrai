@@ -26,6 +26,9 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
+  struct server *s;
+  int shmid = shmget(KEY, sizeof(struct server), IPC_CREAT | 0640);
+
   if (mkfifo(WKP, 0666) == -1) err();
 
   printf("(" HMAG "SERVER SETUP" reset
