@@ -128,10 +128,8 @@ This document must be updated daily by EACH group member.
 ## 2025-01-09 - shared memory
 - have server create shared memory
 
-## 2025-01-10 to 2025-01-12 - ___
-- ___
-- ___
-- ___
+## 2025-01-10 to 2025-01-12 - documentation
+- we worked on code structure and worked on documentation
 
 ## 2025-01-13 - ___
 - ___
