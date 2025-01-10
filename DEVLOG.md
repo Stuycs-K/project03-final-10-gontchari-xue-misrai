@@ -20,14 +20,11 @@ This document must be updated daily by EACH group member.
 - Add documentation for renderer and make a pr
 
 
-## 2025-01-10 to 2025-01-12 - ___
-- TODO: Update images (and maybe add some more)
-- TODO: Add pseudocode for the client rendering and info gathering process
+## 2025-01-10 to 2025-01-12 
+- Reworked structure of chat app
 
-## 2025-01-13 - ___
-- ___
-- ___
-- ___
+## 2025-01-13 
+- 
 
 ## 2025-01-14 - ___
 - ___
