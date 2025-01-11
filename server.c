@@ -7,7 +7,7 @@
 // int to_client, from_client;
 
 int number_of_to_clients = 0, number_of_from_clients = 0, max_fd_to_client = -1,
-    max_fd_from_server = -1;
+    max_fd_from_server = -1, new_number_of_from_clients = 0;
 
 // active pipes are changed using the select function
 fd_set fd_set_of_to_client, active_fd_set_of_to_client, fd_set_of_from_client,
@@ -36,11 +36,12 @@ int main() {
          "\n");
   while (1) {
     // for replacements since select *does stuff*
-    FD_ZERO(&active_fd_set_of_from_client);
-    FD_ZERO(&active_fd_set_of_to_client);
+    // FD_ZERO(&active_fd_set_of_from_client);
+    // FD_ZERO(&active_fd_set_of_to_client);
+    memcpy(&active_fd_set_of_from_client, &fd_set_of_from_client,
+           sizeof(fd_set));
+    memcpy(&active_fd_set_of_to_client, &fd_set_of_to_client, sizeof(fd_set));
 
-    active_fd_set_of_from_client = fd_set_of_from_client;
-    active_fd_set_of_to_client = fd_set_of_to_client;
     int max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
                                                          : max_fd_to_client;
 
@@ -48,7 +49,6 @@ int main() {
         select(max_fd + 1, &active_fd_set_of_from_client,
                &active_fd_set_of_to_client, NULL, NULL);
     if (num_active_from_clients == -1) err();
-    printf("WHAT THE SIGMA\n");
     for (int current_from_client_index = 0;
          current_from_client_index < number_of_from_clients;
          current_from_client_index++) {
@@ -77,39 +77,46 @@ int main() {
         fcntl(from_client_list[current_from_client_index], F_SETFL,
               fcntl(from_client_list[current_from_client_index], F_GETFL) |
                   O_NONBLOCK);
-        if (return_number - random_number == 1) {
-          FD_SET(to_client, &fd_set_of_to_client);
-          to_client_list[number_of_to_clients] = to_client;
-          if (max_fd_to_client < to_client) {
-            max_fd_to_client = to_client;
-          }
-          number_of_to_clients++;
 
-          int new_from_client = server_setup();
-          FD_SET(new_from_client, &fd_set_of_from_client);
-          from_client_list[number_of_from_clients] = new_from_client;
-          if (max_fd_from_server < new_from_client) {
-            max_fd_from_server = new_from_client;
-          }
-          number_of_from_clients++;
+        FD_SET(to_client, &fd_set_of_to_client);
+        to_client_list[number_of_to_clients] = to_client;
+        if (max_fd_to_client < to_client) {
+          max_fd_to_client = to_client;
         }
+        number_of_to_clients++;
+
+        if (remove(WKP) == -1) err();
+        if (mkfifo(WKP, 0666) == -1) err();
+        int new_from_client = server_setup();
+        if (new_from_client == -1) err();
+        FD_SET(new_from_client, &fd_set_of_from_client);
+        from_client_list[number_of_from_clients] = new_from_client;
+        if (max_fd_from_server < new_from_client) {
+          max_fd_from_server = new_from_client;
+        }
+        new_number_of_from_clients = number_of_from_clients + 1;
       }
     }
-    printf("What the sigma\n");
-    FD_ZERO(&active_fd_set_of_from_client);
-    FD_ZERO(&active_fd_set_of_to_client);
+    number_of_from_clients = new_number_of_from_clients;
+    // printf("Number of to_clients: %d \n", number_of_to_clients);
+    // printf("Number of from_clients: %d\n", number_of_from_clients);
+    // FD_ZERO(&active_fd_set_of_from_client);
+    // FD_ZERO(&active_fd_set_of_to_client);
+    // active_fd_set_of_from_client = fd_set_of_from_client;
+    // active_fd_set_of_to_client = fd_set_of_to_client;
 
-    active_fd_set_of_from_client = fd_set_of_from_client;
-    active_fd_set_of_to_client = fd_set_of_to_client;
+    // max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
+    //                                                  : max_fd_to_client;
 
-    max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
-                                                     : max_fd_to_client;
-
-    num_active_from_clients = select(max_fd + 1, &active_fd_set_of_from_client,
-                                     &active_fd_set_of_to_client, NULL, NULL);
+    // num_active_from_clients = select(max_fd + 1,
+    // &active_fd_set_of_from_client,
+    //                                  &active_fd_set_of_to_client, NULL,
+    //                                  NULL);
 
     for (int current_client_index = 0;
          current_client_index < number_of_to_clients; current_client_index++) {
+      printf("current client index: %d\n",
+             current_client_index);
       if (FD_ISSET(to_client_list[current_client_index],
                    &active_fd_set_of_to_client)) {
         int random_int = abs(random_urandom() % 100);
