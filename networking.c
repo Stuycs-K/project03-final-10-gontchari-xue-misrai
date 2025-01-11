@@ -1,5 +1,3 @@
-#include "universal.h"
-
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -13,7 +11,7 @@
 #include <unistd.h>
 
 #include "colors.h"
-
+#include "universal.h"
 
 // UPSTREAM = to the server / from the client
 // DOWNSTREAM = to the client / from the server
@@ -26,14 +24,11 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
-  if (mkfifo(WKP, 0666) == -1) err();
-
   printf("(" HMAG "SERVER SETUP" reset
          ") Created the client pipe in the server setup function\n");
-  int from_client = open(
-      WKP, O_RDONLY, 0666);  // server is only reading messages from the client
+
+  int from_client = open(WKP, O_RDONLY | O_NONBLOCK, 0666);
   if (from_client == -1) err();
-  remove(WKP);
   return from_client;
 }
 
@@ -49,9 +44,9 @@ int server_setup() {
   =========================*/
 int server_handshake(int *to_client) {
   //   set up the private pipe here
-  printf("(" HMAG "SERVER" reset ") Setting up server \n");
   int from_client = server_setup();
   *to_client = server_connect(from_client);
+  if (*to_client == -1) err();
 
   int random_number = random_random();
   if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
@@ -64,11 +59,6 @@ int server_handshake(int *to_client) {
   printf("(" HMAG "SERVER" reset
          ") Got return number %d, which is hopefully iterated from %d\n",
          return_number, random_number);
-  //   got from client();
-  //   get the file descriptor for the client private pipe
-  //   then set the from client to the server's pipe
-  //   how do I get the downstream pipe of the client? calling client
-  //   handshake???
 
   return from_client;
 }
@@ -106,7 +96,9 @@ int client_handshake(int *to_server) {
     *to_server = open(WKP, O_WRONLY, 0666);
   }
 
+  printf("Got here!\n");
   if (write(*to_server, fifo_name, strlen(fifo_name)) == -1) err();
+  printf("Got there!\n");
 
   printf("(" HCYN "CLIENT" reset
          "): Reading from private pipe to get the int\n");
@@ -142,7 +134,16 @@ int client_handshake(int *to_server) {
   =========================*/
 int server_connect(int from_client) {
   char fifo_name_buff[PIPE_SIZING] = {"\0"};
-  if (read(from_client, fifo_name_buff, sizeof(fifo_name_buff)) == -1) err();
+  int ret = read(from_client, fifo_name_buff, sizeof(fifo_name_buff));
+  if (ret == -1) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      return NO_CLIENT;
+    }
+    err();
+  }
+  if (ret == 0) {
+    return NO_CLIENT;
+  }
   printf("(" HMAG "SERVER" reset ") Read from the WKP, got fifo name %s \n",
          fifo_name_buff);
   int to_client = open(fifo_name_buff, O_WRONLY, 0666);

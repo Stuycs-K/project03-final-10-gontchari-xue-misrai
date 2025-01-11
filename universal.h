@@ -12,6 +12,21 @@
 #define UNIVERSAL_H
 #define WKP "mario"
 
+#define NO_CLIENT -404
+
+
+#define MAX_NUM_CLIENTS 500
+
+// messaging flags
+#define SEND_MESSAGE 1
+#define CLOSE_CLIENT -1
+#define CLOSE_SERVER -2
+
+// for part 2
+#define CREATE_CHANNEL 2
+#define CLOSE_CHANNEL -2
+#define KEEP_ALIVE 0
+
 struct server {
     int num_channels;
     char *channels[];

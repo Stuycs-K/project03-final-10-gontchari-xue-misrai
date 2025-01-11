@@ -1,69 +1,163 @@
+#include "server.h"
+
 #include <signal.h>
 
 #include "colors.h"
 #include "universal.h"
-int to_client, from_client;
+// int to_client, from_client;
 
-pid_t a = -1;
+int number_of_to_clients = 0, number_of_from_clients = 0, max_fd_to_client = -1,
+    max_fd_from_server = -1;
+
+// active pipes are changed using the select function
+fd_set fd_set_of_to_client, active_fd_set_of_to_client, fd_set_of_from_client,
+    active_fd_set_of_from_client;
+
+int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
+
+int main() {
+  signal(SIGPIPE, handle_sigpipe);  // Set up signal handler for SIGPIPE
+  signal(SIGINT, handle_sigint);    // Set up signal handler for SIGINT
+
+  if (mkfifo(WKP, 0666) == -1) err();
+
+  FD_ZERO(&fd_set_of_to_client);
+  FD_ZERO(&active_fd_set_of_to_client);
+  FD_ZERO(&fd_set_of_from_client);
+  FD_ZERO(&active_fd_set_of_from_client);
+
+  int initial_from_client = server_setup();
+  FD_SET(initial_from_client, &fd_set_of_from_client);
+  from_client_list[number_of_from_clients] = initial_from_client;
+  max_fd_from_server = initial_from_client;
+  number_of_from_clients++;
+
+  printf("(" HYEL "CHILD SERVER" reset "): Select server " HGRN "READY" reset
+         "\n");
+  while (1) {
+    // for replacements since select *does stuff*
+    FD_ZERO(&active_fd_set_of_from_client);
+    FD_ZERO(&active_fd_set_of_to_client);
+
+    active_fd_set_of_from_client = fd_set_of_from_client;
+    active_fd_set_of_to_client = fd_set_of_to_client;
+    int max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
+                                                         : max_fd_to_client;
+
+    int num_active_from_clients =
+        select(max_fd + 1, &active_fd_set_of_from_client,
+               &active_fd_set_of_to_client, NULL, NULL);
+    if (num_active_from_clients == -1) err();
+    printf("WHAT THE SIGMA\n");
+    for (int current_from_client_index = 0;
+         current_from_client_index < number_of_from_clients;
+         current_from_client_index++) {
+      if (FD_ISSET(from_client_list[current_from_client_index],
+                   &active_fd_set_of_from_client)) {
+        fcntl(from_client_list[current_from_client_index], F_SETFL,
+              fcntl(from_client_list[current_from_client_index], F_GETFL) &
+                  ~O_NONBLOCK);
+
+        int to_client =
+            server_connect(from_client_list[current_from_client_index]);
+        int random_number = random_random();
+        if (write(to_client, &random_number, sizeof(random_number)) == -1)
+          err();
+        printf("(" HMAG "SERVER" reset
+               ") Created random number %d and sent it to client\n",
+               random_number);
+
+        int return_number = -1;
+        if (read(from_client_list[current_from_client_index], &return_number,
+                 sizeof(return_number)) == -1)
+          err();
+        printf("(" HMAG "SERVER" reset
+               ") Got return number %d, which is hopefully iterated from %d\n",
+               return_number, random_number);
+        fcntl(from_client_list[current_from_client_index], F_SETFL,
+              fcntl(from_client_list[current_from_client_index], F_GETFL) |
+                  O_NONBLOCK);
+        if (return_number - random_number == 1) {
+          FD_SET(to_client, &fd_set_of_to_client);
+          to_client_list[number_of_to_clients] = to_client;
+          if (max_fd_to_client < to_client) {
+            max_fd_to_client = to_client;
+          }
+          number_of_to_clients++;
+
+          int new_from_client = server_setup();
+          FD_SET(new_from_client, &fd_set_of_from_client);
+          from_client_list[number_of_from_clients] = new_from_client;
+          if (max_fd_from_server < new_from_client) {
+            max_fd_from_server = new_from_client;
+          }
+          number_of_from_clients++;
+        }
+      }
+    }
+    printf("What the sigma\n");
+    FD_ZERO(&active_fd_set_of_from_client);
+    FD_ZERO(&active_fd_set_of_to_client);
+
+    active_fd_set_of_from_client = fd_set_of_from_client;
+    active_fd_set_of_to_client = fd_set_of_to_client;
+
+    max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
+                                                     : max_fd_to_client;
+
+    num_active_from_clients = select(max_fd + 1, &active_fd_set_of_from_client,
+                                     &active_fd_set_of_to_client, NULL, NULL);
+
+    for (int current_client_index = 0;
+         current_client_index < number_of_to_clients; current_client_index++) {
+      if (FD_ISSET(to_client_list[current_client_index],
+                   &active_fd_set_of_to_client)) {
+        int random_int = abs(random_urandom() % 100);
+        if (write(to_client_list[current_client_index], &random_int,
+                  sizeof(random_int)) == -1) {
+          printf("(" HYEL "CHILD SERVER" reset "): Client " HRED
+                 "DISCONNECT" reset " or other error\n");
+        }
+      }
+    }
+  }
+}
 
 /*=========================
   handle_sigpipe
   args: int sig
 
-  handles and prints a notifying message if it catches a SIGPIPE signal, usually from a child disconnect
+  handles and prints a notifying message if it catches a SIGPIPE signal,
+  usually from a child disconnect
 
   returns ABSOLUTELY NOTHING
   =========================*/
 void handle_sigpipe(int sig) {
   printf("(" HRED "SERVER" reset "): Caught SIGPIPE, client disconnected\n");
+  exit(0);
 }
 
 /*=========================
   handle_sigint
   args: int sig
 
-  handles and prints a notifying message if it catches a SIGINT signal, usually from server disconnect
+  handles and prints a notifying message if it catches a SIGINT signal,
+  usually from server disconnect
 
   returns ABSOLUTELY NOTHING
   =========================*/
 void handle_sigint(int sig) {
-  if (a != 0) {
-    if (unlink(WKP) != 0) err();
-    printf("(" HRED "SERVER" reset "): Closing down server due to " HRED
-           "SIGINT" reset "\n");
-    close(from_client);
-  } else {
-    printf("(" HRED "SERVER" reset "): Closing child processes\n");
-    int close_num = -1;
-    if (write(to_client, &close_num, sizeof(close_num)) == -1) err();
-    close(to_client);
-  }
+  //   if (a != 0) {
+  //     if (unlink(WKP) != 0) err();
+  //     printf("(" HRED "SERVER" reset "): Closing down server due to "
+  //     HRED
+  //            "SIGINT" reset "\n");
+  //     close(from_client);
+  //   } else {
+  //     printf("(" HRED "SERVER" reset "): Closing child processes\n");
+  //     int close_num = CLOSE_SERVER;
+  //     if (write(to_client, &close_num, sizeof(close_num)) == -1) err();
+  //     close(to_client);
+  //   }
   exit(0);
-}
-
-int main() {
-  signal(SIGPIPE, handle_sigpipe);  // Set up signal handler for SIGPIPE
-  signal(SIGINT, handle_sigint);  // Set up signal handler for SIGINT
-  while (1) {
-    if (a != 0) {
-      from_client = server_handshake(&to_client);  // initial handshake
-      printf("(" HMAG "SERVER" reset
-             "): Connection established on the server side\n");
-      a = fork();
-    }
-
-    if (a == 0) {
-      printf("(" HYEL "CHILD SERVER" reset "): Handed off to child\n");
-      while (1) {
-        int random_int = abs(random_urandom() % 100);
-        if (write(to_client, &random_int, sizeof(random_int)) == -1) {
-          printf("(" HYEL "CHILD SERVER" reset "): Client " HRED
-                 "DISCONNECT" reset " or other error\n");
-          close(to_client);
-          exit(0);
-        }
-        sleep(1);
-      }
-    }
-  }
 }
