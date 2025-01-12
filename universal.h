@@ -1,11 +1,11 @@
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define PIPE_SIZING 2048
 #ifndef UNIVERSAL_H
@@ -14,22 +14,29 @@
 
 #define NO_CLIENT -404
 
-
 #define MAX_NUM_CLIENTS 500
 
 // messaging flags
 #define SEND_MESSAGE 1
+#define CREATING_CLIENT 2
 #define CLOSE_CLIENT -1
 #define CLOSE_SERVER -2
 
 // for part 2
-#define CREATE_CHANNEL 2
-#define CLOSE_CHANNEL -2
+#define CREATE_CHANNEL 3
+#define CLOSE_CHANNEL -3
 #define KEEP_ALIVE 0
 
+struct message {
+  int flag;
+  char message[10000];
+  int num; //optional
+};
+
+
 struct server {
-    int num_channels;
-    char *channels[];
+  int num_channels;
+  char *channels[];
 };
 
 int server_handshake(int *to_client);

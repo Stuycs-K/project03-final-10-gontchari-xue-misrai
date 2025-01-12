@@ -17,7 +17,7 @@ int to_server, from_server;
 int main() {
   signal(SIGINT, handle_sigint);
   from_server = client_handshake(&to_server);
-  printf("(" HCYN "CLIENT" reset "): Client " HGRN "ESTABLISHED" reset
+  printf("[ " HCYN "CLIENT" reset " ]: Client " HGRN "ESTABLISHED" reset
          " by the server\n");
   while (1) {
     int randomized_number;
@@ -26,15 +26,15 @@ int main() {
       err();
     }
     if (randomized_number == CLOSE_SERVER) {
-      printf("(" HCYN "CLIENT" reset "): Detected pipe " HRED "CLOSURE" reset
+      printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED "CLOSURE" reset
              " by server; closing down\n");
       close(to_server);
       close(from_server);
       exit(0);
     }
     sleep(1);
-    printf("(" HCYN "CLIENT" reset "): Recieved random number " HGRN "%d" reset
-           " from server\n",
+    printf("[ " HCYN "CLIENT" reset " ] : Recieved random number " HGRN
+           "%d" reset " from server\n",
            randomized_number);
   }
 }
