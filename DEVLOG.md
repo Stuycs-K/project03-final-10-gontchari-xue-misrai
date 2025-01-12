@@ -21,7 +21,8 @@ This document must be updated daily by EACH group member.
 
 
 ## 2025-01-10 to 2025-01-12 
-- Reworked structure of chat app
+- Reworked structure of chat app to use selecting
+- Made it handle errors and other disconnects   
 
 ## 2025-01-13 
 - 
