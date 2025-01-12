@@ -30,10 +30,6 @@ int main() {
     if (randomized_number == CLOSE_SERVER) {
       printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED "CLOSURE" reset
              " by server; closing down\n");
-      int acknowledge_flag = ACKNOWLEDGE;
-      if (write(to_server, &acknowledge_flag, sizeof(acknowledge_flag)) == -1) {
-        err();
-      }
       close(to_server);
       close(from_server);
       exit(0);

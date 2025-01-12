@@ -14,56 +14,6 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
-void handshakes(int *from_client, int *to_client, int *index,
-                int *to_client_list, int *from_client_list,
-                int *number_of_to_clients, int *number_of_from_clients,
-                int *new_number_of_from_clients) {
-  // remove the NONBLOCK
-
-  fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
-
-  int random_number = random_random();
-  int flag = -1;
-  if (read(*from_client, &flag, sizeof(flag)) == -1) err();
-  if (flag == CREATING_CLIENT) {
-    *to_client = server_connect(*from_client);
-
-    if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
-    printf("[ " HMAG "SERVER" reset
-           " ] Created random number %d and sent it to client\n",
-           random_number);
-
-    int return_number = -1;
-    if (read(*from_client, &return_number, sizeof(return_number)) == -1) err();
-    if (return_number - random_number == 1) {
-      printf("[ " HMAG "SERVER" reset " ] Got return number %d, " HGRN
-             "CORRECTLY" reset " iterated from %d\n",
-             return_number, random_number);
-    } else {
-      printf("THE ITERATED NUMBER: %d is " HRED "NOT CORRECT" reset,
-             return_number);
-      err();
-    }
-    //    add the nonblock˝
-    fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
-  } else if (flag == CLOSE_CLIENT) {
-    printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED "DISCONNECT" reset
-           "\n");
-    close(from_client_list[*index]);
-    close(to_client_list[*index]);
-    for (int i = *index + 1; i < *number_of_to_clients; i++) {
-      to_client_list[i - 1] = to_client_list[i];
-    }
-    for (int i = *index + 1; i < *number_of_from_clients; i++) {
-      from_client_list[i - 1] = from_client_list[i];
-    }
-    *number_of_from_clients -= 1;
-    *number_of_to_clients -= 1;
-    *new_number_of_from_clients = *number_of_from_clients;
-    (*index)--;
-  }
-}
-
 int main() {
   signal(SIGPIPE, handle_sigpipe);  // Set up signal handler for SIGPIPE
   signal(SIGINT, handle_sigint);    // Set up signal handler for SIGINT
@@ -166,6 +116,56 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
     if (*max_fd < from_client_list[i]) {
       *max_fd = from_client_list[i];
     }
+  }
+}
+
+void handshakes(int *from_client, int *to_client, int *index,
+                int *to_client_list, int *from_client_list,
+                int *number_of_to_clients, int *number_of_from_clients,
+                int *new_number_of_from_clients) {
+  // remove the NONBLOCK
+
+  fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
+
+  int random_number = random_random();
+  int flag = -1;
+  if (read(*from_client, &flag, sizeof(flag)) == -1) err();
+  if (flag == CREATING_CLIENT) {
+    *to_client = server_connect(*from_client);
+
+    if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
+    printf("[ " HMAG "SERVER" reset
+           " ] Created random number %d and sent it to client\n",
+           random_number);
+
+    int return_number = -1;
+    if (read(*from_client, &return_number, sizeof(return_number)) == -1) err();
+    if (return_number - random_number == 1) {
+      printf("[ " HMAG "SERVER" reset " ] Got return number %d, " HGRN
+             "CORRECTLY" reset " iterated from %d\n",
+             return_number, random_number);
+    } else {
+      printf("THE ITERATED NUMBER: %d is " HRED "NOT CORRECT" reset,
+             return_number);
+      err();
+    }
+    //    add the nonblock˝
+    fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
+  } else if (flag == CLOSE_CLIENT) {
+    printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED "DISCONNECT" reset
+           "\n");
+    close(from_client_list[*index]);
+    close(to_client_list[*index]);
+    for (int i = *index + 1; i < *number_of_to_clients; i++) {
+      to_client_list[i - 1] = to_client_list[i];
+    }
+    for (int i = *index + 1; i < *number_of_from_clients; i++) {
+      from_client_list[i - 1] = from_client_list[i];
+    }
+    *number_of_from_clients -= 1;
+    *number_of_to_clients -= 1;
+    *new_number_of_from_clients = *number_of_from_clients;
+    (*index)--;
   }
 }
 
