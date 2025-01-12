@@ -178,6 +178,7 @@ int random_random() {
   int bytes;
   int read_result = read(r_file, &bytes, sizeof(bytes));
   if (read_result == -1) err();
+  close(r_file);
   return bytes;
 }
 
@@ -195,5 +196,6 @@ int random_urandom() {
   int bytes;
   int read_result = read(r_file, &bytes, sizeof(bytes));
   if (read_result == -1) err();
+  close(r_file);
   return bytes;
 }

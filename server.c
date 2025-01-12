@@ -7,7 +7,7 @@
 // int to_client, from_client;
 
 int number_of_to_clients = 0, number_of_from_clients = 0, max_fd_to_client = -1,
-    max_fd_from_server = -1, new_number_of_from_clients = 0;
+    max_fd_from_client = -1, new_number_of_from_clients = 0;
 
 // active pipes are changed using the select function
 fd_set fd_set_of_to_client, active_fd_set_of_to_client, fd_set_of_from_client,
@@ -29,38 +29,66 @@ int main() {
   int initial_from_client = server_setup();
   FD_SET(initial_from_client, &fd_set_of_from_client);
   from_client_list[number_of_from_clients] = initial_from_client;
-  max_fd_from_server = initial_from_client;
+  max_fd_from_client = initial_from_client;
   number_of_from_clients++;
 
   printf("(" HYEL "CHILD SERVER" reset "): Select server " HGRN "READY" reset
          "\n");
   while (1) {
-    // for replacements since select *does stuff*
-    // FD_ZERO(&active_fd_set_of_from_client);
-    // FD_ZERO(&active_fd_set_of_to_client);
-    memcpy(&active_fd_set_of_from_client, &fd_set_of_from_client,
-           sizeof(fd_set));
-    memcpy(&active_fd_set_of_to_client, &fd_set_of_to_client, sizeof(fd_set));
+    FD_ZERO(&active_fd_set_of_from_client);
+    FD_ZERO(&active_fd_set_of_to_client);
+    printf("number_of_to_clients: %d\n", number_of_to_clients);
 
-    int max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
+    for (int i = 0; i < number_of_to_clients; i++) {
+      if (to_client_list[i] >= 0) {  // Check if the file descriptor is valid
+        FD_SET(to_client_list[i], &active_fd_set_of_to_client);
+      } else {
+        printf("Invalid file descriptor in to_client_list[%d]\n", i);
+        err();
+      }
+    }
+
+    printf("number_of_from_clients: %d\n", number_of_from_clients);
+
+    for (int i = 0; i < number_of_from_clients; i++) {
+      if (from_client_list[i] >= 0) {  // Check if the file descriptor is valid
+        FD_SET(from_client_list[i], &active_fd_set_of_from_client);
+      } else {
+        printf("Invalid file descriptor in from_client_list[%d]\n", i);
+        err();
+      }
+    }
+
+    int max_fd = (max_fd_from_client > max_fd_to_client) ? max_fd_from_client
                                                          : max_fd_to_client;
 
+    struct timeval timeout;
+    timeout.tv_sec = 5;   // 5 seconds timeout
+    timeout.tv_usec = 0;  // 0 microseconds
+    printf("Max FD, %d\n", max_fd);
     int num_active_from_clients =
         select(max_fd + 1, &active_fd_set_of_from_client,
-               &active_fd_set_of_to_client, NULL, NULL);
-    if (num_active_from_clients == -1) err();
-    for (int current_from_client_index = 0;
-         current_from_client_index < number_of_from_clients;
-         current_from_client_index++) {
-      if (FD_ISSET(from_client_list[current_from_client_index],
-                   &active_fd_set_of_from_client)) {
-        fcntl(from_client_list[current_from_client_index], F_SETFL,
-              fcntl(from_client_list[current_from_client_index], F_GETFL) &
-                  ~O_NONBLOCK);
+               &active_fd_set_of_to_client, NULL, &timeout);
+    printf("num_active_from_clients: %d\n", num_active_from_clients);
+    if (num_active_from_clients == -1) {
+      printf("select error: %s\n", strerror(errno));
+      err();
+    } else if (num_active_from_clients == 0) {
+      printf("Select timed out.\n");
+      continue;
+    }
 
-        int to_client =
-            server_connect(from_client_list[current_from_client_index]);
+    if (num_active_from_clients == -1) err();
+    for (int i = 0; i < number_of_from_clients; i++) {
+      if (FD_ISSET(from_client_list[i], &active_fd_set_of_from_client)) {
+        // remove the NONBLOCK
+        fcntl(from_client_list[i], F_SETFL,
+              fcntl(from_client_list[i], F_GETFL) & ~O_NONBLOCK);
+
+        int to_client = server_connect(from_client_list[i]);
+        if (to_client == -1) err();
         int random_number = random_random();
+        printf("Writing to client\n");
         if (write(to_client, &random_number, sizeof(random_number)) == -1)
           err();
         printf("(" HMAG "SERVER" reset
@@ -68,31 +96,32 @@ int main() {
                random_number);
 
         int return_number = -1;
-        if (read(from_client_list[current_from_client_index], &return_number,
-                 sizeof(return_number)) == -1)
+        if (read(from_client_list[i], &return_number, sizeof(return_number)) ==
+            -1)
           err();
         printf("(" HMAG "SERVER" reset
                ") Got return number %d, which is hopefully iterated from %d\n",
                return_number, random_number);
-        fcntl(from_client_list[current_from_client_index], F_SETFL,
-              fcntl(from_client_list[current_from_client_index], F_GETFL) |
-                  O_NONBLOCK);
+        //    add the nonblock˝
+        fcntl(from_client_list[i], F_SETFL,
+              fcntl(from_client_list[i], F_GETFL) | O_NONBLOCK);
 
-        FD_SET(to_client, &fd_set_of_to_client);
+        // FD_SET(to_client, &fd_set_of_to_client);
+        if (to_client == -1) err();
         to_client_list[number_of_to_clients] = to_client;
         if (max_fd_to_client < to_client) {
           max_fd_to_client = to_client;
         }
         number_of_to_clients++;
 
-        if (remove(WKP) == -1) err();
+        if (unlink(WKP) == -1) err();
         if (mkfifo(WKP, 0666) == -1) err();
         int new_from_client = server_setup();
         if (new_from_client == -1) err();
-        FD_SET(new_from_client, &fd_set_of_from_client);
+        // FD_SET(new_from_client, &fd_set_of_from_client);
         from_client_list[number_of_from_clients] = new_from_client;
-        if (max_fd_from_server < new_from_client) {
-          max_fd_from_server = new_from_client;
+        if (max_fd_from_client < new_from_client) {
+          max_fd_from_client = new_from_client;
         }
         new_number_of_from_clients = number_of_from_clients + 1;
       }
@@ -105,7 +134,7 @@ int main() {
     // active_fd_set_of_from_client = fd_set_of_from_client;
     // active_fd_set_of_to_client = fd_set_of_to_client;
 
-    // max_fd = (max_fd_from_server > max_fd_to_client) ? max_fd_from_server
+    // max_fd = (max_fd_from_client > max_fd_to_client) ? max_fd_from_client
     //                                                  : max_fd_to_client;
 
     // num_active_from_clients = select(max_fd + 1,
@@ -115,8 +144,7 @@ int main() {
 
     for (int current_client_index = 0;
          current_client_index < number_of_to_clients; current_client_index++) {
-      printf("current client index: %d\n",
-             current_client_index);
+      printf("current client index: %d\n", current_client_index);
       if (FD_ISSET(to_client_list[current_client_index],
                    &active_fd_set_of_to_client)) {
         int random_int = abs(random_urandom() % 100);
