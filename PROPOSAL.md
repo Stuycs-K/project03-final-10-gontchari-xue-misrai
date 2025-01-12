@@ -35,7 +35,7 @@ A timeline with expected completion dates of parts of the project.
 
 **Basic Structure**
 
-![Server Diagram](/Server_Diagram.png)
+![Server Diagram](Example.png)
 
 **First stage**: basic chat functionality with one channel.
 
