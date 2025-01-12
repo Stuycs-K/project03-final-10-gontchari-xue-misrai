@@ -27,6 +27,8 @@
 #define CLOSE_CHANNEL -3
 #define KEEP_ALIVE 0
 
+#define ACKNOWLEDGE 4
+
 struct message {
   int flag;
   char message[10000];

@@ -14,7 +14,10 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
-void handshakes(int *from_client, int *to_client) {
+void handshakes(int *from_client, int *to_client, int *index,
+                int *to_client_list, int *from_client_list,
+                int *number_of_to_clients, int *number_of_from_clients,
+                int *new_number_of_from_clients) {
   // remove the NONBLOCK
 
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
@@ -22,7 +25,6 @@ void handshakes(int *from_client, int *to_client) {
   int random_number = random_random();
   int flag = -1;
   if (read(*from_client, &flag, sizeof(flag)) == -1) err();
-  printf("Got flag %d\n", flag);
   if (flag == CREATING_CLIENT) {
     *to_client = server_connect(*from_client);
 
@@ -45,7 +47,20 @@ void handshakes(int *from_client, int *to_client) {
     //    add the nonblock˝
     fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
   } else if (flag == CLOSE_CLIENT) {
-
+    printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED "DISCONNECT" reset
+           "\n");
+    close(from_client_list[*index]);
+    close(to_client_list[*index]);
+    for (int i = *index + 1; i < *number_of_to_clients; i++) {
+      to_client_list[i - 1] = to_client_list[i];
+    }
+    for (int i = *index + 1; i < *number_of_from_clients; i++) {
+      from_client_list[i - 1] = from_client_list[i];
+    }
+    *number_of_from_clients -= 1;
+    *number_of_to_clients -= 1;
+    *new_number_of_from_clients = *number_of_from_clients;
+    (*index)--;
   }
 }
 
@@ -69,7 +84,7 @@ int main() {
   while (1) {
     reset_fd_sets(&fd_set_of_from_client, &fd_set_of_to_client,
                   number_of_to_clients, number_of_from_clients, to_client_list,
-                  from_client_list);
+                  from_client_list, &max_fd);
     int num_active_from_clients = select(max_fd + 1, &fd_set_of_from_client,
                                          &fd_set_of_to_client, NULL, NULL);
     if (num_active_from_clients == -1) err();
@@ -78,7 +93,9 @@ int main() {
       if (FD_ISSET(from_client_list[i], &fd_set_of_from_client)) {
         // remove the NONBLOCK
         int to_client = -1;
-        handshakes(&(from_client_list[i]), &to_client);
+        handshakes(&(from_client_list[i]), &to_client, &i, to_client_list,
+                   from_client_list, &number_of_to_clients,
+                   &number_of_from_clients, &new_number_of_from_clients);
 
         to_client_list[number_of_to_clients] = to_client;
         if (max_fd < to_client) {
@@ -121,6 +138,7 @@ int main() {
           }
           number_of_to_clients--;
           number_of_from_clients--;
+          new_number_of_from_clients--;
           current_client_index--;
         }
       }
@@ -131,16 +149,23 @@ int main() {
 void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
                    int number_of_to_clients, int number_of_from_clients,
                    int to_client_list[MAX_NUM_CLIENTS],
-                   int from_client_list[MAX_NUM_CLIENTS]) {
+                   int from_client_list[MAX_NUM_CLIENTS], int *max_fd) {
+  *max_fd = -1;
   FD_ZERO(fd_set_of_from_client);
   FD_ZERO(fd_set_of_to_client);
 
   for (int i = 0; i < number_of_to_clients; i++) {
     FD_SET(to_client_list[i], fd_set_of_to_client);
+    if (*max_fd < to_client_list[i]) {
+      *max_fd = to_client_list[i];
+    }
   }
 
   for (int i = 0; i < number_of_from_clients; i++) {
     FD_SET(from_client_list[i], fd_set_of_from_client);
+    if (*max_fd < from_client_list[i]) {
+      *max_fd = from_client_list[i];
+    }
   }
 }
 
@@ -166,4 +191,29 @@ void handle_sigpipe(int sig) {
 
   returns ABSOLUTELY NOTHING
   =========================*/
-void handle_sigint(int sig) { exit(0); }
+void handle_sigint(int sig) {
+  printf("[ " HRED "SERVER" reset
+         " ]: Caught SIGINT, closing server, number of clients to close: %d\n",
+         number_of_to_clients);
+  for (int i = 0; i < number_of_to_clients; i++) {
+    int close_server_flag = CLOSE_SERVER;
+    // add the block here
+    printf("[ " HRED "SERVER" reset " ]: Closing client %d\n", i);
+    fcntl(to_client_list[i], F_SETFL,
+          fcntl(to_client_list[i], F_GETFL) & ~O_NONBLOCK);
+
+    if (write(to_client_list[i], &close_server_flag,
+              sizeof(close_server_flag)) == -1) {
+      printf("[ " HRED "SERVER" reset " ]: Error closing client %d\n", i);
+      err();
+    }
+  }
+  sleep(3);  // give clients a chance to read˝
+  for (int i = 0; i < number_of_to_clients; i++) {
+    close(to_client_list[i]);
+    close(from_client_list[i]);
+  }
+  close(from_client_list[number_of_from_clients - 1]);
+  printf("[ " HRED "SERVER" reset " ]: Caught SIGINT, server disconnected\n");
+  exit(0);
+}

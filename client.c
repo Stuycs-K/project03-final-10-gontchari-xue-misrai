@@ -21,18 +21,23 @@ int main() {
          " by the server\n");
   while (1) {
     int randomized_number;
-    if (read(from_server, &randomized_number, sizeof(randomized_number)) ==
-        -1) {
+    int ret;
+    if ((ret = read(from_server, &randomized_number,
+                    sizeof(randomized_number))) == -1) {
       err();
     }
+    if (ret == 0) err();
     if (randomized_number == CLOSE_SERVER) {
       printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED "CLOSURE" reset
              " by server; closing down\n");
+      int acknowledge_flag = ACKNOWLEDGE;
+      if (write(to_server, &acknowledge_flag, sizeof(acknowledge_flag)) == -1) {
+        err();
+      }
       close(to_server);
       close(from_server);
       exit(0);
     }
-    sleep(1);
     printf("[ " HCYN "CLIENT" reset " ] : Recieved random number " HGRN
            "%d" reset " from server\n",
            randomized_number);
