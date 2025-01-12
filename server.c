@@ -19,16 +19,20 @@ void handshakes(int *from_client, int *to_client) {
 
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
 
-  *to_client = server_connect(*from_client);
+  int random_number = random_random();
+  int flag = -1;
+  if (read(*from_client, &flag, sizeof(flag)) == -1) err();
+  printf("Got flag %d\n", flag);
+  if (flag == CREATING_CLIENT) {
+    *to_client = server_connect(*from_client);
 
-    int random_number = random_random();
-  if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
+    if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
     printf("[ " HMAG "SERVER" reset
            " ] Created random number %d and sent it to client\n",
            random_number);
 
     int return_number = -1;
-  if (read(*from_client, &return_number, sizeof(return_number)) == -1) err();
+    if (read(*from_client, &return_number, sizeof(return_number)) == -1) err();
     if (return_number - random_number == 1) {
       printf("[ " HMAG "SERVER" reset " ] Got return number %d, " HGRN
              "CORRECTLY" reset " iterated from %d\n",
@@ -40,6 +44,9 @@ void handshakes(int *from_client, int *to_client) {
     }
     //    add the nonblock˝
     fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
+  } else if (flag == CLOSE_CLIENT) {
+
+  }
 }
 
 int main() {

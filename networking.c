@@ -32,36 +32,6 @@ int server_setup() {
   return from_client;
 }
 
-// /*=========================
-//   server_handshake
-//   args: int * to_client
-
-//   Performs the server side pipe 3 way handshake.
-//   Sets *to_client to the file descriptor to the downstream pipe (Client's
-//   private pipe).
-
-//   returns the file descriptor for the upstream pipe (see server setup).
-//   =========================*/
-// int server_handshake(int *to_client) {
-//   //   set up the private pipe here
-//   int from_client = server_setup();
-//   *to_client = server_connect(from_client);
-//   if (*to_client == -1) err();
-
-//   int random_number = random_random();
-//   if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
-//   printf("[ " HMAG "SERVER" reset
-//          " ] Created random number %d and sent it to client\n",
-//          random_number);
-
-//   int return_number = -1;
-//   if (read(from_client, &return_number, sizeof(return_number)) == -1) err();
-//   printf("[ " HMAG "SERVER" reset
-//          " ] Got return number %d, which is hopefully iterated from %d\n",
-//          return_number, random_number);
-
-//   return from_client;
-// }
 
 /*=========================
   client_handshake
@@ -89,8 +59,9 @@ int client_handshake(int *to_server) {
   while (*to_server == -1) {
     *to_server = open(WKP, O_WRONLY, 0666);
   }
-
-  if (write(*to_server, fifo_name, strlen(fifo_name)) == -1) err();
+  int flag = CREATING_CLIENT;
+  if (write(*to_server, &flag, sizeof(flag)) == -1) err();
+  if (write(*to_server, fifo_name, sizeof(fifo_name)) == -1) err();
 
   printf("[ " HCYN "CLIENT" reset
          " ]: Reading from private pipe to get the int\n");
