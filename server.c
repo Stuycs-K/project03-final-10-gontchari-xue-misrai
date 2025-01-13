@@ -168,7 +168,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     *number_of_to_clients -= 1;
     *new_number_of_from_clients = *number_of_from_clients;
     (*index)--;
+  } else if (flag == CLOSE_CLIENT) {
+
   }
+
 }
 
 /*=========================
