@@ -43,26 +43,28 @@ int main() {
       if (FD_ISSET(from_client_list[i], &fd_set_of_from_client)) {
         // remove the NONBLOCK
         int to_client = -1;
-        handshakes(&(from_client_list[i]), &to_client, &i, to_client_list,
-                   from_client_list, &number_of_to_clients,
-                   &number_of_from_clients, &new_number_of_from_clients);
+        handle_from_client(&(from_client_list[i]), &to_client, &i,
+                           to_client_list, from_client_list,
+                           &number_of_to_clients, &number_of_from_clients,
+                           &new_number_of_from_clients);
+        if (to_client != -1) {
+          to_client_list[number_of_to_clients] = to_client;
+          if (max_fd < to_client) {
+            max_fd = to_client;
+          }
+          number_of_to_clients++;
 
-        to_client_list[number_of_to_clients] = to_client;
-        if (max_fd < to_client) {
-          max_fd = to_client;
+          if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
+
+          int new_from_client;
+          if ((new_from_client = server_setup()) == -1) err();
+          // FD_SET(new_from_client, &fd_set_of_from_client);
+          from_client_list[number_of_from_clients] = new_from_client;
+          if (max_fd < new_from_client) {
+            max_fd = new_from_client;
+          }
+          new_number_of_from_clients = number_of_from_clients + 1;
         }
-        number_of_to_clients++;
-
-        if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
-
-        int new_from_client;
-        if ((new_from_client = server_setup()) == -1) err();
-        // FD_SET(new_from_client, &fd_set_of_from_client);
-        from_client_list[number_of_from_clients] = new_from_client;
-        if (max_fd < new_from_client) {
-          max_fd = new_from_client;
-        }
-        new_number_of_from_clients = number_of_from_clients + 1;
       }
     }
     number_of_from_clients = new_number_of_from_clients;
@@ -119,10 +121,10 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
   }
 }
 
-void handshakes(int *from_client, int *to_client, int *index,
-                int *to_client_list, int *from_client_list,
-                int *number_of_to_clients, int *number_of_from_clients,
-                int *new_number_of_from_clients) {
+void handle_from_client(int *from_client, int *to_client, int *index,
+                        int *to_client_list, int *from_client_list,
+                        int *number_of_to_clients, int *number_of_from_clients,
+                        int *new_number_of_from_clients) {
   // remove the NONBLOCK
 
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
