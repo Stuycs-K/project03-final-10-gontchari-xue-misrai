@@ -1,3 +1,4 @@
+
 #include "universal.h"
 
 #include <dirent.h>
@@ -64,11 +65,6 @@ int server_handshake(int *to_client) {
   printf("(" HMAG "SERVER" reset
          ") Got return number %d, which is hopefully iterated from %d\n",
          return_number, random_number);
-  //   got from client();
-  //   get the file descriptor for the client private pipe
-  //   then set the from client to the server's pipe
-  //   how do I get the downstream pipe of the client? calling client
-  //   handshake???
 
   return from_client;
 }
