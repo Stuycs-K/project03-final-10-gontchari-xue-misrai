@@ -84,6 +84,22 @@ int main() {
   }
 }
 
+/*=========================
+  reset_fd_sets
+  args:
+    fd_set *fd_set_of_from_client
+    fd_set *fd_set_of_to_client
+    int number_of_to_clients
+    int number_of_from_clients
+    int to_client_list[MAX_NUM_CLIENTS]
+    int from_client_list[MAX_NUM_CLIENTS]
+    int *max_fd
+
+resets the fd_sets and does some error checking
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
+
 void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
                    int number_of_to_clients, int number_of_from_clients,
                    int to_client_list[MAX_NUM_CLIENTS],
@@ -106,6 +122,25 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
     }
   }
 }
+
+
+/*=========================
+  reset_fd_sets
+  args:
+    int *from_client
+    int *to_client
+    int *index
+    int *to_client_list
+    int *from_client_list                    
+    int *number_of_to_clients
+    int *number_of_from_clients 
+    int *new_number_of_from_clients
+    int *max_fd
+
+resets the fd_sets and does some error checking
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 
 void handle_from_client(int *from_client, int *to_client, int *index,
                         int *to_client_list, int *from_client_list,
