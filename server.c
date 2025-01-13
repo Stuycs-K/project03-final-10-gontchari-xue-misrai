@@ -15,8 +15,9 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
 int main() {
-  signal(SIGPIPE, handle_sigpipe);  // Set up signal handler for SIGPIPE
-  signal(SIGINT, handle_sigint);    // Set up signal handler for SIGINT
+  // handle the sigpipe and signit signals
+  signal(SIGPIPE, handle_sigpipe);
+  signal(SIGINT, handle_sigint);
 
   if (mkfifo(WKP, 0666) == -1) err();
 
@@ -46,25 +47,10 @@ int main() {
         handle_from_client(&(from_client_list[i]), &to_client, &i,
                            to_client_list, from_client_list,
                            &number_of_to_clients, &number_of_from_clients,
-                           &new_number_of_from_clients);
-        if (to_client != -1) {
-          to_client_list[number_of_to_clients] = to_client;
-          if (max_fd < to_client) {
-            max_fd = to_client;
-          }
-          number_of_to_clients++;
+                           &new_number_of_from_clients, &max_fd);
 
-          if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
-
-          int new_from_client;
-          if ((new_from_client = server_setup()) == -1) err();
-          // FD_SET(new_from_client, &fd_set_of_from_client);
-          from_client_list[number_of_from_clients] = new_from_client;
-          if (max_fd < new_from_client) {
-            max_fd = new_from_client;
-          }
-          new_number_of_from_clients = number_of_from_clients + 1;
-        }
+        //    only change the to_client if the handshake happened and the
+        //    to_client updated
       }
     }
     number_of_from_clients = new_number_of_from_clients;
@@ -124,7 +110,7 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
 void handle_from_client(int *from_client, int *to_client, int *index,
                         int *to_client_list, int *from_client_list,
                         int *number_of_to_clients, int *number_of_from_clients,
-                        int *new_number_of_from_clients) {
+                        int *new_number_of_from_clients, int *max_fd) {
   // remove the NONBLOCK
 
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
@@ -153,6 +139,25 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     //    add the nonblock˝
     fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
+
+    if (*to_client != -1) {
+      to_client_list[*number_of_to_clients] = *to_client;
+      if (*max_fd < *to_client) {
+        *max_fd = *to_client;
+      }
+      (*number_of_to_clients)++;
+
+      if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
+
+      int new_from_client;
+      if ((new_from_client = server_setup()) == -1) err();
+      // FD_SET(new_from_client, &fd_set_of_from_client);
+      from_client_list[*number_of_from_clients] = new_from_client;
+      if (*max_fd < new_from_client) {
+        *max_fd = new_from_client;
+      }
+      *new_number_of_from_clients = *number_of_from_clients + 1;
+    }
   } else if (flag == CLOSE_CLIENT) {
     printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED "DISCONNECT" reset
            "\n");
@@ -217,5 +222,6 @@ void handle_sigint(int sig) {
   }
   close(from_client_list[number_of_from_clients - 1]);
   printf("[ " HRED "SERVER" reset " ]: Caught SIGINT, server disconnected\n");
+  if (unlink(WKP) == -1) err();
   exit(0);
 }
