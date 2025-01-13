@@ -32,7 +32,6 @@
 struct message {
   int flag;
   char message[10000];
-  int num; //optional
 };
 
 
