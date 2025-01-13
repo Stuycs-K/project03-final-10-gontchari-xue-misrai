@@ -8,7 +8,7 @@ server: serv
 client: cli
 	@./cli
 
-client.o: client.c universal.h colors.h
+client.o: client.c universal.h colors.h client.h
 	@gcc -c client.c
 
 server.o: server.c universal.h colors.h

@@ -20,14 +20,12 @@ This document must be updated daily by EACH group member.
 - Add documentation for renderer and make a pr
 
 
-## 2025-01-10 to 2025-01-12 - ___
-- TODO: Update images (and maybe add some more)
-- TODO: Add pseudocode for the client rendering and info gathering process
+## 2025-01-10 to 2025-01-12 
+- Reworked structure of chat app to use selecting
+- Made it handle errors and other disconnects   
 
-## 2025-01-13 - ___
-- ___
-- ___
-- ___
+## 2025-01-13 
+- 
 
 ## 2025-01-14 - ___
 - ___
@@ -128,10 +126,8 @@ This document must be updated daily by EACH group member.
 ## 2025-01-09 - shared memory
 - have server create shared memory
 
-## 2025-01-10 to 2025-01-12 - ___
-- ___
-- ___
-- ___
+## 2025-01-10 to 2025-01-12 - documentation
+- we worked on code structure and worked on documentation
 
 ## 2025-01-13 - ___
 - ___
