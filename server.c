@@ -162,6 +162,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   if (flag == CREATING_CLIENT) {
     // adds the clients and creates the server
     // TODO: send the chat history to the client
+    /*
+      IMO, not needed. If we have a set number of channels that everyone
+      can use to write in, I think it would be easier to implement a set
+      of files for each channel and simply read/write to those.
+    */
 
     // three way handshake
     int random_number = random_random();
@@ -221,7 +226,89 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     *number_of_to_clients -= 1;
     *new_number_of_from_clients = *number_of_from_clients;
     (*index)--;
+  } else if (flag == SEND_MESSAGE) {
+    int logFile = open("logs.txt", O_CREAT | O_APPEND | O_WRONLY, 0611);
+    char message[256];
+    int x = read(*from_client, message, sizeof(message));
+    if(x > 0){
+      printf("Client sent a message!\n");
+      write(logFile, message, sizeof(message));
+      // Now we send an ACKNOWLEDGE message. idk if this is the intended implementation, but it sounds good for now.
+      for (int current_client_index = 0;
+           current_client_index < *number_of_to_clients; current_client_index++) {
+        // sends a random number to the clients, which is read by them and printed
+        // out
+        if (FD_ISSET(to_client_list[current_client_index],
+                     &fd_set_of_to_client)) {
+          int *x = ACKNOWLEDGE;
+          if (write(to_client_list[current_client_index], x, sizeof(x)) == -1) {
+            printf("[ " HYEL "SERVER" reset " ]: Client " HRED
+                   "DISCONNECT" reset " or other error\n");
+            close(to_client_list[current_client_index]);
+            close(from_client_list[current_client_index]);
+            for (int i = current_client_index + 1; i < *number_of_to_clients;
+                 i++) {
+              to_client_list[i - 1] = to_client_list[i];
+            }
+            for (int i = current_client_index + 1; i < *number_of_from_clients;
+                 i++) {
+              from_client_list[i - 1] = from_client_list[i];
+            }
+            number_of_to_clients--;
+            number_of_from_clients--;
+            new_number_of_from_clients--;
+            current_client_index--;
+          }
+        }
+      }
+    }
+    else if(x <= 0){
+      printf("Error reading message, client disconnected.\n");
+      close(from_client_list[*index]);
+      close(to_client_list[*index]);
+      for (int i = *index + 1; i < *number_of_to_clients; i++) {
+        to_client_list[i - 1] = to_client_list[i];
+      }
+      for (int i = *index + 1; i < *number_of_from_clients; i++) {
+        from_client_list[i - 1] = from_client_list[i];
+      }
+      *number_of_from_clients -= 1;
+      *number_of_to_clients -= 1;
+      *new_number_of_from_clients = *number_of_from_clients;
+      (*index)--;
+    }
+    /* for (int current_client_index = 0;
+         current_client_index < *number_of_from_clients; current_client_index++) {
+      if (FD_ISSET(from_client_list[current_client_index],
+                   &fd_set_of_from_client)) {
+        char message[256];
+        int x = read(from_client_list[current_client_index], message, sizeof(message));
+        if (x <= 0) {
+          printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED
+                 "DISCONNECT" reset " or other error\n");
+          close(to_client_list[current_client_index]);
+          close(from_client_list[current_client_index]);
+          for (int i = current_client_index + 1; i < *number_of_to_clients;
+               i++) {
+            to_client_list[i - 1] = to_client_list[i];
+          }
+          for (int i = current_client_index + 1; i < *number_of_from_clients;
+               i++) {
+            from_client_list[i - 1] = from_client_list[i];
+          }
+          number_of_to_clients--;
+          number_of_from_clients--;
+          new_number_of_from_clients--;
+          current_client_index--;
+        }
+        else if(x > 0){
+          printf("Recieved message from a client.\n");
+
+        }
+      }
+    }*/
   }
+
 }
 
 /*=========================
