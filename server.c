@@ -213,13 +213,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     *new_number_of_from_clients = *number_of_from_clients;
     (*index)--;
   } else if (flag == SEND_MESSAGE) {
-    int logFile = open("logs.txt", O_CREAT | O_APPEND | O_WRONLY, 0611);
-    char message[256];
+    char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistory, message);
     if(x > 0){
       printf("Client sent a message!\n");
-      write(logFile, message, sizeof(message));
       // Now we send an ACKNOWLEDGE message. idk if this is the intended implementation, but it sounds good for now.
       for (int current_client_index = 0;
            current_client_index < *number_of_to_clients; current_client_index++) {
