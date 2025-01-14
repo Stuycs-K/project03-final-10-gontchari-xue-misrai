@@ -10,26 +10,26 @@ This document must be updated daily by EACH group member.
 - Make the individial files and the makefile targets
 - Created a basic renderer in renderer.c and simplified placement through renderer.h
 
-## 2025-01-08 
+## 2025-01-08
 
-- Updated the client so that the frontend scrolls and also added *COLORS*. 
+- Updated the client so that the frontend scrolls and also added *COLORS*.
 - Made sure input worked in the chatbox
 
-## 2025-01-09 
+## 2025-01-09
 
 - Add documentation for renderer and make a pr
 
 
-## 2025-01-10 to 2025-01-12 
+## 2025-01-10 to 2025-01-12
 - Reworked structure of chat app to use selecting
 - Made it handle errors and other disconnects   
 
-## 2025-01-13 
+## 2025-01-13
 - add comments
 - refactor code
 
 ## 2025-01-14 - ___
-- TODO: change the text box so that it increases sizes with input 
+- TODO: change the text box so that it increases sizes with input
 - ___
 - ___
 
@@ -86,9 +86,9 @@ This document must be updated daily by EACH group member.
 - I need to talk with my group mates about log history and other messaging logistics so when can deal with that.
 
 ## 2025-01-14 - ___
-- ___
-- ___
-- ___
+- Cleaned up server side messaging setup
+- Server writes chat history to a client, and incoming client messages are appended to chatHistory
+- Server side messaging done i think
 
 ## 2025-01-15 - ___
 - ___
