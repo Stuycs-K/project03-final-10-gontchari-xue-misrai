@@ -8,9 +8,9 @@
 #include <curses.h>
 
 #include "renderer.h"
+#include "universal.h"
 
 #define MAX_INPUT 100
-#define MAX_CHAT 30000
 
 char input[MAX_INPUT] = {0};  // Input buffer
 char chat[MAX_CHAT] = "READY PLAYER 0\n";

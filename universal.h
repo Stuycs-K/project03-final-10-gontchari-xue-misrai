@@ -12,6 +12,9 @@
 #define UNIVERSAL_H
 #define WKP "mario"
 
+#define MAX_CHAT 30000
+#define MESSAGE_SIZE 1024
+
 #define NO_CLIENT -404
 
 #define MAX_NUM_CLIENTS 500
