@@ -223,11 +223,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     *new_number_of_from_clients = *number_of_from_clients;
     (*index)--;
   } else if (flag == SEND_MESSAGE) {
+    char message[256];
+    FILE *log_file = fopen("logs.txt", O_CREAT | O_WRONLY, 0700);
     for (int current_client_index = 0;
-         current_client_index < *number_of_to_clients; current_client_index++) {
-      if (FD_ISSET(to_client_list[current_client_index],
-                   &fd_set_of_to_client)) {
-        int random_int = abs(random_urandom() % 100);
+         current_client_index < *number_of_from_clients; current_client_index++) {
+      if (FD_ISSET(from_client_list[current_client_index],
+                   &fd_set_of_from_client)) {
+        char message[256];
         if (write(to_client_list[current_client_index], &random_int,
                   sizeof(random_int)) == -1) {
           printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED
