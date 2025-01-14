@@ -17,7 +17,7 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 // the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
-char chatHistory[MAX_CHAT];
+char chatHistory[MAX_CHAT] = "\0";
 
 int main() {
   // handle the sigpipe and signit signals
