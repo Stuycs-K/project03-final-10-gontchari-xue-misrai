@@ -28,10 +28,9 @@ This document must be updated daily by EACH group member.
 - add comments
 - refactor code
 
-## 2025-01-14 - ___
+## 2025-01-14
 - TODO: change the text box so that it increases sizes with input 
-- ___
-- ___
+- Did not do TODO, but I did start excalidraw drawing on protocols and deleted all of Ivan's comments
 
 ## 2025-01-15 - ___
 - ___
