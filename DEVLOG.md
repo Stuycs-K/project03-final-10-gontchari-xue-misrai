@@ -28,10 +28,16 @@ This document must be updated daily by EACH group member.
 - add comments
 - refactor code
 
+<<<<<<< HEAD
 ## 2025-01-14 - ___
 - TODO: change the text box so that it increases sizes with input
 - ___
 - ___
+=======
+## 2025-01-14
+- TODO: change the text box so that it increases sizes with input 
+- Did not do TODO, but I did start excalidraw drawing on protocols and deleted all of Ivan's comments
+>>>>>>> bfda51722b9c81f6679ed161e0b9704be36a1a75
 
 ## 2025-01-15 - ___
 - ___
@@ -133,10 +139,9 @@ This document must be updated daily by EACH group member.
 - ___
 - ___
 
-## 2025-01-14 - ___
-- ___
-- ___
-- ___
+## 2025-01-14 - client and server
+- removed random numbers from client and server
+- send chat history to clients upon connection
 
 ## 2025-01-15 - ___
 - ___
