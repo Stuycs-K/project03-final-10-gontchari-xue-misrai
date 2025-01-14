@@ -35,8 +35,7 @@ int main() {
   max_fd = initial_from_client;
   number_of_from_clients++;
 
-  printf("[ " HYEL "SERVER" reset " ]: Select server " HGRN "READY" reset
-         "\n");
+  printf("[ " HYEL "SERVER" reset " ]: Select server " HGRN "READY" reset "\n");
   while (1) {
     reset_fd_sets(&fd_set_of_from_client, &fd_set_of_to_client,
                   number_of_to_clients, number_of_from_clients, to_client_list,
@@ -68,8 +67,8 @@ int main() {
         int random_int = abs(random_urandom() % 100);
         if (write(to_client_list[current_client_index], &random_int,
                   sizeof(random_int)) == -1) {
-          printf("[ " HYEL "SERVER" reset " ]: Client " HRED
-                 "DISCONNECT" reset " or other error\n");
+          printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset
+                 " or other error\n");
           close(to_client_list[current_client_index]);
           close(from_client_list[current_client_index]);
           for (int i = current_client_index + 1; i < number_of_to_clients;
@@ -131,11 +130,11 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
 }
 
 /*=========================
-  reset_fd_sets
+  handle_from_client
   args:
     int *from_client
     int *to_client
-    int *index
+    int *index,
     int *to_client_list
     int *from_client_list
     int *number_of_to_clients
@@ -143,7 +142,8 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
     int *new_number_of_from_clients
     int *max_fd
 
-resets the fd_sets and does some error checking
+    handle input from client (e.g. the handshakes, or the messaging), will also
+  update global variables
 
   returns ABSOLUTELY NOTHING
   =========================*/
@@ -213,8 +213,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   } else if (flag == CLOSE_CLIENT) {
     // closes the client (both the to and from client descriptors) and downticks
     // the other trackers
-    printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset
-           "\n");
+    printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset "\n");
     close(from_client_list[*index]);
     close(to_client_list[*index]);
     for (int i = *index + 1; i < *number_of_to_clients; i++) {
