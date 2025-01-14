@@ -240,8 +240,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         // out
         if (FD_ISSET(to_client_list[current_client_index],
                      &fd_set_of_to_client)) {
-          int *x = ACKNOWLEDGE;
-          if (write(to_client_list[current_client_index], x, sizeof(x)) == -1) {
+          if (write(to_client_list[current_client_index], message, sizeof(x)) == -1) {
             printf("[ " HYEL "SERVER" reset " ]: Client " HRED
                    "DISCONNECT" reset " or other error\n");
             close(to_client_list[current_client_index]);
