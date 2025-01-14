@@ -27,7 +27,7 @@ int main() {
       err();
     }
     if (ret == 0) err();
-    if (randomized_number == CLOSE_SERVER) {
+    if (randomized_number == CLOSE_SERVER) { // the same descrbed in Universal.h
       printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED "CLOSURE" reset
              " by server; closing down\n");
       close(to_server);

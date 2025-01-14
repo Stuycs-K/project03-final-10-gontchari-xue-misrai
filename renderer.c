@@ -35,17 +35,19 @@ int main() {
   signal(SIGINT, handle_sigint);
   int pos = 0;  // Current cursor position
 
-  keypad(stdscr, TRUE);  // Enable function keys
-  getmaxyx(stdscr, LINES, COLS);
+  keypad(stdscr, TRUE);           // Enable function keys
+  getmaxyx(stdscr, LINES, COLS);  // intialize the boxes to the correct size
 
   input_win = newwin(3, COLS, LINES - 3, 0);  // Create input window
   box(input_win, 0, 0);                       // Draw border around input window
 
   chat_win = newwin(LINES - 4, COLS, 1, 0);
   scrollok(chat_win, TRUE);
+
   attron(COLOR_PAIR(1));
   box(chat_win, 0, 0);  // Draw border around input window
   attroff(COLOR_PAIR(2));
+
   char *prompt = "CHAT WINDOW";
   attron(COLOR_PAIR(2));
   mvprintw(0, (COLS - strlen(prompt)) / 2, prompt);
@@ -53,9 +55,12 @@ int main() {
   refresh();  // Refresh main screen
 
   mvwprintw(chat_win, 2, 3, "%s", chat);
+  //   make the input print last so that the cursor is there
   mvwprintw(input_win, 1, 1, "%s", input);  // Display input buffer
 
   while (1) {
+    // refreshes the window every iteration, which happens every time a
+    // character is typed I believe
     wrefresh(chat_win);
     wrefresh(input_win);
 
@@ -68,10 +73,13 @@ int main() {
       handle_backspace(input_win, chat_win, &pos, input);
     } else if (pos < MAX_INPUT - 1 && ch >= 32 && ch <= 126) {
       handle_normal_characters(input, &pos, ch);
+      //   deletes the windo so that it can reintialize them again
       delwin(chat_win);
       chat_win = newwin(LINES - 4, COLS, 1, 0);
+      // a make sure that u can scroll, or at least the window can scroll
       scrollok(chat_win, TRUE);
 
+      // types the "READY PLAYER BS onto the screen"
       char chat_add[20];
       sprintf(chat_add, "  READY PLAYER %d\n", ready_player_num);
       ready_player_num++;

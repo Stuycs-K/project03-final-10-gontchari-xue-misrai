@@ -29,18 +29,11 @@
 
 #define ACKNOWLEDGE 4
 
-struct message {
-  int flag;
-  char message[10000];
-};
-
-
 struct server {
   int num_channels;
   char *channels[];
 };
 
-int server_handshake(int *to_client);
 int client_handshake(int *to_server);
 
 // for basic & persistent servers
