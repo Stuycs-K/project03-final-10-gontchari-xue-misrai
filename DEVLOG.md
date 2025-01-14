@@ -29,7 +29,7 @@ This document must be updated daily by EACH group member.
 - refactor code
 
 ## 2025-01-14 - ___
-- ___
+- TODO: change the text box so that it increases sizes with input 
 - ___
 - ___
 
