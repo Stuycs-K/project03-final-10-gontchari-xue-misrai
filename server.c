@@ -234,6 +234,34 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if(x > 0){
       printf("Client sent a message!\n");
       write(logFile, message, sizeof(message));
+      // Now we send an ACKNOWLEDGE message. idk if this is the intended implementation, but it sounds good for now.
+      for (int current_client_index = 0;
+           current_client_index < *number_of_to_clients; current_client_index++) {
+        // sends a random number to the clients, which is read by them and printed
+        // out
+        if (FD_ISSET(to_client_list[current_client_index],
+                     &fd_set_of_to_client)) {
+          int *x = ACKNOWLEDGE;
+          if (write(to_client_list[current_client_index], x, sizeof(x)) == -1) {
+            printf("[ " HYEL "SERVER" reset " ]: Client " HRED
+                   "DISCONNECT" reset " or other error\n");
+            close(to_client_list[current_client_index]);
+            close(from_client_list[current_client_index]);
+            for (int i = current_client_index + 1; i < *number_of_to_clients;
+                 i++) {
+              to_client_list[i - 1] = to_client_list[i];
+            }
+            for (int i = current_client_index + 1; i < *number_of_from_clients;
+                 i++) {
+              from_client_list[i - 1] = from_client_list[i];
+            }
+            number_of_to_clients--;
+            number_of_from_clients--;
+            new_number_of_from_clients--;
+            current_client_index--;
+          }
+        }
+      }
     }
     else if(x <= 0){
       printf("Error reading message, client disconnected.\n");
