@@ -230,6 +230,21 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       printf("Client sent a message!\n");
       write(logFile, message, sizeof(message));
     }
+    else if(x <= 0){
+      printf("Error reading message, client disconnected.\n");
+      close(from_client_list[*index]);
+      close(to_client_list[*index]);
+      for (int i = *index + 1; i < *number_of_to_clients; i++) {
+        to_client_list[i - 1] = to_client_list[i];
+      }
+      for (int i = *index + 1; i < *number_of_from_clients; i++) {
+        from_client_list[i - 1] = from_client_list[i];
+      }
+      *number_of_from_clients -= 1;
+      *number_of_to_clients -= 1;
+      *new_number_of_from_clients = *number_of_from_clients;
+      (*index)--;
+    }
     /* for (int current_client_index = 0;
          current_client_index < *number_of_from_clients; current_client_index++) {
       if (FD_ISSET(from_client_list[current_client_index],
