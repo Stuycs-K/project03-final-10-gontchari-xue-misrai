@@ -132,10 +132,9 @@ This document must be updated daily by EACH group member.
 - ___
 - ___
 
-## 2025-01-14 - ___
-- ___
-- ___
-- ___
+## 2025-01-14 - client and server
+- removed random numbers from client and server
+- send chat history to clients upon connection
 
 ## 2025-01-15 - ___
 - ___
