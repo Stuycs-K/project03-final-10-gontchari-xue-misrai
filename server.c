@@ -162,6 +162,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   if (flag == CREATING_CLIENT) {
     // adds the clients and creates the server
     // TODO: send the chat history to the client
+    /*
+      IMO, not needed. If we have a set number of channels that everyone
+      can use to write in, I think it would be easier to implement a set
+      of files for each channel and simply read/write to those.
+    */
 
     // three way handshake
     int random_number = random_random();
