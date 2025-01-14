@@ -230,8 +230,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       if (FD_ISSET(from_client_list[current_client_index],
                    &fd_set_of_from_client)) {
         char message[256];
-        if (write(to_client_list[current_client_index], &random_int,
-                  sizeof(random_int)) == -1) {
+        int x = read(from_client_list[current_client_index], message, sizeof(message));
+        if (x <= 0) {
           printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED
                  "DISCONNECT" reset " or other error\n");
           close(to_client_list[current_client_index]);
@@ -248,6 +248,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
           number_of_from_clients--;
           new_number_of_from_clients--;
           current_client_index--;
+        }
+        else if(x > 0){
+          printf("Recieved message from a client.\n");
+          
         }
       }
     }
