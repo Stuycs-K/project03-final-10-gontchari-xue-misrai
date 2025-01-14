@@ -17,6 +17,8 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 // the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
+char chatHistory[MAX_CHAT];
+
 int main() {
   // handle the sigpipe and signit signals
   signal(SIGPIPE, handle_sigpipe);
@@ -230,6 +232,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     int logFile = open("logs.txt", O_CREAT | O_APPEND | O_WRONLY, 0611);
     char message[256];
     int x = read(*from_client, message, sizeof(message));
+    strcat(chatHistory, message);
     if(x > 0){
       printf("Client sent a message!\n");
       write(logFile, message, sizeof(message));
