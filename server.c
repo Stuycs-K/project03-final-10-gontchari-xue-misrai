@@ -4,7 +4,9 @@
 
 #include "colors.h"
 #include "universal.h"
-// int to_client, from_client;
+
+// max_fd keeps track of the max_fd of both to_client and from_client, for the
+// select function
 
 int number_of_to_clients = 0, number_of_from_clients = 0,
     new_number_of_from_clients = 0, max_fd = 0;
@@ -12,24 +14,28 @@ int number_of_to_clients = 0, number_of_from_clients = 0,
 // active pipes are changed using the select function
 fd_set fd_set_of_to_client, fd_set_of_from_client;
 
+// the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
 int main() {
-  signal(SIGPIPE, handle_sigpipe);  // Set up signal handler for SIGPIPE
-  signal(SIGINT, handle_sigint);    // Set up signal handler for SIGINT
+  // handle the sigpipe and signit signals
+  signal(SIGPIPE, handle_sigpipe);
+  signal(SIGINT, handle_sigint);
 
   if (mkfifo(WKP, 0666) == -1) err();
 
+  //   initalize the fd_sets through fd_zero
   FD_ZERO(&fd_set_of_to_client);
   FD_ZERO(&fd_set_of_from_client);
 
+  //   create the initial pipe and iterate all the variables
   int initial_from_client = server_setup();
   FD_SET(initial_from_client, &fd_set_of_from_client);
   from_client_list[number_of_from_clients] = initial_from_client;
   max_fd = initial_from_client;
   number_of_from_clients++;
 
-  printf("[ " HYEL "CHILD SERVER" reset " ]: Select server " HGRN "READY" reset
+  printf("[ " HYEL "SERVER" reset " ]: Select server " HGRN "READY" reset
          "\n");
   while (1) {
     reset_fd_sets(&fd_set_of_from_client, &fd_set_of_to_client,
@@ -46,37 +52,23 @@ int main() {
         handle_from_client(&(from_client_list[i]), &to_client, &i,
                            to_client_list, from_client_list,
                            &number_of_to_clients, &number_of_from_clients,
-                           &new_number_of_from_clients);
-        if (to_client != -1) {
-          to_client_list[number_of_to_clients] = to_client;
-          if (max_fd < to_client) {
-            max_fd = to_client;
-          }
-          number_of_to_clients++;
-
-          if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
-
-          int new_from_client;
-          if ((new_from_client = server_setup()) == -1) err();
-          // FD_SET(new_from_client, &fd_set_of_from_client);
-          from_client_list[number_of_from_clients] = new_from_client;
-          if (max_fd < new_from_client) {
-            max_fd = new_from_client;
-          }
-          new_number_of_from_clients = number_of_from_clients + 1;
-        }
+                           &new_number_of_from_clients, &max_fd);
       }
     }
+    // this links back so that we don't have infinite recoursion with the number
+    // of clients increasing ad infinitum
     number_of_from_clients = new_number_of_from_clients;
 
     for (int current_client_index = 0;
          current_client_index < number_of_to_clients; current_client_index++) {
+      // sends a random number to the clients, which is read by them and printed
+      // out
       if (FD_ISSET(to_client_list[current_client_index],
                    &fd_set_of_to_client)) {
         int random_int = abs(random_urandom() % 100);
         if (write(to_client_list[current_client_index], &random_int,
                   sizeof(random_int)) == -1) {
-          printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED
+          printf("[ " HYEL "SERVER" reset " ]: Client " HRED
                  "DISCONNECT" reset " or other error\n");
           close(to_client_list[current_client_index]);
           close(from_client_list[current_client_index]);
@@ -97,6 +89,23 @@ int main() {
     }
   }
 }
+
+/*=========================
+  reset_fd_sets
+  args:
+    fd_set *fd_set_of_from_client
+    fd_set *fd_set_of_to_client
+    int number_of_to_clients
+    int number_of_from_clients
+    int to_client_list[MAX_NUM_CLIENTS]
+    int from_client_list[MAX_NUM_CLIENTS]
+    int *max_fd
+
+resets the fd_sets and does some error checking, such as making sure that the
+file descriptors don't have any -1s
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 
 void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
                    int number_of_to_clients, int number_of_from_clients,
@@ -121,21 +130,45 @@ void reset_fd_sets(fd_set *fd_set_of_from_client, fd_set *fd_set_of_to_client,
   }
 }
 
+/*=========================
+  reset_fd_sets
+  args:
+    int *from_client
+    int *to_client
+    int *index
+    int *to_client_list
+    int *from_client_list
+    int *number_of_to_clients
+    int *number_of_from_clients
+    int *new_number_of_from_clients
+    int *max_fd
+
+resets the fd_sets and does some error checking
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
+
 void handle_from_client(int *from_client, int *to_client, int *index,
                         int *to_client_list, int *from_client_list,
                         int *number_of_to_clients, int *number_of_from_clients,
-                        int *new_number_of_from_clients) {
+                        int *new_number_of_from_clients, int *max_fd) {
   // remove the NONBLOCK
 
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
 
-  int random_number = random_random();
+  //   flags are sent by the client to the server and specified in universal.h
   int flag = -1;
   if (read(*from_client, &flag, sizeof(flag)) == -1) err();
   if (flag == CREATING_CLIENT) {
+    // adds the clients and creates the server
+    // TODO: send the chat history to the client
+
+    // three way handshake
+    int random_number = random_random();
     *to_client = server_connect(*from_client);
 
     if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
+
     printf("[ " HMAG "SERVER" reset
            " ] Created random number %d and sent it to client\n",
            random_number);
@@ -153,8 +186,29 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     //    add the nonblock˝
     fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
+    // end the three way handshake
+
+    // add the new file descriptors to the list (the fd_sets will be
+    // reinitialized at the beginning of the next loop)
+    to_client_list[*number_of_to_clients] = *to_client;
+    if (*max_fd < *to_client) {
+      *max_fd = *to_client;
+    }
+    (*number_of_to_clients)++;
+
+    if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
+
+    int new_from_client;
+    if ((new_from_client = server_setup()) == -1) err();
+    from_client_list[*number_of_from_clients] = new_from_client;
+    if (*max_fd < new_from_client) {
+      *max_fd = new_from_client;
+    }
+    *new_number_of_from_clients = *number_of_from_clients + 1;
   } else if (flag == CLOSE_CLIENT) {
-    printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED "DISCONNECT" reset
+    // closes the client (both the to and from client descriptors) and downticks
+    // the other trackers
+    printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset
            "\n");
     close(from_client_list[*index]);
     close(to_client_list[*index]);
@@ -217,7 +271,8 @@ void handle_sigpipe(int sig) {
   args: int sig
 
   handles and prints a notifying message if it catches a SIGINT signal,
-  usually from server disconnect
+  usually from server disconnect, closes everything and then waits for a bit of
+  time to make sure that the pipes work (an issue I had earlier)
 
   returns ABSOLUTELY NOTHING
   =========================*/
@@ -226,8 +281,8 @@ void handle_sigint(int sig) {
          " ]: Caught SIGINT, closing server, number of clients to close: %d\n",
          number_of_to_clients);
   for (int i = 0; i < number_of_to_clients; i++) {
-    int close_server_flag = CLOSE_SERVER;
-    // add the block here
+    int close_server_flag = CLOSE_SERVER;  // server flag defined in universal.h
+
     printf("[ " HRED "SERVER" reset " ]: Closing client %d\n", i);
     fcntl(to_client_list[i], F_SETFL,
           fcntl(to_client_list[i], F_GETFL) & ~O_NONBLOCK);
@@ -245,5 +300,6 @@ void handle_sigint(int sig) {
   }
   close(from_client_list[number_of_from_clients - 1]);
   printf("[ " HRED "SERVER" reset " ]: Caught SIGINT, server disconnected\n");
+  if (unlink(WKP) == -1) err();
   exit(0);
 }

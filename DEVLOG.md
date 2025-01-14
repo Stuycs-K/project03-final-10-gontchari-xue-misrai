@@ -25,10 +25,11 @@ This document must be updated daily by EACH group member.
 - Made it handle errors and other disconnects   
 
 ## 2025-01-13 
-- 
+- add comments
+- refactor code
 
 ## 2025-01-14 - ___
-- ___
+- TODO: change the text box so that it increases sizes with input 
 - ___
 - ___
 
