@@ -66,26 +66,10 @@ int main() {
       // out
       if (FD_ISSET(to_client_list[current_client_index],
                    &fd_set_of_to_client)) {
-        int random_int = abs(random_urandom() % 100);
-        if (write(to_client_list[current_client_index], &random_int,
-                  sizeof(random_int)) == -1) {
-          printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset
-                 " or other error\n");
-          close(to_client_list[current_client_index]);
-          close(from_client_list[current_client_index]);
-          for (int i = current_client_index + 1; i < number_of_to_clients;
-               i++) {
-            to_client_list[i - 1] = to_client_list[i];
-          }
-          for (int i = current_client_index + 1; i < number_of_from_clients;
-               i++) {
-            from_client_list[i - 1] = from_client_list[i];
-          }
-          number_of_to_clients--;
-          number_of_from_clients--;
-          new_number_of_from_clients--;
-          current_client_index--;
+        /*
+        if () {
         }
+        */
       }
     }
   }
@@ -243,8 +227,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         // out
         if (FD_ISSET(to_client_list[current_client_index],
                      &fd_set_of_to_client)) {
-          int *x = ACKNOWLEDGE;
-          if (write(to_client_list[current_client_index], x, sizeof(x)) == -1) {
+          if (write(to_client_list[current_client_index], message, sizeof(x)) == -1) {
             printf("[ " HYEL "SERVER" reset " ]: Client " HRED
                    "DISCONNECT" reset " or other error\n");
             close(to_client_list[current_client_index]);
@@ -280,36 +263,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       *new_number_of_from_clients = *number_of_from_clients;
       (*index)--;
     }
-    /* for (int current_client_index = 0;
-         current_client_index < *number_of_from_clients; current_client_index++) {
-      if (FD_ISSET(from_client_list[current_client_index],
-                   &fd_set_of_from_client)) {
-        char message[256];
-        int x = read(from_client_list[current_client_index], message, sizeof(message));
-        if (x <= 0) {
-          printf("[ " HYEL "CHILD SERVER" reset " ]: Client " HRED
-                 "DISCONNECT" reset " or other error\n");
-          close(to_client_list[current_client_index]);
-          close(from_client_list[current_client_index]);
-          for (int i = current_client_index + 1; i < *number_of_to_clients;
-               i++) {
-            to_client_list[i - 1] = to_client_list[i];
-          }
-          for (int i = current_client_index + 1; i < *number_of_from_clients;
-               i++) {
-            from_client_list[i - 1] = from_client_list[i];
-          }
-          number_of_to_clients--;
-          number_of_from_clients--;
-          new_number_of_from_clients--;
-          current_client_index--;
-        }
-        else if(x > 0){
-          printf("Recieved message from a client.\n");
-
-        }
-      }
-    }*/
   }
 
 }
