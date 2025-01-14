@@ -20,13 +20,15 @@ int main() {
   printf("[ " HCYN "CLIENT" reset " ]: Client " HGRN "ESTABLISHED" reset
          " by the server\n");
   while (1) {
-    int randomized_number;
+    int randomized_number = 0;
     int ret;
-    if ((ret = read(from_server, &randomized_number,
-                    sizeof(randomized_number))) == -1) {
+    // read messages
+    /*
+    if () {
       err();
     }
-    if (ret == 0) err();
+    */
+    // if (ret == 0) err();
     if (randomized_number == CLOSE_SERVER) { // the same descrbed in Universal.h
       printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED "CLOSURE" reset
              " by server; closing down\n");
@@ -34,9 +36,6 @@ int main() {
       close(from_server);
       exit(0);
     }
-    printf("[ " HCYN "CLIENT" reset " ] : Recieved random number " HGRN
-           "%d" reset " from server\n",
-           randomized_number);
   }
 }
 
