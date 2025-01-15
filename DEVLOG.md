@@ -136,10 +136,9 @@ This document must be updated daily by EACH group member.
 - removed random numbers from client and server
 - send chat history to clients upon connection
 
-## 2025-01-15 - ___
-- ___
-- ___
-- ___
+## 2025-01-15 - more working on client
+- have client send first message to server
+- we figured out the structure of getting client input
 
 ## 2025-01-16 - ___
 - ___
