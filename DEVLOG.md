@@ -32,10 +32,9 @@ This document must be updated daily by EACH group member.
 - TODO: change the text box so that it increases sizes with input
 - Did not do TODO, but I did start excalidraw drawing on protocols and deleted all of Ivan's comments
 
-## 2025-01-15 - ___
-- ___
-- ___
-- ___
+## 2025-01-15 
+- Created renderer example so that gathering of characters can be nonblocking
+- Work with groupmates and teachers to brainstorm ways for ncurses to work without waiting for user input.
 
 ## 2025-01-16 - ___
 - ___
