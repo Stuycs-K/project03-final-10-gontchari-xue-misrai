@@ -7,6 +7,11 @@
 
 int to_server, from_server;
 
+
+// IVAN TODO: have client send its username and pid appended at the front of the mesage
+
+
+
 /*=========================
   main
 
