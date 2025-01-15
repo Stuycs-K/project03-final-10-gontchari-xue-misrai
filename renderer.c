@@ -67,7 +67,8 @@ int main() {
     int ch = getch();  // Capture user input
 
     if (ch == '\n') {
-      handle_input(&chat_open);
+      // TODO: With this "enter", send the message to the server
+      handle_enter(&chat_open);
       break;
     } else if ((ch == KEY_BACKSPACE || ch == 127) && pos > 0) {
       handle_backspace(input_win, chat_win, &pos, input);
@@ -103,7 +104,7 @@ int main() {
 }
 
 /*=========================
-  handle_input
+  handle_enter
   args: int * chat_open
 
   Sets the chat_window to open.
@@ -112,7 +113,7 @@ int main() {
 
   returns ABSOLUTELY NOTHING
   =========================*/
-void handle_input(int *chat_open) { *chat_open = -1; }
+void handle_enter(int *chat_open) { *chat_open = -1; }
 
 /*=========================
   handle_backspace
