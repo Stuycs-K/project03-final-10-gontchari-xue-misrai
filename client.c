@@ -22,12 +22,14 @@ int main() {
   while (1) {
     int randomized_number = 0;
     int ret;
-    // read messages
-    /*
-    if () {
-      err();
-    }
-    */
+
+    // should be waiting for user input here instead
+    char *user_input = "user input";
+
+    int flag = SEND_MESSAGE;
+    write(to_server, &flag, sizeof(int));
+    write(to_server, &user_input, strlen(user_input));
+
     // if (ret == 0) err();
     if (randomized_number == CLOSE_SERVER) { // the same descrbed in Universal.h
       printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED "CLOSURE" reset
