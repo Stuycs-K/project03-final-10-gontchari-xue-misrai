@@ -190,6 +190,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       *max_fd = new_from_client;
     }
     *new_number_of_from_clients = *number_of_from_clients + 1;
+
+
+    write(*to_client, chatHistory, MAX_CHAT);
   } else if (flag == CLOSE_CLIENT) {
     // closes the client (both the to and from client descriptors) and downticks
     // the other trackers
