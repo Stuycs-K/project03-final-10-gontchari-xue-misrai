@@ -26,6 +26,7 @@
 #define CLOSE_SERVER -2
 
 // for part 2
+#define MAX_NUM_CHANNELS 5000
 #define CREATE_CHANNEL 3
 #define CLOSE_CHANNEL -3
 #define KEEP_ALIVE 0
