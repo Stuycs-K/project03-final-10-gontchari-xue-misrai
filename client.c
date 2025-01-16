@@ -1,6 +1,7 @@
 #include "client.h"
 
-#include <stdio.h>
+#include <unistd.h>
+#include <pwd.h>
 #include <signal.h>
 
 #include "colors.h"
@@ -22,8 +23,10 @@ char signature[256];
   =========================*/
 int main() {
   char *usrnme;
-  usrnme=(char *)calloc(50,sizeof(char));
-  cuserid(usrnme);
+  //usrnme=(char *)calloc(50,sizeof(char));
+  uid_t x = getuid();
+  struct passwd *y = getpwuid(x);
+  usrnme = y->pw_name;
   // cuserid(signature);
   printf("USERID: %s\n", usrnme);
   char pid[256];
