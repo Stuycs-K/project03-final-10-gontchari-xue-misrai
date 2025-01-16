@@ -32,21 +32,27 @@ int main() {
   strcat(signature, pid);
   // printf("TESTING SIGNATURE HERE: %s\n", signature);
 
-
   signal(SIGINT, handle_sigint);
   from_server = client_handshake(&to_server);
   printf("[ " HCYN "CLIENT" reset " ]: Client " HGRN "ESTABLISHED" reset
          " by the server\n");
+  
+  char chat_history[MAX_CHAT];
+  read(from_server, &chat_history, MAX_CHAT);
+  printf("%s\n", chat_history);
+
   while (1) {
     int randomized_number = 0;
     int ret;
 
     // should be waiting for user input here instead
+    /*
     char *user_input = "user input";
 
     int flag = SEND_MESSAGE;
     write(to_server, &flag, sizeof(int));
     write(to_server, &user_input, strlen(user_input));
+    */
 
     // if (ret == 0) err();
     if (randomized_number == CLOSE_SERVER) { // the same descrbed in Universal.h
