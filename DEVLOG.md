@@ -89,9 +89,9 @@ This document must be updated daily by EACH group member.
 - Server side messaging done i think
 
 ## 2025-01-15 - ___
-- ___
-- ___
-- ___
+- Discussed and planned in class how to use ncurses and other functionalities to load user input and chat updates at the same time.
+- Wrote code that generates a signature for the start of every message that looks like "username@pid"
+- idk why but client.c has almost nothing, so I can't really add the signature to user messages, but that's quick so we'll see tomorrow
 
 ## 2025-01-16 - ___
 - ___
