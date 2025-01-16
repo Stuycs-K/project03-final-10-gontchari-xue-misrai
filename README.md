@@ -2,7 +2,7 @@
 
 # Discordia
 
-### Got Is-Xus
+### Got Is-Xus [28]
 
 Ivan Gontchar, Elias Xu, Ishaana Misra
 
