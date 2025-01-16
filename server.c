@@ -19,10 +19,23 @@ int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
 char chatHistory[MAX_CHAT] = "\0";
 
+char * chatHistories[MAX_NUM_CHANNELS];
+int currChannels[MAX_NUM_CLIENTS];
+char * channelNames[MAX_NUM_CHANNELS];
+
 int main() {
   // handle the sigpipe and signit signals
   signal(SIGPIPE, handle_sigpipe);
   signal(SIGINT, handle_sigint);
+
+  for(int i = 0; i < MAX_NUM_CHANNELS; i++){
+    chatHistories[i] = (char *)calloc(MAX_CHAT, sizeof(char));
+    channelNames[i] = NULL;
+  }
+  char first[10] = "general";
+  chatHistories[0] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
+  strcpy(channelNames[0], first);
+
 
   if (mkfifo(WKP, 0666) == -1) err();
 

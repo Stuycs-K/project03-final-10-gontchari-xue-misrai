@@ -27,6 +27,7 @@
 
 // for part 2
 #define MAX_NUM_CHANNELS 5000
+#define MAX_SIZE_CHANNEL_NAME 1024
 #define CREATE_CHANNEL 3
 #define CLOSE_CHANNEL -3
 #define KEEP_ALIVE 0
