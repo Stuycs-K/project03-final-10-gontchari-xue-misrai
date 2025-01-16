@@ -37,9 +37,7 @@ This document must be updated daily by EACH group member.
 - Work with groupmates and teachers to brainstorm ways for ncurses to work without waiting for user input.
 
 ## 2025-01-16 - ___
-- ___
-- ___
-- ___
+- Worked (pair partnering) with Ivan on working on the server stuff for phase 2
 
 ## 2025-01-17 to 2025-01-19 - ___
 - ___
