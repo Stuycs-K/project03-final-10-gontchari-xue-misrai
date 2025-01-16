@@ -1,5 +1,6 @@
 #include "client.h"
 
+#include <stdio.h>
 #include <signal.h>
 
 #include "colors.h"
@@ -10,7 +11,7 @@ int to_server, from_server;
 
 // IVAN TODO: have client send its username and pid appended at the front of the mesage
 
-
+char signature[256];
 
 /*=========================
   main
@@ -20,6 +21,14 @@ int to_server, from_server;
   returns ABSOLUTELY NOTHING
   =========================*/
 int main() {
+  cuserid(signature);
+  printf("USERID: %s\n", signature);
+  char pid[256];
+  sprintf(pid, "@%d: ", getpid());
+  strcat(signature, pid);
+  printf("TESTING SIGNATURE HERE: %s\n", signature);
+
+
   signal(SIGINT, handle_sigint);
   from_server = client_handshake(&to_server);
   printf("[ " HCYN "CLIENT" reset " ]: Client " HGRN "ESTABLISHED" reset
