@@ -11,6 +11,9 @@ int to_server, from_server;
 
 char signature[256];
 
+//TODO: Changing channels and other channel functionalities
+
+
 /*=========================
   main
 

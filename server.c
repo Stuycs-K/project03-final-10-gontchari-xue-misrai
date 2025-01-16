@@ -36,6 +36,9 @@ int main() {
   chatHistories[0] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
   strcpy(channelNames[0], first);
 
+  for (int i = 0; i < MAX_NUM_CLIENTS; i++) {
+    currChannels[i] = 0;
+  }
 
   if (mkfifo(WKP, 0666) == -1) err();
 
@@ -159,6 +162,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   int flag = -1;
   if (read(*from_client, &flag, sizeof(flag)) == -1) err();
   if (flag == CREATING_CLIENT) {
+
     // adds the clients and creates the server
 
     // three way handshake
@@ -223,6 +227,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     *new_number_of_from_clients = *number_of_from_clients;
     (*index)--;
   } else if (flag == SEND_MESSAGE) {
+    // TODO: What channel the message is being sent to... and check if subscribed to channels have updates
+
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistory, message);
@@ -271,6 +277,15 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       *new_number_of_from_clients = *number_of_from_clients;
       (*index)--;
     }
+  }
+  else if(flag == CREATE_CHANNEL){
+
+  }
+  else if(flag == CHANGE_CHANNEL){
+
+  }
+  else if(flag == CLOSE_CHANNEL){
+
   }
 
 }
