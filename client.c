@@ -9,9 +9,6 @@
 
 int to_server, from_server;
 
-
-// IVAN TODO: have client send its username and pid appended at the front of the mesage
-
 char signature[256];
 
 /*=========================
@@ -28,12 +25,12 @@ int main() {
   struct passwd *y = getpwuid(x);
   usrnme = y->pw_name;
   // cuserid(signature);
-  printf("USERID: %s\n", usrnme);
+  // printf("USERID: %s\n", usrnme);
   char pid[256];
   sprintf(pid, "@%d: ", getpid());
   strcat(signature, usrnme);
   strcat(signature, pid);
-  printf("TESTING SIGNATURE HERE: %s\n", signature);
+  // printf("TESTING SIGNATURE HERE: %s\n", signature);
 
 
   signal(SIGINT, handle_sigint);
