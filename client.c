@@ -21,10 +21,14 @@ char signature[256];
   returns ABSOLUTELY NOTHING
   =========================*/
 int main() {
-  cuserid(signature);
-  printf("USERID: %s\n", signature);
+  char *usrnme;
+  usrnme=(char *)calloc(50,sizeof(char));
+  cuserid(usrnme);
+  // cuserid(signature);
+  printf("USERID: %s\n", usrnme);
   char pid[256];
   sprintf(pid, "@%d: ", getpid());
+  strcat(signature, usrnme);
   strcat(signature, pid);
   printf("TESTING SIGNATURE HERE: %s\n", signature);
 
