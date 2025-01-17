@@ -17,7 +17,7 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 // the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
-char chatHistory[MAX_CHAT] = "\0";
+char chatHistory[MAX_CHAT] = "Test messages\0";
 
 int main() {
   // handle the sigpipe and signit signals
@@ -59,19 +59,6 @@ int main() {
     // this links back so that we don't have infinite recoursion with the number
     // of clients increasing ad infinitum
     number_of_from_clients = new_number_of_from_clients;
-
-    for (int current_client_index = 0;
-         current_client_index < number_of_to_clients; current_client_index++) {
-      // sends a random number to the clients, which is read by them and printed
-      // out
-      if (FD_ISSET(to_client_list[current_client_index],
-                   &fd_set_of_to_client)) {
-        /*
-        if () {
-        }
-        */
-      }
-    }
   }
 }
 
@@ -192,7 +179,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     *new_number_of_from_clients = *number_of_from_clients + 1;
 
 
-    write(*to_client, chatHistory, MAX_CHAT);
+    if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
+
   } else if (flag == CLOSE_CLIENT) {
     // closes the client (both the to and from client descriptors) and downticks
     // the other trackers

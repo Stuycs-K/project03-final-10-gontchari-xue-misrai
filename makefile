@@ -1,6 +1,6 @@
 compile serv cli: server.o client.o networking.o colors.h
-	@gcc -o cli client.o networking.o
-	@gcc -o serv server.o networking.o
+	@gcc -o cli client.o networking.o -lncurses
+	@gcc -o serv server.o networking.o -lncurses
 
 server: serv
 	@./serv
@@ -9,7 +9,7 @@ client: cli
 	@./cli
 
 client.o: client.c universal.h colors.h client.h
-	@gcc -c client.c
+	@gcc -c client.c -lncurses
 
 server.o: server.c universal.h colors.h
 	@gcc -c server.c -lncurses
