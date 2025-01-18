@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  // for memset()
+#include <sys/select.h>
 #include <unistd.h>  // for usleep()
 
 #include "colors.h"
@@ -38,12 +39,8 @@ int main() {
   struct passwd *y = getpwuid(x);
   usrnme = y->pw_name;
 
-  char pid[256];
-  sprintf(pid, "@%d: ", getpid());
-  strcat(signature, usrnme);
-  strcat(signature, pid);
-
   //   getting the name
+  sprintf(signature, "%s@%d: ", usrnme, getpid());
   sprintf(header_signature, "%s@%d", usrnme, getpid());
   sprintf(header, "Your name is: %s", header_signature);
 
@@ -146,6 +143,7 @@ int main() {
         char new_chat[MAX_CHAT];
         if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
         // set the chat to the new chat
+        chat[0] = 0;
         strcpy(chat, new_chat);
       } else if (flag == CLOSE_SERVER) {
         endwin();
@@ -230,14 +228,14 @@ int main() {
         // We'll just clear it
         // TODO send message to server
         int flag = SEND_MESSAGE;
-        char message[MESSAGE_SIZE];
+        char message[MESSAGE_SIZE] = {0};
         strcat(message, signature);
         strcat(message, buffer);
         if (write(to_server, &flag, sizeof(flag)) == -1) err();
         if (write(to_server, message, sizeof(message)) == -1) err();
-
         idx = 0;
-        message[0] = '\0';
+
+        memset(buffer, 0, sizeof(buffer));
         memset(buffer, 0, sizeof(buffer));
       } else if (ch == 27) {
         // If ESC pressed, break (exit)
@@ -287,7 +285,7 @@ void handle_resize(int sig) {
     resizeterm(ROWS, COLS);
 
     attron(COLOR_PAIR(3));
-    mvprintw(0, (COLS - strlen(header)) / 2, header);
+    mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
     attroff(COLOR_PAIR(3));
 
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);

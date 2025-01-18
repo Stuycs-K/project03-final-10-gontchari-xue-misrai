@@ -2,6 +2,7 @@
 
 #include <signal.h>
 
+#include <sys/select.h>
 #include "colors.h"
 #include "universal.h"
 
