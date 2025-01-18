@@ -20,7 +20,7 @@ char header[512] = {0};
 
 int chat_open = 1;
 
-WINDOW *win_input, *win_chat, *people_window, *channel_window;
+WINDOW *win_input, *win_chat, *win_people, *win_channel;
 fd_set to_server_fd_set, from_server_fd_set;
 
 // just to head off any strcat issues
@@ -69,17 +69,35 @@ int main() {
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
   init_pair(2, COLOR_CYAN, COLOR_BLACK);     // input box
   init_pair(3, COLOR_YELLOW, COLOR_BLACK);   // header
+  init_pair(4, COLOR_GREEN, COLOR_BLACK);    // channel
+  init_pair(5, COLOR_RED, COLOR_BLACK);      // people
 
   getmaxyx(stdscr, ROWS, COLS);
 
   // Create two windows
+  //   the arguements are height, width, starty, startx
+  win_chat = newwin(ROWS - 4, 3 * COLS / 4, 1, COLS / 4);
+  win_channel = newwin((ROWS - 4) / 2, COLS / 4, 1, 0);
+  win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4, (ROWS - 4) / 2, 0);
   win_input = newwin(3, COLS, ROWS - 3, 0);
-  win_chat = newwin(ROWS - 4, COLS, 1, 0);
-
-
-
   // Draw initial boxes
   mvprintw(0, (COLS - strlen(header)) / 2, header);
+
+  box(win_channel, 0, 0);
+  wattron(win_channel, A_BOLD);
+  wattron(win_channel, COLOR_PAIR(4));
+  mvwprintw(win_channel, 0, 1, " Channels ");
+  wattroff(win_channel, COLOR_PAIR(4));
+  wattroff(win_channel, A_BOLD);
+  wrefresh(win_channel);
+
+  box(win_people, 0, 0);
+  wattron(win_people, A_BOLD);
+  wattron(win_people, COLOR_PAIR(5));
+  mvwprintw(win_people, 0, 1, " People ");
+  wattroff(win_people, COLOR_PAIR(5));
+  wattroff(win_people, A_BOLD);
+  wrefresh(win_people);
 
   box(win_chat, 0, 0);
   wattron(win_chat, A_BOLD);
@@ -152,8 +170,30 @@ int main() {
     mvprintw(0, (COLS - strlen(header)) / 2, header);
     attroff(COLOR_PAIR(3));
 
-    wresize(win_chat, ROWS - 4, COLS);
-    mvwin(win_chat, 1, 0);
+    wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
+    mvwin(win_channel, 1, 0);
+    werase(win_channel);
+    box(win_channel, 0, 0);
+    wattron(win_channel, A_BOLD);
+    wattron(win_channel, COLOR_PAIR(4));
+    mvwprintw(win_channel, 0, 1, " Channels ");
+    wattroff(win_channel, COLOR_PAIR(4));
+    wattroff(win_channel, A_BOLD);
+    wrefresh(win_channel);
+
+    wresize(win_people, (ROWS - 4) / 2, COLS / 4);
+    mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
+    werase(win_people);
+    box(win_people, 0, 0);
+    wattron(win_people, A_BOLD);
+    wattron(win_people, COLOR_PAIR(5));
+    mvwprintw(win_people, 0, 1, " People ");
+    wattroff(win_people, COLOR_PAIR(5));
+    wattroff(win_people, A_BOLD);
+    wrefresh(win_people);
+
+    wresize(win_chat, ROWS - 4, 3 * COLS / 4);
+    mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
     mvwprintw(win_chat, 1, 2, "%s", chat, COLS, ROWS);
     box(win_chat, 0, 0);
@@ -227,7 +267,7 @@ int main() {
     }
 
     // Small delay so we don’t hog the CPU
-    usleep(100);  // 0.1 seconds
+    usleep(10000);  // 0.1 seconds
   }
 
   // Cleanup
@@ -250,6 +290,28 @@ void handle_resize(int sig) {
     mvprintw(0, (COLS - strlen(header)) / 2, header);
     attroff(COLOR_PAIR(3));
 
+    wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
+    mvwin(win_channel, 1, 0);
+    werase(win_channel);
+    box(win_channel, 0, 0);
+    wattron(win_channel, A_BOLD);
+    wattron(win_channel, COLOR_PAIR(4));
+    mvwprintw(win_channel, 0, 1, " Channels ");
+    wattroff(win_channel, COLOR_PAIR(4));
+    wattroff(win_channel, A_BOLD);
+    wrefresh(win_channel);
+
+    wresize(win_people, (ROWS - 4) / 2, COLS / 4);
+    mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
+    werase(win_people);
+    box(win_people, 0, 0);
+    wattron(win_people, A_BOLD);
+    wattron(win_people, COLOR_PAIR(5));
+    mvwprintw(win_people, 0, 1, " People ");
+    wattroff(win_people, COLOR_PAIR(5));
+    wattroff(win_people, A_BOLD);
+    wrefresh(win_people);
+
     wresize(win_input, 3, COLS);
     mvwin(win_input, ROWS - 3, 0);
     werase(win_input);
@@ -262,8 +324,8 @@ void handle_resize(int sig) {
     mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
 
-    wresize(win_chat, ROWS - 4, COLS);
-    mvwin(win_chat, 1, 0);
+    wresize(win_chat, ROWS - 4, 3 * COLS / 4);
+    mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
     mvwprintw(win_chat, 1, 2, "%s", chat, COLS, ROWS);
     box(win_chat, 0, 0);
