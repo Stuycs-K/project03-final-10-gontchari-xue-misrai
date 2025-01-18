@@ -14,12 +14,17 @@
 #include "colors.h"
 #include "universal.h"
 
+// ! min height: 10
+// ! min width: 50
+
 char chat[MAX_CHAT] = {0};
 char signature[256] = {0};
 char header_signature[256] = {0};
 char header[512] = {0};
 
 int chat_open = 1;
+
+char *terminal_resize_prompt = "Resize your terminal";
 
 WINDOW *win_input, *win_chat, *win_people, *win_channel;
 fd_set to_server_fd_set, from_server_fd_set;
@@ -123,47 +128,216 @@ int main() {
 
   // Main loop
   while (1) {
-    // refresh the FD_SETS
-    FD_ZERO(&to_server_fd_set);
-    FD_ZERO(&from_server_fd_set);
-    FD_SET(from_server, &from_server_fd_set);
-    FD_SET(to_server, &to_server_fd_set);
+    if (chat_open == 1) {
+      // refresh the FD_SETS
+      FD_ZERO(&to_server_fd_set);
+      FD_ZERO(&from_server_fd_set);
+      FD_SET(from_server, &from_server_fd_set);
+      FD_SET(to_server, &to_server_fd_set);
 
-    int ret = select((to_server > from_server ? to_server : from_server) + 1,
-                     &from_server_fd_set, &to_server_fd_set, NULL, NULL);
+      int ret = select((to_server > from_server ? to_server : from_server) + 1,
+                       &from_server_fd_set, &to_server_fd_set, NULL, NULL);
 
-    if (ret == -1) {
-      err();
-    }
-
-    if (FD_ISSET(from_server, &from_server_fd_set)) {
-      int flag = 0;
-      if (read(from_server, &flag, sizeof(flag)) == -1) err();
-      if (flag == SEND_MESSAGE) {
-        char new_chat[MAX_CHAT];
-        if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
-        // set the chat to the new chat
-        chat[0] = 0;
-        strcpy(chat, new_chat);
-      } else if (flag == CLOSE_SERVER) {
-        endwin();
-        printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
-               "CLOSURE" reset " by server; closing down\n");
-        close(to_server);
-        close(from_server);
-        exit(0);
-      } else {
-        endwin();
-        printf("Recieved Unknown flag: %d\n", flag);
-        close(to_server);
-        close(from_server);
-        exit(0);
+      if (ret == -1) {
+        err();
       }
+
+      if (FD_ISSET(from_server, &from_server_fd_set)) {
+        int flag = 0;
+        if (read(from_server, &flag, sizeof(flag)) == -1) err();
+        if (flag == SEND_MESSAGE) {
+          char new_chat[MAX_CHAT];
+          if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
+          // set the chat to the new chat
+          chat[0] = 0;
+          strcpy(chat, new_chat);
+        } else if (flag == CLOSE_SERVER) {
+          endwin();
+          printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
+                 "CLOSURE" reset " by server; closing down\n");
+          close(to_server);
+          close(from_server);
+          exit(0);
+        } else {
+          endwin();
+          printf("Recieved Unknown flag: %d\n", flag);
+          close(to_server);
+          close(from_server);
+          exit(0);
+        }
+      }
+
+      refresh();
+      // 3) Continuously update the other box
+      // ! Order matters here! the rendering is very skibidi in this area
+      attron(COLOR_PAIR(3));
+      mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
+      attroff(COLOR_PAIR(3));
+
+      wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
+      mvwin(win_channel, 1, 0);
+      werase(win_channel);
+      box(win_channel, 0, 0);
+      wattron(win_channel, A_BOLD);
+      wattron(win_channel, COLOR_PAIR(4));
+      mvwprintw(win_channel, 0, 1, " Channels ");
+      wattroff(win_channel, COLOR_PAIR(4));
+      wattroff(win_channel, A_BOLD);
+      wrefresh(win_channel);
+
+      wresize(win_people, (ROWS - 4) / 2, COLS / 4);
+      mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
+      werase(win_people);
+      box(win_people, 0, 0);
+      wattron(win_people, A_BOLD);
+      wattron(win_people, COLOR_PAIR(5));
+      mvwprintw(win_people, 0, 1, " People ");
+      wattroff(win_people, COLOR_PAIR(5));
+      wattroff(win_people, A_BOLD);
+      wrefresh(win_people);
+
+      wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
+      mvwin(win_chat, 1, COLS / 4);
+      werase(win_chat);
+      mvwprintw(win_chat, 1, 2, "%s", chat);
+      box(win_chat, 0, 0);
+      wattron(win_chat, A_BOLD);
+      wattron(win_chat, COLOR_PAIR(1));
+      mvwprintw(win_chat, 0, 1, " Chat ");
+      wattroff(win_chat, COLOR_PAIR(1));
+      wattroff(win_chat, A_BOLD);
+      wrefresh(win_chat);
+
+      // 2) Update the input window
+      wresize(win_input, 3, COLS);
+      mvwin(win_input, ROWS - 3, 0);
+      werase(win_input);
+      box(win_input, 0, 0);
+      wattron(win_input, A_BOLD);
+      wattron(win_input, COLOR_PAIR(2));
+      mvwprintw(win_input, 0, 2, " Input ");
+      wattroff(win_input, COLOR_PAIR(2));
+      wattroff(win_input, A_BOLD);
+      mvwprintw(win_input, 1, 1, "%s", buffer);
+      wrefresh(win_input);
+
+      // poll for input from server
+      static char
+          int_buf[sizeof(int)];  // this is a static variable because we
+                                 // want to keep the buffer between calls
+      static int bytes_collected = 0;
+
+      ch = wgetch(win_input);
+      if (ch != ERR) {
+        // Handle character
+        if (ch == '\n') {
+          // For example, you could "submit" the buffer here
+          // We'll just clear it
+          // TODO send message to server
+          int flag = SEND_MESSAGE;
+          char message[MESSAGE_SIZE] = {0};
+          strcat(message, signature);
+          strcat(message, buffer);
+          if (write(to_server, &flag, sizeof(flag)) == -1) err();
+          if (write(to_server, message, sizeof(message)) == -1) err();
+          idx = 0;
+
+          memset(buffer, 0, sizeof(buffer));
+          memset(buffer, 0, sizeof(buffer));
+        } else if (ch == 27) {
+          // If ESC pressed, break (exit)
+          int flag = CLOSE_CLIENT;
+          if (write(to_server, &flag, sizeof(flag)) == -1) err();
+          sleep(1);
+          close(to_server);
+          close(from_server);
+          char fifo_name[PIPE_SIZING] = {"\0"};
+          sprintf(fifo_name, "%d", getpid());
+          char *fifo_ending = ".fifo";
+          strcat(fifo_name, fifo_ending);
+          unlink(fifo_name);
+
+          endwin();
+          exit(0);
+        } else if (ch == KEY_BACKSPACE || ch == 127) {
+          // Handle backspace
+          if (idx > 0) {
+            buffer[--idx] = '\0';
+          }
+        } else if (idx < (int)sizeof(buffer) - 1) {
+          // Append typed character
+          buffer[idx++] = ch;
+          buffer[idx] = '\0';
+        }
+      }
+    } else {
+      // for really small screens
+      refresh();
+      clear();
+
+      mvprintw(ROWS / 2 - 1, (COLS - sizeof(terminal_resize_prompt) - 4) / 2,
+               "%s", terminal_resize_prompt);
+
+      mvprintw(ROWS / 2, (COLS / 2) - 5, "Width ");
+      attron(A_BOLD);
+      if (COLS < 50) {
+        attron(COLOR_PAIR(5));
+      } else {
+        attron(COLOR_PAIR(4));
+      }
+      mvprintw(ROWS / 2, (COLS / 2) + 5, "%d", COLS);
+      if (COLS < 50) {
+        attroff(COLOR_PAIR(5));
+      } else {
+        attroff(COLOR_PAIR(4));
+      }
+      attroff(A_BOLD);
+
+      mvprintw(ROWS / 2 + 1, (COLS / 2) - 5, "Height ");
+      attron(A_BOLD);
+      if (ROWS < 10) {
+        attron(COLOR_PAIR(5));
+      } else {
+        attron(COLOR_PAIR(4));
+      }
+      mvprintw(ROWS / 2 + 1, (COLS / 2) + 5, "%d", ROWS);
+      if (ROWS < 10) {
+        attroff(COLOR_PAIR(5));
+      } else {
+        attroff(COLOR_PAIR(4));
+      }
+      attroff(A_BOLD);
+
+      refresh();
     }
 
+    // Small delay so we don’t hog the CPU
+    usleep(10000);  // 0.1 seconds
+  }
+
+  // Cleanup
+  delwin(win_chat);
+  delwin(win_input);
+  endwin();  // End curses mode
+
+  return 0;
+}
+
+void handle_resize(int sig) {
+  getmaxyx(stdscr, ROWS, COLS);
+
+  if (ROWS < 10 || COLS < 50) {
+    chat_open = 0;
+  } else {
+    chat_open = 1;
+  }
+
+  if (chat_open == 1) {
+    endwin();
     refresh();
-    // 3) Continuously update the other box
-    // ! Order matters here! the rendering is very skibidi in this area
+    clear();
+    getmaxyx(stdscr, ROWS, COLS);
+
     attron(COLOR_PAIR(3));
     mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
     attroff(COLOR_PAIR(3));
@@ -214,125 +388,45 @@ int main() {
     wattroff(win_input, A_BOLD);
     mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
-
-    // poll for input from server
-    static char int_buf[sizeof(int)];  // this is a static variable because we
-                                       // want to keep the buffer between calls
-    static int bytes_collected = 0;
-
-    ch = wgetch(win_input);
-    if (ch != ERR) {
-      // Handle character
-      if (ch == '\n') {
-        // For example, you could "submit" the buffer here
-        // We'll just clear it
-        // TODO send message to server
-        int flag = SEND_MESSAGE;
-        char message[MESSAGE_SIZE] = {0};
-        strcat(message, signature);
-        strcat(message, buffer);
-        if (write(to_server, &flag, sizeof(flag)) == -1) err();
-        if (write(to_server, message, sizeof(message)) == -1) err();
-        idx = 0;
-
-        memset(buffer, 0, sizeof(buffer));
-        memset(buffer, 0, sizeof(buffer));
-      } else if (ch == 27) {
-        // If ESC pressed, break (exit)
-        int flag = CLOSE_CLIENT;
-        if (write(to_server, &flag, sizeof(flag)) == -1) err();
-        sleep(1);
-        close(to_server);
-        close(from_server);
-        char fifo_name[PIPE_SIZING] = {"\0"};
-        sprintf(fifo_name, "%d", getpid());
-        char *fifo_ending = ".fifo";
-        strcat(fifo_name, fifo_ending);
-        unlink(fifo_name);
-
-        endwin();
-        exit(0);
-      } else if (ch == KEY_BACKSPACE || ch == 127) {
-        // Handle backspace
-        if (idx > 0) {
-          buffer[--idx] = '\0';
-        }
-      } else if (idx < (int)sizeof(buffer) - 1) {
-        // Append typed character
-        buffer[idx++] = ch;
-        buffer[idx] = '\0';
-      }
-    }
-
-    // Small delay so we don’t hog the CPU
-    usleep(10000);  // 0.1 seconds
-  }
-
-  // Cleanup
-  delwin(win_chat);
-  delwin(win_input);
-  endwin();  // End curses mode
-
-  return 0;
-}
-
-void handle_resize(int sig) {
-  if (chat_open == 1) {
+    refresh();
+  } else if (chat_open == 0) {
     endwin();
     refresh();
     clear();
     getmaxyx(stdscr, ROWS, COLS);
-    resizeterm(ROWS, COLS);
+    mvprintw(ROWS / 2 - 1, (COLS - sizeof(terminal_resize_prompt) - 4) / 2,
+             "%s", terminal_resize_prompt);
+    mvprintw(ROWS / 2, (COLS / 2) - 5, "Width ");
 
-    attron(COLOR_PAIR(3));
-    mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
-    attroff(COLOR_PAIR(3));
+    attron(A_BOLD);
+    if (COLS < 50) {
+      attron(COLOR_PAIR(5));
+    } else {
+      attron(COLOR_PAIR(4));
+    }
+    mvprintw(ROWS / 2, (COLS / 2) + 5, "%d", COLS);
+    if (COLS < 50) {
+      attroff(COLOR_PAIR(5));
+    } else {
+      attroff(COLOR_PAIR(4));
+    }
+    attroff(A_BOLD);
 
-    wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
-    mvwin(win_channel, 1, 0);
-    werase(win_channel);
-    box(win_channel, 0, 0);
-    wattron(win_channel, A_BOLD);
-    wattron(win_channel, COLOR_PAIR(4));
-    mvwprintw(win_channel, 0, 1, " Channels ");
-    wattroff(win_channel, COLOR_PAIR(4));
-    wattroff(win_channel, A_BOLD);
-    wrefresh(win_channel);
+    mvprintw(ROWS / 2 + 1, (COLS / 2) - 5, "Height ");
+    attron(A_BOLD);
+    if (ROWS < 10) {
+      attron(COLOR_PAIR(5));
+    } else {
+      attron(COLOR_PAIR(4));
+    }
+    mvprintw(ROWS / 2 + 1, (COLS / 2) + 5, "%d", ROWS);
+    if (ROWS < 10) {
+      attroff(COLOR_PAIR(5));
+    } else {
+      attroff(COLOR_PAIR(4));
+    }
+    attroff(A_BOLD);
 
-    wresize(win_people, (ROWS - 4) / 2, COLS / 4);
-    mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
-    werase(win_people);
-    box(win_people, 0, 0);
-    wattron(win_people, A_BOLD);
-    wattron(win_people, COLOR_PAIR(5));
-    mvwprintw(win_people, 0, 1, " People ");
-    wattroff(win_people, COLOR_PAIR(5));
-    wattroff(win_people, A_BOLD);
-    wrefresh(win_people);
-
-    wresize(win_input, 3, COLS);
-    mvwin(win_input, ROWS - 3, 0);
-    werase(win_input);
-    box(win_input, 0, 0);
-    wattron(win_input, A_BOLD);
-    wattron(win_input, COLOR_PAIR(2));
-    mvwprintw(win_input, 0, 2, " Input ");
-    wattroff(win_input, COLOR_PAIR(2));
-    wattroff(win_input, A_BOLD);
-    mvwprintw(win_input, 1, 1, "%s", buffer);
-    wrefresh(win_input);
-
-    wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
-    mvwin(win_chat, 1, COLS / 4);
-    werase(win_chat);
-    mvwprintw(win_chat, 1, 2, "%s", chat);
-    box(win_chat, 0, 0);
-    wattron(win_chat, A_BOLD);
-    wattron(win_chat, COLOR_PAIR(1));
-    mvwprintw(win_chat, 0, 1, " Chat ");
-    wattroff(win_chat, COLOR_PAIR(1));
-    wattroff(win_chat, A_BOLD);
-    wrefresh(win_chat);
     refresh();
   }
 }
