@@ -48,6 +48,7 @@ int main() {
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
+  write(to_server, usrnme, sizeof(usrnme));
 
   FD_ZERO(&to_server_fd_set);
   FD_ZERO(&from_server_fd_set);
