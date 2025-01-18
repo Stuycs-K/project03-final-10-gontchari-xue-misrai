@@ -20,7 +20,7 @@ char header[512] = {0};
 
 int chat_open = 1;
 
-WINDOW *win_input, *win_update;
+WINDOW *win_input, *win_chat, *people_window, *channel_window;
 fd_set to_server_fd_set, from_server_fd_set;
 
 // just to head off any strcat issues
@@ -74,18 +74,20 @@ int main() {
 
   // Create two windows
   win_input = newwin(3, COLS, ROWS - 3, 0);
-  win_update = newwin(ROWS - 4, COLS, 1, 0);
+  win_chat = newwin(ROWS - 4, COLS, 1, 0);
+
+
 
   // Draw initial boxes
   mvprintw(0, (COLS - strlen(header)) / 2, header);
 
-  box(win_update, 0, 0);
-  wattron(win_update, A_BOLD);
-  wattron(win_update, COLOR_PAIR(1));
-  mvwprintw(win_update, 0, 1, " Chat ");
-  wattroff(win_update, COLOR_PAIR(1));
-  wattroff(win_update, A_BOLD);
-  wrefresh(win_update);
+  box(win_chat, 0, 0);
+  wattron(win_chat, A_BOLD);
+  wattron(win_chat, COLOR_PAIR(1));
+  mvwprintw(win_chat, 0, 1, " Chat ");
+  wattroff(win_chat, COLOR_PAIR(1));
+  wattroff(win_chat, A_BOLD);
+  wrefresh(win_chat);
 
   box(win_input, 0, 0);
   wattron(win_input, A_BOLD);
@@ -150,17 +152,17 @@ int main() {
     mvprintw(0, (COLS - strlen(header)) / 2, header);
     attroff(COLOR_PAIR(3));
 
-    wresize(win_update, ROWS - 4, COLS);
-    mvwin(win_update, 1, 0);
-    werase(win_update);
-    mvwprintw(win_update, 1, 2, "%s", chat, COLS, ROWS);
-    box(win_update, 0, 0);
-    wattron(win_update, A_BOLD);
-    wattron(win_update, COLOR_PAIR(1));
-    mvwprintw(win_update, 0, 1, " Chat ");
-    wattroff(win_update, COLOR_PAIR(1));
-    wattroff(win_update, A_BOLD);
-    wrefresh(win_update);
+    wresize(win_chat, ROWS - 4, COLS);
+    mvwin(win_chat, 1, 0);
+    werase(win_chat);
+    mvwprintw(win_chat, 1, 2, "%s", chat, COLS, ROWS);
+    box(win_chat, 0, 0);
+    wattron(win_chat, A_BOLD);
+    wattron(win_chat, COLOR_PAIR(1));
+    mvwprintw(win_chat, 0, 1, " Chat ");
+    wattroff(win_chat, COLOR_PAIR(1));
+    wattroff(win_chat, A_BOLD);
+    wrefresh(win_chat);
 
     // 2) Update the input window
     wresize(win_input, 3, COLS);
@@ -229,7 +231,7 @@ int main() {
   }
 
   // Cleanup
-  delwin(win_update);
+  delwin(win_chat);
   delwin(win_input);
   endwin();  // End curses mode
 
@@ -260,17 +262,17 @@ void handle_resize(int sig) {
     mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
 
-    wresize(win_update, ROWS - 4, COLS);
-    mvwin(win_update, 1, 0);
-    werase(win_update);
-    mvwprintw(win_update, 1, 2, "%s", chat, COLS, ROWS);
-    box(win_update, 0, 0);
-    wattron(win_update, A_BOLD);
-    wattron(win_update, COLOR_PAIR(1));
-    mvwprintw(win_update, 0, 1, " Chat ");
-    wattroff(win_update, COLOR_PAIR(1));
-    wattroff(win_update, A_BOLD);
-    wrefresh(win_update);
+    wresize(win_chat, ROWS - 4, COLS);
+    mvwin(win_chat, 1, 0);
+    werase(win_chat);
+    mvwprintw(win_chat, 1, 2, "%s", chat, COLS, ROWS);
+    box(win_chat, 0, 0);
+    wattron(win_chat, A_BOLD);
+    wattron(win_chat, COLOR_PAIR(1));
+    mvwprintw(win_chat, 0, 1, " Chat ");
+    wattroff(win_chat, COLOR_PAIR(1));
+    wattroff(win_chat, A_BOLD);
+    wrefresh(win_chat);
     refresh();
   }
 }
