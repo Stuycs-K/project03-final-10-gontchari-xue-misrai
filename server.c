@@ -126,7 +126,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
                         int *number_of_to_clients, int *number_of_from_clients,
                         int *new_number_of_from_clients, int *max_fd) {
   // remove the NONBLOCK
-
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) & ~O_NONBLOCK);
 
   //   flags are sent by the client to the server and specified in universal.h
@@ -161,7 +160,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
     printf("Sent chat history to client\n");
 
-    fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
     // end the three way handshake
 
     // add the new file descriptors to the list (the fd_sets will be
@@ -202,10 +200,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistory, message);
+    // send the chat history to the client
     if (x > 0) {
-      printf("Client sent a message!\n");
-      // Now we send an ACKNOWLEDGE message. idk if this is the intended
-      // implementation, but it sounds good for now.
+      printf("[" HMAG " SERVER " reset "]: Client sent a message!\n");
+      //   TODO: send acknowledge message?
       for (int current_client_index = 0;
            current_client_index < *number_of_to_clients;
            current_client_index++) {
@@ -213,27 +211,17 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         // printed out
         if (FD_ISSET(to_client_list[current_client_index],
                      &fd_set_of_to_client)) {
-          if (write(to_client_list[current_client_index], message, sizeof(x)) ==
-              -1) {
-            printf("[ " HYEL "SERVER" reset " ]: Client " HRED
-                   "DISCONNECT" reset " or other error\n");
-            close(to_client_list[current_client_index]);
-            close(from_client_list[current_client_index]);
-            for (int i = current_client_index + 1; i < *number_of_to_clients;
-                 i++) {
-              to_client_list[i - 1] = to_client_list[i];
-            }
-            for (int i = current_client_index + 1; i < *number_of_from_clients;
-                 i++) {
-              from_client_list[i - 1] = from_client_list[i];
-            }
-            number_of_to_clients--;
-            number_of_from_clients--;
-            new_number_of_from_clients--;
-            current_client_index--;
-          }
+          int flag = SEND_MESSAGE;
+          if (write(to_client_list[current_client_index], &flag,
+                    sizeof(flag) == -1))
+            err();
+
+          if (write(to_client_list[current_client_index], &chatHistory,
+                    sizeof(chatHistory)) == -1)
+            err();
         }
       }
+      printf("[" HMAG " SERVER " reset "]: Sent message to all clients\n");
     } else if (x <= 0) {
       printf("Error reading message, client disconnected.\n");
       close(from_client_list[*index]);
@@ -250,6 +238,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       (*index)--;
     }
   }
+  // add the nonblock
+  fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
 }
 
 /*=========================
@@ -262,7 +252,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   returns ABSOLUTELY NOTHING
   =========================*/
 void handle_sigpipe(int sig) {
-  printf("[ " HRED "SERVER" reset " ]: Caught SIGPIPE, client disconnected\n");
+  printf("[ " HRED "SERVER" reset " ]: Caught " HRED "SIGPIPE" reset
+         ", client disconnected\n");
 }
 
 /*=========================
@@ -292,13 +283,14 @@ void handle_sigint(int sig) {
       err();
     }
   }
-  sleep(3);  // give clients a chance to read˝
+  sleep(1);  // give clients a chance to read˝
   for (int i = 0; i < number_of_to_clients; i++) {
     close(to_client_list[i]);
     close(from_client_list[i]);
   }
   close(from_client_list[number_of_from_clients - 1]);
-  printf("[ " HRED "SERVER" reset " ]: Caught SIGINT, server disconnected\n");
+  printf("[ " HRED "SERVER" reset " ]: Caught " HRED "SIGINT" reset
+         ", server disconnected\n");
   if (unlink(WKP) == -1) err();
   exit(0);
 }
