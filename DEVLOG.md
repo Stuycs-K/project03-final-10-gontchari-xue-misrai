@@ -40,9 +40,8 @@ This document must be updated daily by EACH group member.
 - Worked (pair partnering) with Ivan on working on the server stuff for phase 2
 
 ## 2025-01-17 to 2025-01-19 - ___
-- ___
-- ___
-- ___
+- Finished the initial chat stuff, added boxes, fixed bugs
+
 
 ## 2025-01-20 - ___
 - ___
