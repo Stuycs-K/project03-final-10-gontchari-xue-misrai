@@ -133,7 +133,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   if (read(*from_client, &flag, sizeof(flag)) == -1) err();
   if (flag == CREATING_CLIENT) {
     // adds the clients and creates the server
-
     // three way handshake
     int random_number = random_random();
     *to_client = server_connect(*from_client);
@@ -200,9 +199,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistory, message);
+    strcat(chatHistory, "\n");
     // send the chat history to the client
     if (x > 0) {
-      printf("[" HMAG " SERVER " reset "]: Client sent a message!\n");
+      printf("[" HMAG " SERVER " reset "]: Client sent a message: %s!\n",
+             message);
       //   TODO: send acknowledge message?
       for (int current_client_index = 0;
            current_client_index < *number_of_to_clients;
@@ -213,7 +214,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
                      &fd_set_of_to_client)) {
           int flag = SEND_MESSAGE;
           if (write(to_client_list[current_client_index], &flag,
-                    sizeof(flag) == -1))
+                    sizeof(flag)) == -1)
             err();
 
           if (write(to_client_list[current_client_index], &chatHistory,
