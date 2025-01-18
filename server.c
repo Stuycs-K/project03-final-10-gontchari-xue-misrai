@@ -160,7 +160,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     printf("Sent chat history to client\n");
 
     // end the three way handshake
-
     // add the new file descriptors to the list (the fd_sets will be
     // reinitialized at the beginning of the next loop)
     to_client_list[*number_of_to_clients] = *to_client;
@@ -199,7 +198,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistory, message);
-    strcat(chatHistory, "\n");
+    strcat(chatHistory, "\n ");
+    strcat(chatHistory, " ");
     // send the chat history to the client
     if (x > 0) {
       printf("[" HMAG " SERVER " reset "]: Client sent a message: %s!\n",

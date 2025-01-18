@@ -3,6 +3,7 @@
 #include <curses.h>
 #include <locale.h>
 #include <ncurses.h>
+#include <pwd.h>  // for struct passwd
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,19 +13,39 @@
 #include "colors.h"
 #include "universal.h"
 
-char chat[MAX_CHAT];
+char chat[MAX_CHAT] = {0};
+char signature[256] = {0};
+char header_signature[256] = {0};
+char header[512] = {0};
 
 int chat_open = 1;
 
 WINDOW *win_input, *win_update;
 fd_set to_server_fd_set, from_server_fd_set;
 
-char buffer[128] = {0};
+// just to head off any strcat issues
+char buffer[MESSAGE_SIZE - 256 - 1] = {0};
+
 int ROWS, COLS;
 int from_server, to_server;
 
 int main() {
   setlocale(LC_ALL, "");
+
+  char *usrnme;
+
+  uid_t x = getuid();
+  struct passwd *y = getpwuid(x);
+  usrnme = y->pw_name;
+
+  char pid[256];
+  sprintf(pid, "@%d: ", getpid());
+  strcat(signature, usrnme);
+  strcat(signature, pid);
+
+  //   getting the name
+  sprintf(header_signature, "%s@%d", usrnme, getpid());
+  sprintf(header, "Your name is: %s", header_signature);
 
   from_server = client_handshake(&to_server);
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
@@ -45,29 +66,37 @@ int main() {
   curs_set(TRUE);  // Show the cursor (optional)
 
   start_color();
-  init_pair(1, COLOR_RED, COLOR_GREEN);   // chat box
-  init_pair(2, COLOR_CYAN, COLOR_BLACK);  // prompt
+  init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
+  init_pair(2, COLOR_CYAN, COLOR_BLACK);     // input box
+  init_pair(3, COLOR_YELLOW, COLOR_BLACK);   // header
 
   getmaxyx(stdscr, ROWS, COLS);
 
   // Create two windows
-  WINDOW *win_input = newwin(3, COLS, ROWS - 3, 0);
-  WINDOW *win_update = newwin(ROWS - 4, COLS, 1, 0);
+  win_input = newwin(3, COLS, ROWS - 3, 0);
+  win_update = newwin(ROWS - 4, COLS, 1, 0);
 
   // Draw initial boxes
+  mvprintw(0, (COLS - strlen(header)) / 2, header);
 
   box(win_update, 0, 0);
-  mvwprintw(win_update, 0, 2, " Update ");
+  wattron(win_update, A_BOLD);
+  wattron(win_update, COLOR_PAIR(1));
+  mvwprintw(win_update, 0, 1, " Chat ");
+  wattroff(win_update, COLOR_PAIR(1));
+  wattroff(win_update, A_BOLD);
   wrefresh(win_update);
 
   box(win_input, 0, 0);
-  mvwprintw(win_input, 0, 2, " Input ");
+  wattron(win_input, A_BOLD);
+  wattron(win_input, COLOR_PAIR(2));
+  mvwprintw(win_input, 0, 1, " Input ");
+  wattroff(win_input, COLOR_PAIR(2));
+  wattroff(win_input, A_BOLD);
   wrefresh(win_input);
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
-  //   keypad(win_input, TRUE);  // Enable special keys (arROWS, etc.) if you
-  //   want
 
   // Prepare a small buffer to hold typed input
   memset(buffer, 0, sizeof(buffer));
@@ -116,12 +145,21 @@ int main() {
 
     refresh();
     // 3) Continuously update the other box
+    // ! Order matters here! the rendering is very skibidi in this area
+    attron(COLOR_PAIR(3));
+    mvprintw(0, (COLS - strlen(header)) / 2, header);
+    attroff(COLOR_PAIR(3));
+
     wresize(win_update, ROWS - 4, COLS);
     mvwin(win_update, 1, 0);
     werase(win_update);
-    box(win_update, 0, 0);
-    mvwprintw(win_update, 0, 2, " Update ");
     mvwprintw(win_update, 1, 2, "%s", chat, COLS, ROWS);
+    box(win_update, 0, 0);
+    wattron(win_update, A_BOLD);
+    wattron(win_update, COLOR_PAIR(1));
+    mvwprintw(win_update, 0, 1, " Chat ");
+    wattroff(win_update, COLOR_PAIR(1));
+    wattroff(win_update, A_BOLD);
     wrefresh(win_update);
 
     // 2) Update the input window
@@ -129,7 +167,11 @@ int main() {
     mvwin(win_input, ROWS - 3, 0);
     werase(win_input);
     box(win_input, 0, 0);
+    wattron(win_input, A_BOLD);
+    wattron(win_input, COLOR_PAIR(2));
     mvwprintw(win_input, 0, 2, " Input ");
+    wattroff(win_input, COLOR_PAIR(2));
+    wattroff(win_input, A_BOLD);
     mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
 
@@ -146,10 +188,14 @@ int main() {
         // We'll just clear it
         // TODO send message to server
         int flag = SEND_MESSAGE;
+        char message[MESSAGE_SIZE];
+        strcat(message, signature);
+        strcat(message, buffer);
         if (write(to_server, &flag, sizeof(flag)) == -1) err();
-        if (write(to_server, buffer, sizeof(buffer)) == -1) err();
+        if (write(to_server, message, sizeof(message)) == -1) err();
 
         idx = 0;
+        message[0] = '\0';
         memset(buffer, 0, sizeof(buffer));
       } else if (ch == 27) {
         // If ESC pressed, break (exit)
@@ -186,20 +232,32 @@ void handle_resize(int sig) {
     getmaxyx(stdscr, ROWS, COLS);
     resizeterm(ROWS, COLS);
 
+    attron(COLOR_PAIR(3));
+    mvprintw(0, (COLS - strlen(header)) / 2, header);
+    attroff(COLOR_PAIR(3));
+
     wresize(win_input, 3, COLS);
     mvwin(win_input, ROWS - 3, 0);
     werase(win_input);
     box(win_input, 0, 0);
+    wattron(win_input, A_BOLD);
+    wattron(win_input, COLOR_PAIR(2));
     mvwprintw(win_input, 0, 2, " Input ");
+    wattroff(win_input, COLOR_PAIR(2));
+    wattroff(win_input, A_BOLD);
     mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
 
     wresize(win_update, ROWS - 4, COLS);
     mvwin(win_update, 1, 0);
     werase(win_update);
-    box(win_update, 0, 0);
-    mvwprintw(win_update, 0, 2, " Update ");
     mvwprintw(win_update, 1, 2, "%s", chat, COLS, ROWS);
+    box(win_update, 0, 0);
+    wattron(win_update, A_BOLD);
+    wattron(win_update, COLOR_PAIR(1));
+    mvwprintw(win_update, 0, 1, " Chat ");
+    wattroff(win_update, COLOR_PAIR(1));
+    wattroff(win_update, A_BOLD);
     wrefresh(win_update);
     refresh();
   }
