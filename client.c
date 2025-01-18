@@ -199,7 +199,19 @@ int main() {
         memset(buffer, 0, sizeof(buffer));
       } else if (ch == 27) {
         // If ESC pressed, break (exit)
-        break;
+        int flag = CLOSE_CLIENT;
+        if (write(to_server, &flag, sizeof(flag)) == -1) err();
+        sleep(1);
+        close(to_server);
+        close(from_server);
+        char fifo_name[PIPE_SIZING] = {"\0"};
+        sprintf(fifo_name, "%d", getpid());
+        char *fifo_ending = ".fifo";
+        strcat(fifo_name, fifo_ending);
+        unlink(fifo_name);
+
+        endwin();
+        exit(0);
       } else if (ch == KEY_BACKSPACE || ch == 127) {
         // Handle backspace
         if (idx > 0) {
@@ -213,7 +225,7 @@ int main() {
     }
 
     // Small delay so we don’t hog the CPU
-    usleep(10000);  // 0.1 seconds
+    usleep(100);  // 0.1 seconds
   }
 
   // Cleanup

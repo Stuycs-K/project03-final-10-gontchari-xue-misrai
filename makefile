@@ -9,10 +9,10 @@ client: cli
 	@./cli
 
 client.o: client.c universal.h colors.h client.h
-	@gcc -c client.c -lncurses
+	@gcc -c client.c 
 
 server.o: server.c universal.h colors.h
-	@gcc -c server.c -lncurses
+	@gcc -c server.c 
 
 networking.o: networking.c universal.h colors.h
 	@gcc -c networking.c
