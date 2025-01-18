@@ -1,6 +1,3 @@
-#include "client.h"
-#include "colors.h"
-
 #include <curses.h>
 #include <locale.h>
 #include <ncurses.h>
@@ -9,6 +6,7 @@
 #include <string.h>  // for memset()
 #include <unistd.h>  // for usleep()
 
+#include "client.h"
 #include "universal.h"
 
 char chat[MAX_CHAT];
@@ -24,13 +22,13 @@ int from_server, to_server;
 int main() {
   setlocale(LC_ALL, "");
 
-  from_server = client_handshake(&to_server);
-  printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
-
-  if (read(from_server, &chat, sizeof(chat)) == -1) err();
-
   signal(SIGWINCH, handle_resize);
   signal(SIGINT, handle_sigint);
+
+  from_server = client_handshake(&to_server);
+  printf("Got past client handshake\n");
+
+  if (read(from_server, &chat, sizeof(chat)) == -1) err();
 
   initscr();       // Start curses mode
   cbreak();        // Disable line buffering

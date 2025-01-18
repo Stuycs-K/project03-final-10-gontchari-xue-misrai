@@ -17,7 +17,7 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 // the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
-char chatHistory[MAX_CHAT] = "Test messages\0";
+char chatHistory[MAX_CHAT] = {0};
 
 int main() {
   // handle the sigpipe and signit signals
@@ -156,7 +156,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
              return_number);
       err();
     }
-    //    add the nonblock˝
+    //    add the nonblock
+    printf("[ " HYEL "SERVER" reset " ]: Client " HGRN "CONNECTED" reset "\n");
+    if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
+    printf("Sent chat history to client\n");
+
     fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
     // end the three way handshake
 
@@ -178,9 +182,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     *new_number_of_from_clients = *number_of_from_clients + 1;
 
-
-    if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
-
   } else if (flag == CLOSE_CLIENT) {
     // closes the client (both the to and from client descriptors) and downticks
     // the other trackers
@@ -201,16 +202,19 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistory, message);
-    if(x > 0){
+    if (x > 0) {
       printf("Client sent a message!\n");
-      // Now we send an ACKNOWLEDGE message. idk if this is the intended implementation, but it sounds good for now.
+      // Now we send an ACKNOWLEDGE message. idk if this is the intended
+      // implementation, but it sounds good for now.
       for (int current_client_index = 0;
-           current_client_index < *number_of_to_clients; current_client_index++) {
-        // sends a random number to the clients, which is read by them and printed
-        // out
+           current_client_index < *number_of_to_clients;
+           current_client_index++) {
+        // sends a random number to the clients, which is read by them and
+        // printed out
         if (FD_ISSET(to_client_list[current_client_index],
                      &fd_set_of_to_client)) {
-          if (write(to_client_list[current_client_index], message, sizeof(x)) == -1) {
+          if (write(to_client_list[current_client_index], message, sizeof(x)) ==
+              -1) {
             printf("[ " HYEL "SERVER" reset " ]: Client " HRED
                    "DISCONNECT" reset " or other error\n");
             close(to_client_list[current_client_index]);
@@ -230,8 +234,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
           }
         }
       }
-    }
-    else if(x <= 0){
+    } else if (x <= 0) {
       printf("Error reading message, client disconnected.\n");
       close(from_client_list[*index]);
       close(to_client_list[*index]);
@@ -247,7 +250,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       (*index)--;
     }
   }
-
 }
 
 /*=========================
