@@ -81,7 +81,7 @@ int main() {
   win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4, (ROWS - 4) / 2, 0);
   win_input = newwin(3, COLS, ROWS - 3, 0);
   // Draw initial boxes
-  mvprintw(0, (COLS - strlen(header)) / 2, header);
+  mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
 
   box(win_channel, 0, 0);
   wattron(win_channel, A_BOLD);
@@ -167,7 +167,7 @@ int main() {
     // 3) Continuously update the other box
     // ! Order matters here! the rendering is very skibidi in this area
     attron(COLOR_PAIR(3));
-    mvprintw(0, (COLS - strlen(header)) / 2, header);
+    mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
     attroff(COLOR_PAIR(3));
 
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
@@ -195,7 +195,7 @@ int main() {
     wresize(win_chat, ROWS - 4, 3 * COLS / 4);
     mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
-    mvwprintw(win_chat, 1, 2, "%s", chat, COLS, ROWS);
+    mvwprintw(win_chat, 1, 2, "%s", chat);
     box(win_chat, 0, 0);
     wattron(win_chat, A_BOLD);
     wattron(win_chat, COLOR_PAIR(1));
@@ -327,7 +327,7 @@ void handle_resize(int sig) {
     wresize(win_chat, ROWS - 4, 3 * COLS / 4);
     mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
-    mvwprintw(win_chat, 1, 2, "%s", chat, COLS, ROWS);
+    mvwprintw(win_chat, 1, 2, "%s", chat);
     box(win_chat, 0, 0);
     wattron(win_chat, A_BOLD);
     wattron(win_chat, COLOR_PAIR(1));
