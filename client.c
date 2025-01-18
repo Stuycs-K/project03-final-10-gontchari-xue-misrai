@@ -76,7 +76,7 @@ int main() {
 
   // Create two windows
   //   the arguements are height, width, starty, startx
-  win_chat = newwin(ROWS - 4, 3 * COLS / 4, 1, COLS / 4);
+  win_chat = newwin(ROWS - 4, 3 * COLS / 4 + 1, 1, COLS / 4);
   win_channel = newwin((ROWS - 4) / 2, COLS / 4, 1, 0);
   win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4, (ROWS - 4) / 2, 0);
   win_input = newwin(3, COLS, ROWS - 3, 0);
@@ -192,7 +192,7 @@ int main() {
     wattroff(win_people, A_BOLD);
     wrefresh(win_people);
 
-    wresize(win_chat, ROWS - 4, 3 * COLS / 4);
+    wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
     mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
     mvwprintw(win_chat, 1, 2, "%s", chat);
@@ -324,7 +324,7 @@ void handle_resize(int sig) {
     mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
 
-    wresize(win_chat, ROWS - 4, 3 * COLS / 4);
+    wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
     mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
     mvwprintw(win_chat, 1, 2, "%s", chat);
