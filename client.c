@@ -17,6 +17,7 @@
 // ! min height: 10
 // ! min width: 50
 
+int min_height = 30, min_width = 60;
 char chat[MAX_CHAT] = {0};
 char signature[256] = {0};
 char header_signature[256] = {0};
@@ -65,7 +66,7 @@ int main() {
   initscr();       // Start curses mode
   cbreak();        // Disable line buffering
   noecho();        // Don't echo() while we do getch
-  curs_set(TRUE);  // Show the cursor (optional)
+  curs_set(FALSE);  // Show the cursor (optional)
 
   start_color();
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
@@ -79,8 +80,8 @@ int main() {
   // Create two windows
   //   the arguements are height, width, starty, startx
   win_chat = newwin(ROWS - 4, 3 * COLS / 4 + 1, 1, COLS / 4);
-  win_channel = newwin((ROWS - 4) / 2, COLS / 4, 1, 0);
-  win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4, (ROWS - 4) / 2, 0);
+  win_channel = newwin((ROWS - 4) / 2, COLS / 4 - 1, 1, 0);
+  win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4 - 1, (ROWS - 4) / 2, 0);
   win_input = newwin(3, COLS, ROWS - 3, 0);
   // Draw initial boxes
   mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
@@ -112,7 +113,7 @@ int main() {
   box(win_input, 0, 0);
   wattron(win_input, A_BOLD);
   wattron(win_input, COLOR_PAIR(2));
-  mvwprintw(win_input, 0, 1, " Input ");
+  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
   wattroff(win_input, COLOR_PAIR(2));
   wattroff(win_input, A_BOLD);
   wrefresh(win_input);
@@ -128,6 +129,13 @@ int main() {
 
   // Main loop
   while (1) {
+    getmaxyx(stdscr, ROWS, COLS);
+    if (ROWS < min_height || COLS < min_width) {
+      chat_open = 0;
+    } else {
+      chat_open = 1;
+    }
+
     if (chat_open == 1) {
       // refresh the FD_SETS
       FD_ZERO(&to_server_fd_set);
@@ -174,7 +182,7 @@ int main() {
       mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
       attroff(COLOR_PAIR(3));
 
-      wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
+      wresize(win_channel, (ROWS - 4) / 2, COLS / 4 - 1);
       mvwin(win_channel, 1, 0);
       werase(win_channel);
       box(win_channel, 0, 0);
@@ -185,7 +193,7 @@ int main() {
       wattroff(win_channel, A_BOLD);
       wrefresh(win_channel);
 
-      wresize(win_people, (ROWS - 4) / 2, COLS / 4);
+      wresize(win_people, (ROWS - 4) / 2, COLS / 4 - 1);
       mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
       werase(win_people);
       box(win_people, 0, 0);
@@ -215,7 +223,7 @@ int main() {
       box(win_input, 0, 0);
       wattron(win_input, A_BOLD);
       wattron(win_input, COLOR_PAIR(2));
-      mvwprintw(win_input, 0, 2, " Input ");
+      mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
       wattroff(win_input, COLOR_PAIR(2));
       wattroff(win_input, A_BOLD);
       mvwprintw(win_input, 1, 1, "%s", buffer);
@@ -245,20 +253,9 @@ int main() {
           memset(buffer, 0, sizeof(buffer));
           memset(buffer, 0, sizeof(buffer));
         } else if (ch == 27) {
-          // If ESC pressed, break (exit)
-          int flag = CLOSE_CLIENT;
-          if (write(to_server, &flag, sizeof(flag)) == -1) err();
-          sleep(1);
-          close(to_server);
-          close(from_server);
-          char fifo_name[PIPE_SIZING] = {"\0"};
-          sprintf(fifo_name, "%d", getpid());
-          char *fifo_ending = ".fifo";
-          strcat(fifo_name, fifo_ending);
-          unlink(fifo_name);
-
-          endwin();
-          exit(0);
+          // If ESC pressed, clear the buffer
+          idx = 0;
+          buffer[0] = '\0';
         } else if (ch == KEY_BACKSPACE || ch == 127) {
           // Handle backspace
           if (idx > 0) {
@@ -280,13 +277,13 @@ int main() {
 
       mvprintw(ROWS / 2, (COLS / 2) - 5, "Width ");
       attron(A_BOLD);
-      if (COLS < 50) {
+      if (COLS < min_width) {
         attron(COLOR_PAIR(5));
       } else {
         attron(COLOR_PAIR(4));
       }
       mvprintw(ROWS / 2, (COLS / 2) + 5, "%d", COLS);
-      if (COLS < 50) {
+      if (COLS < min_width) {
         attroff(COLOR_PAIR(5));
       } else {
         attroff(COLOR_PAIR(4));
@@ -295,13 +292,13 @@ int main() {
 
       mvprintw(ROWS / 2 + 1, (COLS / 2) - 5, "Height ");
       attron(A_BOLD);
-      if (ROWS < 10) {
+      if (ROWS < min_height) {
         attron(COLOR_PAIR(5));
       } else {
         attron(COLOR_PAIR(4));
       }
       mvprintw(ROWS / 2 + 1, (COLS / 2) + 5, "%d", ROWS);
-      if (ROWS < 10) {
+      if (ROWS < min_height) {
         attroff(COLOR_PAIR(5));
       } else {
         attroff(COLOR_PAIR(4));
@@ -312,7 +309,7 @@ int main() {
     }
 
     // Small delay so we don’t hog the CPU
-    usleep(10000);  // 0.1 seconds
+    usleep(1000);  // 0.1 seconds
   }
 
   // Cleanup
@@ -326,7 +323,7 @@ int main() {
 void handle_resize(int sig) {
   getmaxyx(stdscr, ROWS, COLS);
 
-  if (ROWS < 10 || COLS < 50) {
+  if (ROWS < min_height || COLS < min_width) {
     chat_open = 0;
   } else {
     chat_open = 1;
@@ -383,7 +380,7 @@ void handle_resize(int sig) {
     box(win_input, 0, 0);
     wattron(win_input, A_BOLD);
     wattron(win_input, COLOR_PAIR(2));
-    mvwprintw(win_input, 0, 2, " Input ");
+    mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
     wattroff(win_input, COLOR_PAIR(2));
     wattroff(win_input, A_BOLD);
     mvwprintw(win_input, 1, 1, "%s", buffer);
@@ -399,13 +396,13 @@ void handle_resize(int sig) {
     mvprintw(ROWS / 2, (COLS / 2) - 5, "Width ");
 
     attron(A_BOLD);
-    if (COLS < 50) {
+    if (COLS < min_width) {
       attron(COLOR_PAIR(5));
     } else {
       attron(COLOR_PAIR(4));
     }
     mvprintw(ROWS / 2, (COLS / 2) + 5, "%d", COLS);
-    if (COLS < 50) {
+    if (COLS < min_width) {
       attroff(COLOR_PAIR(5));
     } else {
       attroff(COLOR_PAIR(4));
@@ -414,13 +411,13 @@ void handle_resize(int sig) {
 
     mvprintw(ROWS / 2 + 1, (COLS / 2) - 5, "Height ");
     attron(A_BOLD);
-    if (ROWS < 10) {
+    if (ROWS < min_height) {
       attron(COLOR_PAIR(5));
     } else {
       attron(COLOR_PAIR(4));
     }
     mvprintw(ROWS / 2 + 1, (COLS / 2) + 5, "%d", ROWS);
-    if (ROWS < 10) {
+    if (ROWS < min_height) {
       attroff(COLOR_PAIR(5));
     } else {
       attroff(COLOR_PAIR(4));
