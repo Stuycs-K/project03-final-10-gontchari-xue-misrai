@@ -66,7 +66,10 @@ int main() {
   int current_user = 0;
   printf("%d\n", num_users);
   while (current_user < num_users) {
-    read(from_server, &(client_names[current_user]), 256);
+    printf("%d\n", current_user);
+    size_t len;
+    read(from_server, &len, sizeof(len));
+    read(from_server, &(client_names[current_user]), len);
     printf("%s", client_names[current_user]);
     current_user += 1;
   }
