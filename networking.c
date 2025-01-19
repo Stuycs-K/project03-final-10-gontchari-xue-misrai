@@ -45,7 +45,7 @@ int client_handshake(int *to_server) {
   printf("[ " HCYN "CLIENT" reset " ]: Creating fifo\n");
   char fifo_name[PIPE_SIZING] = {"\0"};
   sprintf(fifo_name, "%d", getpid());
-  char *fifo_ending = ".fifo";
+  const char *fifo_ending = ".fifo";
   strcat(fifo_name, fifo_ending);
 
   umask(0);
@@ -121,24 +121,6 @@ int err() {
   printf("\x1b[31m errno %d\x1b[0m ", errno);
   printf("%s\n", strerror(errno));
   exit(1);
-}
-
-/*=========================
-  random_random()
-  args: none
-
-  gets a random integer from dev/random to be used in code
-
-  returns random int
-  =========================*/
-int random_random() {
-  int r_file = open("/dev/random", O_RDONLY, 0);
-  if (r_file == -1) err();
-  int bytes;
-  int read_result = read(r_file, &bytes, sizeof(bytes));
-  if (read_result == -1) err();
-  close(r_file);
-  return bytes;
 }
 
 /*=========================

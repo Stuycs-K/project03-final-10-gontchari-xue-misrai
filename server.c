@@ -29,7 +29,6 @@ int main() {
   if (mkfifo(WKP, 0666) == -1) err();
   if (chmod(WKP, 0666) == -1) err();
 
-
   //   initalize the fd_sets through fd_zero
   FD_ZERO(&fd_set_of_to_client);
   FD_ZERO(&fd_set_of_from_client);
@@ -138,7 +137,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   if (flag == CREATING_CLIENT) {
     // adds the clients and creates the server
     // three way handshake
-    int random_number = random_random();
+    int random_number = random_urandom();
     *to_client = server_connect(*from_client);
 
     if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
@@ -218,9 +217,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         // printed out
         if (FD_ISSET(to_client_list[current_client_index],
                      &fd_set_of_to_client)) {
-          int flag = SEND_MESSAGE;
-          if (write(to_client_list[current_client_index], &flag,
-                    sizeof(flag)) == -1)
+          int message_flag = SEND_MESSAGE;
+          if (write(to_client_list[current_client_index], &message_flag,
+                    sizeof(message_flag)) == -1)
             err();
 
           if (write(to_client_list[current_client_index], &chatHistory,
@@ -229,7 +228,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         }
       }
       printf("[" HMAG " SERVER " reset "]: Sent message to all clients\n");
-    } else if (x <= 0) {
+    } else {
       printf("Error reading message, client disconnected.\n");
       close(from_client_list[*index]);
       close(to_client_list[*index]);

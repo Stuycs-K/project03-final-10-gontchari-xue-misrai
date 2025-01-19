@@ -39,10 +39,10 @@ int boosted_input_height = 0;
 int main() {
   setlocale(LC_ALL, "");
 
-  char *usrnme;
+  const char *usrnme;
 
   uid_t x = getuid();
-  struct passwd *y = getpwuid(x);
+  const struct passwd *y = getpwuid(x);
   usrnme = y->pw_name;
 
   //   getting the name, with format "username@pid: "
@@ -385,7 +385,7 @@ void handle_sigint(int sig) {
   close(from_server);
   char fifo_name[PIPE_SIZING] = {"\0"};
   sprintf(fifo_name, "%d", getpid());
-  char *fifo_ending = ".fifo";
+  const char *fifo_ending = ".fifo";
   strcat(fifo_name, fifo_ending);
   unlink(fifo_name);
 
