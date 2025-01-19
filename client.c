@@ -141,45 +141,45 @@ int main() {
       chat_open = 1;
     }
 
+    // refresh the FD_SETS
+    FD_ZERO(&to_server_fd_set);
+    FD_ZERO(&from_server_fd_set);
+    FD_SET(from_server, &from_server_fd_set);
+    FD_SET(to_server, &to_server_fd_set);
+
+    int ret = select((to_server > from_server ? to_server : from_server) + 1,
+                     &from_server_fd_set, &to_server_fd_set, NULL, NULL);
+
+    if (ret == -1) {
+      err();
+    }
+
+    if (FD_ISSET(from_server, &from_server_fd_set)) {
+      int flag = 0;
+      if (read(from_server, &flag, sizeof(flag)) == -1) err();
+      if (flag == SEND_MESSAGE) {
+        char new_chat[MAX_CHAT];
+        if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
+        // set the chat to the new chat
+        chat[0] = 0;
+        strcpy(chat, new_chat);
+      } else if (flag == CLOSE_SERVER) {
+        endwin();
+        printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
+               "CLOSURE" reset " by server; closing down\n");
+        close(to_server);
+        close(from_server);
+        exit(0);
+      } else {
+        endwin();
+        printf("Recieved Unknown flag: %d\n", flag);
+        close(to_server);
+        close(from_server);
+        exit(0);
+      }
+    }
+
     if (chat_open == 1) {
-      // refresh the FD_SETS
-      FD_ZERO(&to_server_fd_set);
-      FD_ZERO(&from_server_fd_set);
-      FD_SET(from_server, &from_server_fd_set);
-      FD_SET(to_server, &to_server_fd_set);
-
-      int ret = select((to_server > from_server ? to_server : from_server) + 1,
-                       &from_server_fd_set, &to_server_fd_set, NULL, NULL);
-
-      if (ret == -1) {
-        err();
-      }
-
-      if (FD_ISSET(from_server, &from_server_fd_set)) {
-        int flag = 0;
-        if (read(from_server, &flag, sizeof(flag)) == -1) err();
-        if (flag == SEND_MESSAGE) {
-          char new_chat[MAX_CHAT];
-          if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
-          // set the chat to the new chat
-          chat[0] = 0;
-          strcpy(chat, new_chat);
-        } else if (flag == CLOSE_SERVER) {
-          endwin();
-          printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
-                 "CLOSURE" reset " by server; closing down\n");
-          close(to_server);
-          close(from_server);
-          exit(0);
-        } else {
-          endwin();
-          printf("Recieved Unknown flag: %d\n", flag);
-          close(to_server);
-          close(from_server);
-          exit(0);
-        }
-      }
-
       refresh();
       // 3) Continuously update the other box
       // ! Order matters here! the rendering is very skibidi in this area
@@ -236,15 +236,13 @@ int main() {
 
       wrefresh(win_input);
 
-      // poll for input from server
-      static char
-          int_buf[sizeof(int)];  // this is a static variable because we
-                                 // want to keep the buffer between calls
-      static int bytes_collected = 0;
-
       ch = wgetch(win_input);
       if (ch != ERR) {
         // Handle character
+        if (ch == KEY_RESIZE) {
+          continue;
+        }
+
         if (ch == '\n') {
           // For example, you could "submit" the buffer here
           // We'll just clear it
