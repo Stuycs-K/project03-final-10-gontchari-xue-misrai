@@ -1,8 +1,8 @@
 #include "server.h"
 
 #include <signal.h>
-
 #include <sys/select.h>
+
 #include "colors.h"
 #include "universal.h"
 
@@ -271,8 +271,8 @@ void handle_sigpipe(int sig) {
   returns ABSOLUTELY NOTHING
   =========================*/
 void handle_sigint(int sig) {
-  printf("[ " HRED "SERVER" reset
-         " ]: Caught "HRED"SIGINT"reset", closing server, number of clients to close: %d\n",
+  printf("[ " HRED "SERVER" reset " ]: Caught " HRED "SIGINT" reset
+         ", closing server, number of clients to close: %d\n",
          number_of_to_clients);
   for (int i = 0; i < number_of_to_clients; i++) {
     int close_server_flag = CLOSE_SERVER;  // server flag defined in universal.h
