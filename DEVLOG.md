@@ -41,6 +41,8 @@ This document must be updated daily by EACH group member.
 
 ## 2025-01-17 to 2025-01-19 - ___
 - Finished the initial chat stuff, added boxes, fixed bugs
+- Make it so that sizing works
+- Make sure the text continually updates
 
 
 ## 2025-01-20 - ___
