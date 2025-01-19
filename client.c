@@ -67,7 +67,7 @@ int main() {
   initscr();        // Start curses mode
   cbreak();         // Disable line buffering
   noecho();         // Don't echo() while we do getch
-  curs_set(TRUE);  // Show the cursor (optional)
+  curs_set(TRUE);      // Show the cursor
 
   start_color();
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
@@ -371,11 +371,10 @@ void handle_resize(int sig) {
               COLS - col_shift);
       displayed_buffer[COLS - col_shift] = '\0';
     }
-
     attron(COLOR_PAIR(3));
     mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
     attroff(COLOR_PAIR(3));
-
+    
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
     mvwin(win_channel, 1, 0);
     werase(win_channel);
@@ -423,7 +422,7 @@ void handle_resize(int sig) {
     wattroff(win_input, A_BOLD);
     wmove(win_input, 1, 1 + strlen(displayed_buffer));
     wrefresh(win_input);
-
+    
     refresh();
     scrollok(win_chat, TRUE);
     scrollok(win_people, TRUE);

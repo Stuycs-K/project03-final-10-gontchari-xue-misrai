@@ -272,7 +272,7 @@ void handle_sigpipe(int sig) {
   =========================*/
 void handle_sigint(int sig) {
   printf("[ " HRED "SERVER" reset
-         " ]: Caught SIGINT, closing server, number of clients to close: %d\n",
+         " ]: Caught "HRED"SIGINT"reset", closing server, number of clients to close: %d\n",
          number_of_to_clients);
   for (int i = 0; i < number_of_to_clients; i++) {
     int close_server_flag = CLOSE_SERVER;  // server flag defined in universal.h
