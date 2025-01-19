@@ -250,11 +250,15 @@ int main() {
           // TODO send message to server
           char message[MESSAGE_SIZE] = {0};
 
+          // printf("USER DID INPUT STARTING WITH: %c : THIS\n", buffer[0]);
           //if the user is trying to use a command
-          if(message[0] == '/'){
-            char * line = message;
+          if(buffer[0] == '/'){
+            // printf("HERE!!!\n");
+            char * line = buffer;
             char ** args;
-            parse_args(message, args);
+            printf("Pre parse args\n");
+            parse_args(buffer, args);
+            printf(" post parse args\n");
             // Does this actually work?
             if(sizeof(args) < 2){
               printf("Did not provide a channel name for a second argument.\n");
@@ -267,6 +271,7 @@ int main() {
             char * channelName = args[1];
 
             if(strcmp(command, "/create") == 0){
+              printf("MADE IT TO CREATE\n");
               flag = CREATE_CHANNEL;
               strcpy(message, channelName);
             }
@@ -529,8 +534,10 @@ void handle_sigint(int sig) {
 
 
 void parse_args( char * line, char ** arg_ary ){
+  printf("STARTING PARGSE ARGS BTW\n");
   char *curr = line;
   int i = 0;
+  printf("PRE PARSE ARGS WHILE LOOP\n");
   while(curr){
     arg_ary[i] = strsep(&curr, " ");
     i++;
