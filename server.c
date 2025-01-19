@@ -187,6 +187,12 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
 
     umask(0);
+    int client_flag = NEW_CLIENT;
+    for (int current_client_index = 0; current_client_index < *number_of_to_clients-1; current_client_index++) {
+        if (write(to_client_list[current_client_index], &client_flag, sizeof(flag)) == -1) err();
+        if (write(to_client_list[current_client_index], client_names[current_client_index], strlen(client_names[current_client_index])) == -1) err();
+    }
+
     if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
     if (chmod(WKP, 0666) == -1) err();
 
@@ -204,6 +210,17 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset "\n");
     close(from_client_list[*index]);
     close(to_client_list[*index]);
+    // send disconnect message
+    /*
+    int client_flag = NEW_CLIENT;
+    for (int current_client_index = 0; current_client_index < *number_of_to_clients; current_client_index++) {
+        if (current_client_index != *index) {
+            if (write(to_client_list[current_client_index], &client_flag, sizeof(flag)) == -1) err();
+            if (write(to_client_list[current_client_index], client_names[current_client_index], strlen(client_names[current_client_index])) == -1) err();
+        }
+    }
+    */
+
     for (int i = *index + 1; i < *number_of_to_clients; i++) {
       to_client_list[i - 1] = to_client_list[i];
     }
