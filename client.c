@@ -255,10 +255,10 @@ int main() {
           if(buffer[0] == '/'){
             // printf("HERE!!!\n");
             char * line = buffer;
-            char ** args;
-            printf("Pre parse args\n");
+            char * args[5];
+            // printf("Pre parse args\n");
             parse_args(buffer, args);
-            printf(" post parse args\n");
+            // printf(" post parse args\n");
             // Does this actually work?
             if(sizeof(args) < 2){
               printf("Did not provide a channel name for a second argument.\n");
@@ -271,17 +271,17 @@ int main() {
             char * channelName = args[1];
 
             if(strcmp(command, "/create") == 0){
-              printf("MADE IT TO CREATE\n");
+              // printf("MADE IT TO CREATE\n");
               flag = CREATE_CHANNEL;
-              strcpy(message, channelName);
+              strcat(message, channelName);
             }
             else if(strcmp(command, "/switch") == 0){
               flag = CHANGE_CHANNEL;
-              strcpy(message, channelName);
+              strcat(message, channelName);
             }
             else if(strcmp(command, "/remove") == 0){
               flag = CLOSE_CHANNEL;
-              strcpy(message, channelName);
+              strcat(message, channelName);
             }
             else{
               // TODO: what happens here if a command is not valid
@@ -291,9 +291,10 @@ int main() {
           }
           else{
             flag = SEND_MESSAGE;
+            strcat(message, signature);
+            strcat(message, buffer);
           }
-          strcat(message, signature);
-          strcat(message, buffer);
+
           if (write(to_server, &flag, sizeof(flag)) == -1) err();
           if (write(to_server, message, sizeof(message)) == -1) err();
           idx = 0;
@@ -534,13 +535,15 @@ void handle_sigint(int sig) {
 
 
 void parse_args( char * line, char ** arg_ary ){
-  printf("STARTING PARGSE ARGS BTW\n");
+  // printf("STARTING PARGSE ARGS BTW\n");
   char *curr = line;
   int i = 0;
-  printf("PRE PARSE ARGS WHILE LOOP\n");
+  // printf("PRE PARSE ARGS WHILE LOOP\n");
   while(curr){
     arg_ary[i] = strsep(&curr, " ");
     i++;
   }
+  // printf("POST PARSE ARGS WHILE LOOP\n");
   arg_ary[i] = NULL;
+  // printf("POST PARSE ARGS WHILE LOOP\n");
 }
