@@ -252,10 +252,11 @@ int main() {
 
           //if the user is trying to use a command
           if(message[0] == '/'){
+            char * line = message;
             char ** args;
             parse_args(message, args);
             // Does this actually work?
-            if(len(args) < 2){
+            if(sizeof(args) < 2){
               printf("Did not provide a channel name for a second argument.\n");
             }
 
@@ -264,15 +265,15 @@ int main() {
 
             if(strcmp(command, "/createChannel") == 0){
               flag = CREATE_CHANNEL;
-              message = channelName;
+              strcpy(message, channelName);
             }
             else if(strcmp(command, "/changeChannel") == 0){
               flag = CHANGE_CHANNEL;
-              message = channelName;
+              strcpy(message, channelName);
             }
             else if(strcmp(command, "closeChannel") == 0){
               flag = CLOSE_CHANNEL;
-              message = channelName;
+              strcpy(message, channelName);
             }
             else{
               // TODO: what happens here if a command is not valid
