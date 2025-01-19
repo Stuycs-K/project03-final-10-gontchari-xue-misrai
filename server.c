@@ -273,7 +273,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     strcpy(channelNames[number_of_channels - 1], channelName);
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
     currChannels[*index] = number_of_channels - 1;
-
+    if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
   }
   else if(flag == CHANGE_CHANNEL){
     char channelName[MESSAGE_SIZE];
