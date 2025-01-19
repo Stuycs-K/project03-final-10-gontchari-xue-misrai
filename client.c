@@ -251,7 +251,26 @@ int main() {
 
           //if the user is trying to use a command
           if(message[0] == '/'){
-            
+            char ** args;
+            parse_args(message, args);
+            char * command = args[0];
+            if(strcmp(command, "/createChannel") == 0){
+
+            }
+            else if(strcmp(command, "") == 0){
+
+            }
+            else if(strcmp(command, "") == 0){
+
+            }
+            else if(strcmp(command, "") == 0){
+
+            }
+            else{
+              // TODO: what happens here if a command is not valid
+              // This is a placeholder print because I don't know the implications of putting this here
+              printf("That is not a valid command please use one of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
+            }
           }
           else{
             int flag = SEND_MESSAGE;
