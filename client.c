@@ -259,19 +259,22 @@ int main() {
             if(sizeof(args) < 2){
               printf("Did not provide a channel name for a second argument.\n");
             }
+            else if(sizeof(args) > 2){
+              printf("You must provide only 2 arguments: the command, and the channel name to be used for the command.\n");
+            }
 
             char * command = args[0];
             char * channelName = args[1];
 
-            if(strcmp(command, "/createChannel") == 0){
+            if(strcmp(command, "/create") == 0){
               flag = CREATE_CHANNEL;
               strcpy(message, channelName);
             }
-            else if(strcmp(command, "/changeChannel") == 0){
+            else if(strcmp(command, "/switch") == 0){
               flag = CHANGE_CHANNEL;
               strcpy(message, channelName);
             }
-            else if(strcmp(command, "closeChannel") == 0){
+            else if(strcmp(command, "/remove") == 0){
               flag = CLOSE_CHANNEL;
               strcpy(message, channelName);
             }
