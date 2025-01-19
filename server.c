@@ -18,6 +18,8 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 // the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
+char client_names[MAX_NUM_CLIENTS][256];
+
 char chatHistory[MAX_CHAT] = {0};
 
 int main() {
@@ -162,9 +164,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
     printf("Sent chat history to client\n");
 
-    char username[256];
-    read(*from_client, &username, sizeof(username));
-    printf("%s\n", username);
+    read(*from_client, &(client_names[*number_of_to_clients]), 256);
+    printf("%s\n", client_names[*number_of_to_clients]);
 
     // end the three way handshake
     // add the new file descriptors to the list (the fd_sets will be
