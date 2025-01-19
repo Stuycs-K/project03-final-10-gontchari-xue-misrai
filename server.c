@@ -33,13 +33,14 @@ int main() {
 
   for(int i = 0; i < MAX_NUM_CHANNELS; i++){
     chatHistories[i] = (char *)calloc(MAX_CHAT, sizeof(char));
-    channelNames[i] = NULL;
+    // channelNames[i] = NULL;
+    channelNames[i] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
   }
 
   printf("POST INITIALIZING CHAT HISTORIES AND CHANNEL NAMES.\n");
 
   char first[10] = "general";
-  chatHistories[0] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
+  // channelNames[0] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
   strcpy(channelNames[0], first);
 
   printf("POST MAKING FIRST CHANNEL THE GENERAL CHANNEL\n");
