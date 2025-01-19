@@ -290,7 +290,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
   }
   else if(flag == CLOSE_CHANNEL){
+    char channelName[MESSAGE_SIZE];
+    int x = read(*from_client, channelName, sizeof(channelName));
 
+    int channel_index = 0;
+    while(strcmp(channelNames[channel_index], channelName) == 0){
+      channel_index++;
+    }
   }
   // add the nonblock
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
