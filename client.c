@@ -37,6 +37,7 @@ int from_server, to_server;
 int boosted_input_height = 0;
 
 char client_names[MAX_NUM_CLIENTS][256];
+int num_users;
 
 int main() {
   setlocale(LC_ALL, "");
@@ -60,13 +61,13 @@ int main() {
   write(to_server, &header_signature, strlen(header_signature));
 
   // receive list of current clients
-  int num_users;
   read(from_server, &num_users, sizeof(int));
 
   int current_user = 0;
+  printf("%d\n", num_users);
   while (current_user < num_users) {
-    printf("%d\n", current_user);
     read(from_server, &(client_names[current_user]), 256);
+    printf("%s", client_names[current_user]);
     current_user += 1;
   }
 
@@ -98,6 +99,45 @@ int main() {
   win_channel = newwin((ROWS - 4) / 2, COLS / 4 - 1, 1, 0);
   win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4 - 1, (ROWS - 4) / 2, 0);
   win_input = newwin(3, COLS, ROWS - 3, 0);
+
+  // Draw initial boxes
+  mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
+
+  box(win_channel, 0, 0);
+  wattron(win_channel, A_BOLD);
+  wattron(win_channel, COLOR_PAIR(4));
+  mvwprintw(win_channel, 0, 1, " Channels ");
+  wattroff(win_channel, COLOR_PAIR(4));
+  wattroff(win_channel, A_BOLD);
+  wrefresh(win_channel);
+
+  box(win_people, 0, 0);
+  wattron(win_people, A_BOLD);
+  wattron(win_people, COLOR_PAIR(5));
+  mvwprintw(win_people, 0, 1, " Users ");
+  for (int i = 1; i <= num_users; i++) {
+    mvwprintw(win_people, i, 1, "%s", client_names[i]);
+  }
+  wattroff(win_people, COLOR_PAIR(5));
+  wattroff(win_people, A_BOLD);
+  wrefresh(win_people);
+
+  box(win_chat, 0, 0);
+  wattron(win_chat, A_BOLD);
+  wattron(win_chat, COLOR_PAIR(1));
+  mvwprintw(win_chat, 0, 1, " Chat ");
+  wattroff(win_chat, COLOR_PAIR(1));
+  wattroff(win_chat, A_BOLD);
+  wrefresh(win_chat);
+
+  box(win_input, 0, 0);
+  wattron(win_input, A_BOLD);
+  wattron(win_input, COLOR_PAIR(2));
+  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
+  wattroff(win_input, COLOR_PAIR(2));
+  wattroff(win_input, A_BOLD);
+  wmove(win_input, 1, 1 + strlen(displayed_buffer));
+  wrefresh(win_input);
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);

@@ -31,6 +31,8 @@
 #define KEEP_ALIVE 0
 
 #define ACKNOWLEDGE 4
+#define NEW_CLIENT 5
+#define REMOVED_CLIENT 6
 
 struct server {
   int num_channels;

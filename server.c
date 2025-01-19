@@ -176,6 +176,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     (*number_of_to_clients)++;
 
+    printf("%d\n", *number_of_to_clients);
     write(*to_client, number_of_to_clients, sizeof(int));
 
     int user = 0;
