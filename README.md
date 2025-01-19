@@ -8,7 +8,7 @@ Ivan Gontchar, Elias Xu, Ishaana Misra
 
 ## Project Description:
 
-We are going to simulate a chat app using pipes. Users will be able to type and read messages in different channels, which can be read by other users in those channels. Additionally, they'll know who else is in the "chat room." The window will be constantly resizng, and if it becomes too small the client will complain and force the user to resize. The chats will be managed by a server.
+We are going to simulate a chat app using names pipes (fifos). Users will be able to type and read messages in different channels, which can be read by other users in those channels. Additionally, they'll know who else is in the "chat room." The window will be constantly resizng, and if it becomes too small the client will complain and force the user to resize. The chats will be managed by a server.
 
 ## Instructions:
 
@@ -70,20 +70,21 @@ make client # you can also run ./cli
 ### External packages
 
 Through testing on the stuy computers, there does not seem to be an external packages that need to be installed. Here is a list of the used packages (though not all are actually used in the code): 
-    - `signal.h`
-    - `sys/select.h`
-    - `dirent.h`
-    - `errno.h`
-    - `fcntl.h`
-    - `stdlib.h`
-    - `string.h`
-    - `sys/stat.h`
-    - `sys/types.h`
-    - `time.h`
-    - `unistd.h`
-    - `pwd.h`
-    - `unistd.h`
-    - `ncurses.h`
-    - `locale.h`
-    - `curses.h`
+
+- `signal.h`
+- `sys/select.h`
+- `dirent.h`
+- `errno.h`
+- `fcntl.h`
+- `stdlib.h`
+- `string.h`
+- `sys/stat.h`
+- `sys/types.h`
+- `time.h`
+- `unistd.h`
+- `pwd.h`
+- `unistd.h`
+- `ncurses.h`
+- `locale.h`
+- `curses.h`
 
