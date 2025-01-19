@@ -229,6 +229,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   } else if (flag == SEND_MESSAGE) {
     // TODO: What channel the message is being sent to... and check if subscribed to channels have updates
 
+    int this_clients_channel = currChannels[*index];
+
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
     strcat(chatHistories[currChannels[*index]], message);
@@ -244,16 +246,19 @@ void handle_from_client(int *from_client, int *to_client, int *index,
            current_client_index++) {
         // sends a random number to the clients, which is read by them and
         // printed out
-        if (FD_ISSET(to_client_list[current_client_index],
-                     &fd_set_of_to_client)) {
-          int flag = SEND_MESSAGE;
-          if (write(to_client_list[current_client_index], &flag,
-                    sizeof(flag)) == -1)
-            err();
+        if(currChannels[current_client_index] == this_clients_channel){
+          if (FD_ISSET(to_client_list[current_client_index],
+                       &fd_set_of_to_client)) {
+            int flag = SEND_MESSAGE;
+            if (write(to_client_list[current_client_index], &flag,
+                      sizeof(flag)) == -1)
+              err();
 
-          if (write(to_client_list[current_client_index], chatHistories[currChannels[*index]],
-                    sizeof(MAX_CHAT)) == -1)
-            err();
+            if (write(to_client_list[current_client_index], chatHistories[currChannels[*index]],
+                      sizeof(MAX_CHAT)) == -1)
+              err();
+          }
+
         }
       }
       printf("[" HMAG " SERVER " reset "]: Sent message to all clients\n");
@@ -275,7 +280,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   }
   else if(flag == CREATE_CHANNEL){
     int flag = CHANGE_CHANNEL;
-    if (write(to_client_list[current_client_index], &flag, sizeof(flag)) == -1) err();
+    if (write(to_client_list[*index], &flag, sizeof(flag)) == -1) err();
 
     *to_client = to_client_list[*index];
     number_of_channels++;
@@ -294,7 +299,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   }
   else if(flag == CHANGE_CHANNEL){
     int flag = CHANGE_CHANNEL;
-    if (write(to_client_list[current_client_index], &flag, sizeof(flag)) == -1) err();
+    if (write(to_client_list[*index], &flag, sizeof(flag)) == -1) err();
 
     char channelName[MESSAGE_SIZE];
     int x = read(*from_client, channelName, sizeof(channelName));
@@ -306,6 +311,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       channel_index++;
     }
 
+    *to_client = to_client_list[*index];
     currChannels[*index] = channel_index;
     if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
 
