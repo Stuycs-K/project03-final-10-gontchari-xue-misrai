@@ -274,6 +274,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
   }
   else if(flag == CREATE_CHANNEL){
+    *to_client = to_client_list[*index];
     number_of_channels++;
 
     char channelName[MESSAGE_SIZE];
@@ -284,7 +285,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     printf("Client trying to create channel \"%s\".\n", channelName);
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
     currChannels[*index] = number_of_channels - 1;
+    printf("TRYING TO WRITE BACK TO CLIENT\n");
     if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
+    printf("WROTE BACK TO CLIENT\n");
   }
   else if(flag == CHANGE_CHANNEL){
     char channelName[MESSAGE_SIZE];
