@@ -274,6 +274,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
   }
   else if(flag == CREATE_CHANNEL){
+    int flag = CHANGE_CHANNEL;
+    if (write(to_client_list[current_client_index], &flag, sizeof(flag)) == -1) err();
+
     *to_client = to_client_list[*index];
     number_of_channels++;
 
@@ -290,6 +293,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     printf("WROTE BACK TO CLIENT\n");
   }
   else if(flag == CHANGE_CHANNEL){
+    int flag = CHANGE_CHANNEL;
+    if (write(to_client_list[current_client_index], &flag, sizeof(flag)) == -1) err();
+
     char channelName[MESSAGE_SIZE];
     int x = read(*from_client, channelName, sizeof(channelName));
 
