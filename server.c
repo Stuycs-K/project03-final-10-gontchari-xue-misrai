@@ -26,6 +26,7 @@ int currChannels[MAX_NUM_CLIENTS];
 char * channelNames[MAX_NUM_CHANNELS];
 
 int main() {
+  printf("FIRST LINE IN MAIN\n");
   // handle the sigpipe and signit signals
   signal(SIGPIPE, handle_sigpipe);
   signal(SIGINT, handle_sigint);
@@ -34,13 +35,20 @@ int main() {
     chatHistories[i] = (char *)calloc(MAX_CHAT, sizeof(char));
     channelNames[i] = NULL;
   }
+
+  printf("POST INITIALIZING CHAT HISTORIES AND CHANNEL NAMES.\n");
+
   char first[10] = "general";
   chatHistories[0] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
   strcpy(channelNames[0], first);
 
+  printf("POST MAKING FIRST CHANNEL THE GENERAL CHANNEL\n");
+
   for (int i = 0; i < MAX_NUM_CLIENTS; i++) {
     currChannels[i] = 0;
   }
+
+  printf("POST CHANNEL SETUP\n");
 
   if (mkfifo(WKP, 0666) == -1) err();
   if (chmod(WKP, 0666) == -1) err();
