@@ -25,8 +25,10 @@ int main() {
   signal(SIGPIPE, handle_sigpipe);
   signal(SIGINT, handle_sigint);
 
+  umask(0);
   if (mkfifo(WKP, 0666) == -1) err();
   if (chmod(WKP, 0666) == -1) err();
+
 
   //   initalize the fd_sets through fd_zero
   FD_ZERO(&fd_set_of_to_client);
@@ -170,6 +172,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     (*number_of_to_clients)++;
 
+    umask(0);
     if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
     if (chmod(WKP, 0666) == -1) err();
 

@@ -47,6 +47,8 @@ int client_handshake(int *to_server) {
   sprintf(fifo_name, "%d", getpid());
   char *fifo_ending = ".fifo";
   strcat(fifo_name, fifo_ending);
+
+  umask(0);
   if (mkfifo(fifo_name, 0666) == -1) err();
   if (chmod(fifo_name, 0666) == -1) err();
 
