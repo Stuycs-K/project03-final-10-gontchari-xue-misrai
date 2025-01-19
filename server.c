@@ -271,6 +271,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     int x = read(*from_client, channelName, sizeof(channelName));
     chatHistories[number_of_channels - 1] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
     strcpy(channelNames[number_of_channels - 1], channelName);
+
+    printf("Client trying to create channel \"%s\".\n", channelName);
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
     currChannels[*index] = number_of_channels - 1;
     if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
@@ -278,6 +280,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   else if(flag == CHANGE_CHANNEL){
     char channelName[MESSAGE_SIZE];
     int x = read(*from_client, channelName, sizeof(channelName));
+
+    printf("Client trying to change to channel \"%s\".\n", channelName);
 
     int channel_index = 0;
     while(strcmp(channelNames[channel_index], channelName) == 0){
@@ -293,11 +297,25 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     int x = read(*from_client, channelName, sizeof(channelName));
 
     int channel_index = 0;
-    while(strcmp(channelNames[channel_index], channelName) == 0){
-      channel_index++;
+    if(strcmp("general", channelName) == 0){
+      printf("Client trying to close the general channel, this is NOT ALLOWED.\n");
+    }
+    else{
+      printf("Client trying to close \"%s\" channel.\n", channelName);
+      while(strcmp(channelNames[channel_index], channelName) == 0){
+        channel_index++;
+      }
+
+      // TODO: actually closing the channel
+      for (int i = channel_index + 1; i < number_of_channels; i++) {
+        chatHistories[i - 1] = chatHistories[i];
+      }
+      number_of_channels -= 1;
     }
 
-    // TODO: actually closing the channel
+    // char * chatHistories[MAX_NUM_CHANNELS];
+    // int currChannels[MAX_NUM_CLIENTS];
+    // char * channelNames[MAX_NUM_CHANNELS];
 
   }
   // add the nonblock
