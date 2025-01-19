@@ -23,6 +23,11 @@ char header[512] = {0};
 char *terminal_resize_prompt = "Resize your terminal";
 char buffer[MESSAGE_SIZE - 256 - 1] = {0};
 char displayed_buffer[MESSAGE_SIZE - 256 - 1] = {0};
+
+// adding the channel buff and the people buff for further use
+char channel_buff[10024] = {0};
+char people_buff[10024] = {0};
+
 int idx = 0;
 int ch;
 int col_shift = 4;
@@ -87,40 +92,13 @@ int main() {
   // Draw initial boxes
   mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
 
-  box(win_channel, 0, 0);
-  wattron(win_channel, A_BOLD);
-  wattron(win_channel, COLOR_PAIR(4));
-  mvwprintw(win_channel, 0, 1, " Channels ");
-  wattroff(win_channel, COLOR_PAIR(4));
-  wattroff(win_channel, A_BOLD);
-  wrefresh(win_channel);
+  render_channel_box();
 
-  box(win_people, 0, 0);
-  wattron(win_people, A_BOLD);
-  wattron(win_people, COLOR_PAIR(5));
-  mvwprintw(win_people, 0, 1, " People ");
-  wattroff(win_people, COLOR_PAIR(5));
-  wattroff(win_people, A_BOLD);
-  wrefresh(win_people);
+  render_people_box();
 
-  box(win_chat, 0, 0);
-  wattron(win_chat, A_BOLD);
-  wattron(win_chat, COLOR_PAIR(1));
-  mvwprintw(win_chat, 0, 1, " Chat ");
-  wattroff(win_chat, COLOR_PAIR(1));
-  wattroff(win_chat, A_BOLD);
-  wrefresh(win_chat);
+  render_chat_box();
 
-  box(win_input, 0, 0);
-  wattron(win_input, A_BOLD);
-  wattron(win_input, COLOR_PAIR(2));
-  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
-  wattroff(win_input, COLOR_PAIR(2));
-  wattroff(win_input, A_BOLD);
-  wrefresh(win_input);
-
-  // Move the cursor to the input window
-  wmove(win_input, 1, 1 + strlen(displayed_buffer));
+  render_input_box();
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
@@ -188,51 +166,23 @@ int main() {
       wresize(win_channel, (ROWS - 4) / 2, COLS / 4 - 1);
       mvwin(win_channel, 1, 0);
       werase(win_channel);
-      box(win_channel, 0, 0);
-      wattron(win_channel, A_BOLD);
-      wattron(win_channel, COLOR_PAIR(4));
-      mvwprintw(win_channel, 0, 1, " Channels ");
-      wattroff(win_channel, COLOR_PAIR(4));
-      wattroff(win_channel, A_BOLD);
-      wrefresh(win_channel);
+      render_channel_box();
 
       wresize(win_people, (ROWS - 4) / 2, COLS / 4 - 1);
       mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
       werase(win_people);
-      box(win_people, 0, 0);
-      wattron(win_people, A_BOLD);
-      wattron(win_people, COLOR_PAIR(5));
-      mvwprintw(win_people, 0, 1, " People ");
-      wattroff(win_people, COLOR_PAIR(5));
-      wattroff(win_people, A_BOLD);
-      wrefresh(win_people);
+      render_people_box();
 
       wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
       mvwin(win_chat, 1, COLS / 4);
       werase(win_chat);
-      mvwprintw(win_chat, 1, 2, "%s", chat);
-      box(win_chat, 0, 0);
-      wattron(win_chat, A_BOLD);
-      wattron(win_chat, COLOR_PAIR(1));
-      mvwprintw(win_chat, 0, 1, " Chat ");
-      wattroff(win_chat, COLOR_PAIR(1));
-      wattroff(win_chat, A_BOLD);
-      wrefresh(win_chat);
+      render_chat_box();
 
       // 2) Update the input window
       wresize(win_input, 3, COLS);
       mvwin(win_input, ROWS - 3, 0);
       werase(win_input);
-      mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
-      box(win_input, 0, 0);
-      wattron(win_input, A_BOLD);
-      wattron(win_input, COLOR_PAIR(2));
-      mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
-      wattroff(win_input, COLOR_PAIR(2));
-      wattroff(win_input, A_BOLD);
-      wmove(win_input, 1, 1 + strlen(displayed_buffer));
-
-      wrefresh(win_input);
+      render_input_box();
 
       // poll for input from server
       static char
@@ -381,50 +331,23 @@ void handle_resize(int sig) {
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
     mvwin(win_channel, 1, 0);
     werase(win_channel);
-    box(win_channel, 0, 0);
-    wattron(win_channel, A_BOLD);
-    wattron(win_channel, COLOR_PAIR(4));
-    mvwprintw(win_channel, 0, 1, " Channels ");
-    wattroff(win_channel, COLOR_PAIR(4));
-    wattroff(win_channel, A_BOLD);
-    wrefresh(win_channel);
+    render_channel_box();
 
     wresize(win_people, (ROWS - 4) / 2, COLS / 4);
     mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
     werase(win_people);
-    box(win_people, 0, 0);
-    wattron(win_people, A_BOLD);
-    wattron(win_people, COLOR_PAIR(5));
-    mvwprintw(win_people, 0, 1, " People ");
-    wattroff(win_people, COLOR_PAIR(5));
-    wattroff(win_people, A_BOLD);
-    wrefresh(win_people);
+    render_people_box();
 
     wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
     mvwin(win_chat, 1, COLS / 4);
     werase(win_chat);
-    mvwprintw(win_chat, 1, 2, "%s", chat);
-    box(win_chat, 0, 0);
-    wattron(win_chat, A_BOLD);
-    wattron(win_chat, COLOR_PAIR(1));
-    mvwprintw(win_chat, 0, 1, " Chat ");
-    wattroff(win_chat, COLOR_PAIR(1));
-    wattroff(win_chat, A_BOLD);
-    wrefresh(win_chat);
+    render_chat_box();
 
     // 2) Update the input window
     wresize(win_input, 3, COLS);
     mvwin(win_input, ROWS - 3, 0);
     werase(win_input);
-    mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
-    box(win_input, 0, 0);
-    wattron(win_input, A_BOLD);
-    wattron(win_input, COLOR_PAIR(2));
-    mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
-    wattroff(win_input, COLOR_PAIR(2));
-    wattroff(win_input, A_BOLD);
-    wmove(win_input, 1, 1 + strlen(displayed_buffer));
-    wrefresh(win_input);
+    render_input_box();
 
     refresh();
     scrollok(win_chat, TRUE);
@@ -473,6 +396,7 @@ void handle_resize(int sig) {
   }
 }
 
+// TODO: ADD Documentaiton
 void handle_sigint(int sig) {
   int flag = CLOSE_CLIENT;
   if (write(to_server, &flag, sizeof(flag)) == -1) err();
@@ -484,7 +408,50 @@ void handle_sigint(int sig) {
   char *fifo_ending = ".fifo";
   strcat(fifo_name, fifo_ending);
   unlink(fifo_name);
-
   endwin();
   exit(0);
+}
+
+// TODO: ADD Documentation
+void render_people_box() {
+  box(win_people, 0, 0);
+  wattron(win_people, A_BOLD);
+  wattron(win_people, COLOR_PAIR(5));
+  mvwprintw(win_people, 0, 1, " People ");
+  wattroff(win_people, COLOR_PAIR(5));
+  wattroff(win_people, A_BOLD);
+  wrefresh(win_people);
+}
+
+void render_channel_box() {
+  box(win_channel, 0, 0);
+  wattron(win_channel, A_BOLD);
+  wattron(win_channel, COLOR_PAIR(4));
+  mvwprintw(win_channel, 0, 1, " Channels ");
+  wattroff(win_channel, COLOR_PAIR(4));
+  wattroff(win_channel, A_BOLD);
+  wrefresh(win_channel);
+}
+
+void render_input_box() {
+  mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
+  box(win_input, 0, 0);
+  wattron(win_input, A_BOLD);
+  wattron(win_input, COLOR_PAIR(2));
+  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
+  wattroff(win_input, COLOR_PAIR(2));
+  wattroff(win_input, A_BOLD);
+  // Move the cursor to the input window
+  wmove(win_input, 1, 1 + strlen(displayed_buffer));
+  wrefresh(win_input);
+}
+
+void render_chat_box() {
+  box(win_chat, 0, 0);
+  wattron(win_chat, A_BOLD);
+  wattron(win_chat, COLOR_PAIR(1));
+  mvwprintw(win_chat, 0, 1, " Chat ");
+  wattroff(win_chat, COLOR_PAIR(1));
+  wattroff(win_chat, A_BOLD);
+  wrefresh(win_chat);
 }
