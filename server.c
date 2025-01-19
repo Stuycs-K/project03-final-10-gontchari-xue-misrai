@@ -162,6 +162,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
     printf("Sent chat history to client\n");
 
+    char username[256];
+    read(*from_client, &username, sizeof(username));
+    printf("%s\n", username);
+
     // end the three way handshake
     // add the new file descriptors to the list (the fd_sets will be
     // reinitialized at the beginning of the next loop)
