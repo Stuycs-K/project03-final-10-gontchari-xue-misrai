@@ -220,9 +220,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
     char message[MESSAGE_SIZE];
     int x = read(*from_client, message, sizeof(message));
-    strcat(chatHistory, message);
-    strcat(chatHistory, "\n ");
-    strcat(chatHistory, " ");
+    strcat(chatHistories[currChannels[*index]], message);
+    strcat(chatHistories[currChannels[*index]], "\n ");
+    strcat(chatHistories[currChannels[*index]], " ");
     // send the chat history to the client
     if (x > 0) {
       printf("[" HMAG " SERVER " reset "]: Client sent a message: %s!\n",
