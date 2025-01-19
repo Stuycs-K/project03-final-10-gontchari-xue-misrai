@@ -20,6 +20,7 @@ int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
 char chatHistory[MAX_CHAT] = {0};
 
+int number_of_channels = 1;
 char * chatHistories[MAX_NUM_CHANNELS];
 int currChannels[MAX_NUM_CLIENTS];
 char * channelNames[MAX_NUM_CHANNELS];
@@ -149,7 +150,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   int flag = -1;
   if (read(*from_client, &flag, sizeof(flag)) == -1) err();
   if (flag == CREATING_CLIENT) {
-
+    // printf("NUM CLIENTS: %d\n", *number_of_to_clients);
     // adds the clients and creates the server
     // three way handshake
     int random_number = random_random();
@@ -174,7 +175,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     //    add the nonblock
     printf("[ " HYEL "SERVER" reset " ]: Client " HGRN "CONNECTED" reset "\n");
-    if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
+    if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
     printf("Sent chat history to client\n");
 
     // end the three way handshake
@@ -195,6 +196,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       *max_fd = new_from_client;
     }
     *new_number_of_from_clients = *number_of_from_clients + 1;
+    printf("NUM CLIENTS: %d\n", *number_of_to_clients);
+
 
   } else if (flag == CLOSE_CLIENT) {
     // closes the client (both the to and from client descriptors) and downticks
@@ -260,9 +263,27 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
   }
   else if(flag == CREATE_CHANNEL){
+    number_of_channels++;
 
+    char channelName[MESSAGE_SIZE];
+    int x = read(*from_client, channelName, sizeof(channelName));
+    chatHistories[number_of_channels - 1] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
+    strcpy(channelNames[number_of_channels - 1], channelName);
+    // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
+
+
+    // char * chatHistories[MAX_NUM_CHANNELS];
+    // int currChannels[MAX_NUM_CLIENTS];
+    // char * channelNames[MAX_NUM_CHANNELS];
   }
   else if(flag == CHANGE_CHANNEL){
+    char channelName[MESSAGE_SIZE];
+    int x = read(*from_client, channelName, sizeof(channelName));
+
+    int i = 0;
+    while(strcmp(channelNames[i], ) == 0){
+
+    }
 
   }
   else if(flag == CLOSE_CHANNEL){
