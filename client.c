@@ -244,6 +244,7 @@ int main() {
       if (ch != ERR) {
         // Handle character
         if (ch == '\n') {
+          int flag;
           // For example, you could "submit" the buffer here
           // We'll just clear it
           // TODO send message to server
@@ -253,18 +254,25 @@ int main() {
           if(message[0] == '/'){
             char ** args;
             parse_args(message, args);
+            // Does this actually work?
+            if(len(args) < 2){
+              printf("Did not provide a channel name for a second argument.\n");
+            }
+
             char * command = args[0];
+            char * channelName = args[1];
+
             if(strcmp(command, "/createChannel") == 0){
-
+              flag = CREATE_CHANNEL;
+              message = channelName;
             }
-            else if(strcmp(command, "") == 0){
-
+            else if(strcmp(command, "/changeChannel") == 0){
+              flag = CHANGE_CHANNEL;
+              message = channelName;
             }
-            else if(strcmp(command, "") == 0){
-
-            }
-            else if(strcmp(command, "") == 0){
-
+            else if(strcmp(command, "closeChannel") == 0){
+              flag = CLOSE_CHANNEL;
+              message = channelName;
             }
             else{
               // TODO: what happens here if a command is not valid
@@ -273,7 +281,7 @@ int main() {
             }
           }
           else{
-            int flag = SEND_MESSAGE;
+            flag = SEND_MESSAGE;
           }
           strcat(message, signature);
           strcat(message, buffer);
