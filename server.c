@@ -43,6 +43,7 @@ int main() {
   }
 
   if (mkfifo(WKP, 0666) == -1) err();
+  if (chmod(WKP, 0666) == -1) err();
 
   //   initalize the fd_sets through fd_zero
   FD_ZERO(&fd_set_of_to_client);
@@ -188,6 +189,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     (*number_of_to_clients)++;
 
     if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
+    if (chmod(WKP, 0666) == -1) err();
 
     int new_from_client;
     if ((new_from_client = server_setup()) == -1) err();
@@ -328,7 +330,7 @@ void handle_sigpipe(int sig) {
   =========================*/
 void handle_sigint(int sig) {
   printf("[ " HRED "SERVER" reset
-         " ]: Caught SIGINT, closing server, number of clients to close: %d\n",
+         " ]: Caught "HRED"SIGINT"reset", closing server, number of clients to close: %d\n",
          number_of_to_clients);
   for (int i = 0; i < number_of_to_clients; i++) {
     int close_server_flag = CLOSE_SERVER;  // server flag defined in universal.h

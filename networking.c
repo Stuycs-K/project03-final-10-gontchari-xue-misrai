@@ -49,6 +49,7 @@ int client_handshake(int *to_server) {
   char *fifo_ending = ".fifo";
   strcat(fifo_name, fifo_ending);
   if (mkfifo(fifo_name, 0666) == -1) err();
+  if (chmod(fifo_name, 0666) == -1) err();
 
   printf("[ " HCYN "CLIENT" reset
          " ]: Sending the number %d.fifo (the pipe_name) to the parent "

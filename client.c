@@ -1,4 +1,5 @@
 #include "client.h"
+#include "universal.h"
 
 #include <curses.h>
 #include <locale.h>
@@ -13,7 +14,6 @@
 #include <unistd.h>  // for usleep()
 
 #include "colors.h"
-#include "universal.h"
 
 // just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
@@ -244,11 +244,46 @@ int main() {
       if (ch != ERR) {
         // Handle character
         if (ch == '\n') {
+          int flag;
           // For example, you could "submit" the buffer here
           // We'll just clear it
           // TODO send message to server
-          int flag = SEND_MESSAGE;
           char message[MESSAGE_SIZE] = {0};
+
+          //if the user is trying to use a command
+          if(message[0] == '/'){
+            char * line = message;
+            char ** args;
+            parse_args(message, args);
+            // Does this actually work?
+            if(sizeof(args) < 2){
+              printf("Did not provide a channel name for a second argument.\n");
+            }
+
+            char * command = args[0];
+            char * channelName = args[1];
+
+            if(strcmp(command, "/createChannel") == 0){
+              flag = CREATE_CHANNEL;
+              strcpy(message, channelName);
+            }
+            else if(strcmp(command, "/changeChannel") == 0){
+              flag = CHANGE_CHANNEL;
+              strcpy(message, channelName);
+            }
+            else if(strcmp(command, "closeChannel") == 0){
+              flag = CLOSE_CHANNEL;
+              strcpy(message, channelName);
+            }
+            else{
+              // TODO: what happens here if a command is not valid
+              // This is a placeholder print because I don't know the implications of putting this here
+              printf("That is not a valid command please use one of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
+            }
+          }
+          else{
+            flag = SEND_MESSAGE;
+          }
           strcat(message, signature);
           strcat(message, buffer);
           if (write(to_server, &flag, sizeof(flag)) == -1) err();
