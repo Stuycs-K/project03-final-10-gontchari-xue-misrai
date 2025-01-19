@@ -46,11 +46,12 @@ int main() {
   struct passwd *y = getpwuid(x);
   usrnme = y->pw_name;
 
-  //   getting the name
+  //   getting the name, with format "username@pid: "
   sprintf(signature, "%s@%d: ", usrnme, getpid());
   sprintf(header_signature, "%s@%d", usrnme, getpid());
   sprintf(header, "Your name is: %s", header_signature);
 
+  // perform the client handshake
   from_server = client_handshake(&to_server);
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
 
@@ -64,10 +65,10 @@ int main() {
   signal(SIGWINCH, handle_resize);
   signal(SIGINT, handle_sigint);
 
-  initscr();        // Start curses mode
-  cbreak();         // Disable line buffering
-  noecho();         // Don't echo() while we do getch
-  curs_set(TRUE);      // Show the cursor
+  initscr();       // Start curses mode
+  cbreak();        // Disable line buffering
+  noecho();        // Don't echo() while we do getch
+  curs_set(TRUE);  // Show the cursor
 
   start_color();
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
@@ -132,8 +133,11 @@ int main() {
   while (1) {
     getmaxyx(stdscr, ROWS, COLS);
     if (ROWS < min_height || COLS < min_width) {
+      // don't show cursor when the chat doesn't work
+      curs_set(FALSE);
       chat_open = 0;
     } else {
+      curs_set(TRUE);
       chat_open = 1;
     }
 
@@ -297,7 +301,7 @@ int main() {
       refresh();
       clear();
 
-      mvprintw(ROWS / 2 - 1, (COLS - sizeof(terminal_resize_prompt) - 4) / 2,
+      mvprintw(ROWS / 2 - 1, (COLS - sizeof(terminal_resize_prompt) - 8) / 2,
                "%s", terminal_resize_prompt);
 
       mvprintw(ROWS / 2, (COLS / 2) - 5, "Width ");
@@ -349,8 +353,10 @@ void handle_resize(int sig) {
   getmaxyx(stdscr, ROWS, COLS);
 
   if (ROWS < min_height || COLS < min_width) {
+    curs_set(FALSE);
     chat_open = 0;
   } else {
+    curs_set(TRUE);
     chat_open = 1;
   }
 
@@ -374,7 +380,7 @@ void handle_resize(int sig) {
     attron(COLOR_PAIR(3));
     mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
     attroff(COLOR_PAIR(3));
-    
+
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
     mvwin(win_channel, 1, 0);
     werase(win_channel);
@@ -422,7 +428,7 @@ void handle_resize(int sig) {
     wattroff(win_input, A_BOLD);
     wmove(win_input, 1, 1 + strlen(displayed_buffer));
     wrefresh(win_input);
-    
+
     refresh();
     scrollok(win_chat, TRUE);
     scrollok(win_people, TRUE);
@@ -433,7 +439,7 @@ void handle_resize(int sig) {
     refresh();
     clear();
     getmaxyx(stdscr, ROWS, COLS);
-    mvprintw(ROWS / 2 - 1, (COLS - sizeof(terminal_resize_prompt) - 4) / 2,
+    mvprintw(ROWS / 2 - 1, (COLS - sizeof(terminal_resize_prompt) - 8) / 2,
              "%s", terminal_resize_prompt);
     mvprintw(ROWS / 2, (COLS / 2) - 5, "Width ");
 
