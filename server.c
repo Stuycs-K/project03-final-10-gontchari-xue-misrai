@@ -259,7 +259,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       (*index)--;
     }
   }
-<<<<<<< HEAD
   else if(flag == CREATE_CHANNEL){
 
   }
@@ -269,11 +268,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
   else if(flag == CLOSE_CHANNEL){
 
   }
-
-=======
   // add the nonblock
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
->>>>>>> main
 }
 
 /*=========================

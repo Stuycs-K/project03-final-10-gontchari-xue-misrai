@@ -32,16 +32,10 @@ int chat_open = 1;
 WINDOW *win_input, *win_chat, *win_people, *win_channel;
 int ROWS, COLS;
 
-<<<<<<< HEAD
 //TODO: Changing channels and other channel functionalities
 
-
-/*=========================
-  main
-=======
 fd_set to_server_fd_set, from_server_fd_set;
 int from_server, to_server;
->>>>>>> main
 
 int boosted_input_height = 0;
 
