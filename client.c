@@ -36,6 +36,8 @@ int from_server, to_server;
 
 int boosted_input_height = 0;
 
+char client_names[MAX_NUM_CLIENTS][256];
+
 int main() {
   setlocale(LC_ALL, "");
   if (remove("./cli") == -1) err();
@@ -56,6 +58,17 @@ int main() {
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
   write(to_server, &header_signature, strlen(header_signature));
+
+  // receive list of current clients
+  int num_users;
+  read(from_server, &num_users, sizeof(int));
+
+  int current_user = 0;
+  while (current_user < num_users) {
+    printf("%d\n", current_user);
+    read(from_server, &(client_names[current_user]), 256);
+    current_user += 1;
+  }
 
   FD_ZERO(&to_server_fd_set);
   FD_ZERO(&from_server_fd_set);

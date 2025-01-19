@@ -176,6 +176,15 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     (*number_of_to_clients)++;
 
+    write(*to_client, number_of_to_clients, sizeof(int));
+
+    int user = 0;
+    while (user < *number_of_to_clients) {
+        size_t len = strlen(client_names[user]);
+        write(*to_client, client_names[user], len);
+        user += 1;
+    }
+
     umask(0);
     if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
     if (chmod(WKP, 0666) == -1) err();
