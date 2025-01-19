@@ -270,7 +270,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     chatHistories[number_of_channels - 1] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
     strcpy(channelNames[number_of_channels - 1], channelName);
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
-
+    currChannels[*index] = number_of_channels - 1;
 
     // char * chatHistories[MAX_NUM_CHANNELS];
     // int currChannels[MAX_NUM_CLIENTS];
@@ -285,7 +285,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       channel_index++;
     }
 
-    // currChannels[this client] = channel_index;
+    currChannels[*index] = channel_index;
     if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
 
   }
