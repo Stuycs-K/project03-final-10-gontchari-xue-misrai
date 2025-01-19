@@ -138,6 +138,7 @@ int main() {
         printf("Recieved Unknown flag: %d\n", flag);
         close(to_server);
         close(from_server);
+        endwin();
         exit(0);
       }
     }
@@ -368,7 +369,7 @@ void handle_resize(int sig) {
 }
 
 void handle_sigint(int sig) {
-  int flag = CLOSE_CLIENT;
+    int flag = CLOSE_CLIENT;
   if (write(to_server, &flag, sizeof(flag)) == -1) err();
   sleep(1);
   close(to_server);
