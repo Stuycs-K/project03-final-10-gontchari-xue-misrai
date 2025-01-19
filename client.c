@@ -127,6 +127,10 @@ int main() {
         chat[0] = 0;
         strcpy(chat, new_chat);
       } else if (flag == CLOSE_SERVER) {
+        delwin(win_chat);
+        delwin(win_input);
+        delwin(win_people);
+        delwin(win_channel);
         endwin();
         printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
                "CLOSURE" reset " by server; closing down\n");
@@ -134,11 +138,14 @@ int main() {
         close(from_server);
         exit(0);
       } else {
+        delwin(win_chat);
+        delwin(win_input);
+        delwin(win_people);
+        delwin(win_channel);
         endwin();
         printf("Recieved Unknown flag: %d\n", flag);
         close(to_server);
         close(from_server);
-        endwin();
         exit(0);
       }
     }
@@ -306,6 +313,8 @@ int main() {
   // Cleanup
   delwin(win_chat);
   delwin(win_input);
+  delwin(win_people);
+  delwin(win_channel);
   endwin();  // End curses mode
 
   return 0;
@@ -369,7 +378,7 @@ void handle_resize(int sig) {
 }
 
 void handle_sigint(int sig) {
-    int flag = CLOSE_CLIENT;
+  int flag = CLOSE_CLIENT;
   if (write(to_server, &flag, sizeof(flag)) == -1) err();
   sleep(1);
   close(to_server);
