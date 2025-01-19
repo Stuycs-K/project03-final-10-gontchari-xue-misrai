@@ -69,10 +69,10 @@ int main() {
   signal(SIGWINCH, handle_resize);
   signal(SIGINT, handle_sigint);
 
-  initscr();       // Start curses mode
-  cbreak();        // Disable line buffering
-  noecho();        // Don't echo() while we do getch
-  curs_set(TRUE);  // Show the cursor (optional)
+  initscr();        // Start curses mode
+  cbreak();         // Disable line buffering
+  noecho();         // Don't echo() while we do getch
+  curs_set(FALSE);  // Show the cursor (optional)
 
   start_color();
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
@@ -98,7 +98,13 @@ int main() {
 
   render_chat_box();
 
-  render_input_box();
+  box(win_input, 0, 0);
+  wattron(win_input, A_BOLD);
+  wattron(win_input, COLOR_PAIR(2));
+  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
+  wattroff(win_input, COLOR_PAIR(2));
+  wattroff(win_input, A_BOLD);
+  wrefresh(win_input);
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
@@ -182,7 +188,14 @@ int main() {
       wresize(win_input, 3, COLS);
       mvwin(win_input, ROWS - 3, 0);
       werase(win_input);
-      render_input_box();
+      mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
+      box(win_input, 0, 0);
+      wattron(win_input, A_BOLD);
+      wattron(win_input, COLOR_PAIR(2));
+      mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
+      wattroff(win_input, COLOR_PAIR(2));
+      wattroff(win_input, A_BOLD);
+      wrefresh(win_input);
 
       // poll for input from server
       static char
@@ -347,8 +360,14 @@ void handle_resize(int sig) {
     wresize(win_input, 3, COLS);
     mvwin(win_input, ROWS - 3, 0);
     werase(win_input);
-    render_input_box();
-
+    mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
+    box(win_input, 0, 0);
+    wattron(win_input, A_BOLD);
+    wattron(win_input, COLOR_PAIR(2));
+    mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
+    wattroff(win_input, COLOR_PAIR(2));
+    wattroff(win_input, A_BOLD);
+    wrefresh(win_input);
     refresh();
     scrollok(win_chat, TRUE);
     scrollok(win_people, TRUE);
