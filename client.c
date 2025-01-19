@@ -32,6 +32,8 @@ int chat_open = 1;
 WINDOW *win_input, *win_chat, *win_people, *win_channel;
 int ROWS, COLS;
 
+//TODO: Changing channels and other channel functionalities
+
 fd_set to_server_fd_set, from_server_fd_set;
 int from_server, to_server;
 
@@ -67,7 +69,7 @@ int main() {
   initscr();        // Start curses mode
   cbreak();         // Disable line buffering
   noecho();         // Don't echo() while we do getch
-  curs_set(TRUE);      // Show the cursor
+  curs_set(TRUE);  // Show the cursor (optional)
 
   start_color();
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
@@ -245,8 +247,15 @@ int main() {
           // For example, you could "submit" the buffer here
           // We'll just clear it
           // TODO send message to server
-          int flag = SEND_MESSAGE;
           char message[MESSAGE_SIZE] = {0};
+
+          //if the user is trying to use a command
+          if(message[0] == '/'){
+            
+          }
+          else{
+            int flag = SEND_MESSAGE;
+          }
           strcat(message, signature);
           strcat(message, buffer);
           if (write(to_server, &flag, sizeof(flag)) == -1) err();
@@ -371,10 +380,11 @@ void handle_resize(int sig) {
               COLS - col_shift);
       displayed_buffer[COLS - col_shift] = '\0';
     }
+
     attron(COLOR_PAIR(3));
     mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
     attroff(COLOR_PAIR(3));
-    
+
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
     mvwin(win_channel, 1, 0);
     werase(win_channel);
@@ -422,7 +432,7 @@ void handle_resize(int sig) {
     wattroff(win_input, A_BOLD);
     wmove(win_input, 1, 1 + strlen(displayed_buffer));
     wrefresh(win_input);
-    
+
     refresh();
     scrollok(win_chat, TRUE);
     scrollok(win_people, TRUE);
@@ -484,4 +494,15 @@ void handle_sigint(int sig) {
 
   endwin();
   exit(0);
+}
+
+
+void parse_args( char * line, char ** arg_ary ){
+  char *curr = line;
+  int i = 0;
+  while(curr){
+    arg_ary[i] = strsep(&curr, " ");
+    i++;
+  }
+  arg_ary[i] = NULL;
 }
