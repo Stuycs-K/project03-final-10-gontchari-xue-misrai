@@ -1,4 +1,5 @@
 #include "client.h"
+#include "universal.h"
 
 #include <curses.h>
 #include <locale.h>
@@ -13,7 +14,6 @@
 #include <unistd.h>  // for usleep()
 
 #include "colors.h"
-#include "universal.h"
 
 // just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
