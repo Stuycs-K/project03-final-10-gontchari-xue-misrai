@@ -67,7 +67,7 @@ int main() {
   initscr();        // Start curses mode
   cbreak();         // Disable line buffering
   noecho();         // Don't echo() while we do getch
-  curs_set(FALSE);  // Show the cursor (optional)
+  curs_set(TRUE);  // Show the cursor (optional)
 
   start_color();
   init_pair(1, COLOR_MAGENTA, COLOR_BLACK);  // chat box
@@ -117,10 +117,8 @@ int main() {
   mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
   wattroff(win_input, COLOR_PAIR(2));
   wattroff(win_input, A_BOLD);
-  wrefresh(win_input);
-
-  // Move the cursor to the input window
   wmove(win_input, 1, 1 + strlen(displayed_buffer));
+  wrefresh(win_input);
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
