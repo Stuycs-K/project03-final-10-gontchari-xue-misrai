@@ -240,8 +240,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
                     sizeof(flag)) == -1)
             err();
 
-          if (write(to_client_list[current_client_index], &chatHistory,
-                    sizeof(chatHistory)) == -1)
+          if (write(to_client_list[current_client_index], chatHistories[currChannels[*index]],
+                    sizeof(MAX_CHAT)) == -1)
             err();
         }
       }
@@ -272,9 +272,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
     currChannels[*index] = number_of_channels - 1;
 
-    // char * chatHistories[MAX_NUM_CHANNELS];
-    // int currChannels[MAX_NUM_CLIENTS];
-    // char * channelNames[MAX_NUM_CHANNELS];
   }
   else if(flag == CHANGE_CHANNEL){
     char channelName[MESSAGE_SIZE];
@@ -297,6 +294,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     while(strcmp(channelNames[channel_index], channelName) == 0){
       channel_index++;
     }
+
+    // TODO: actually closing the channel
+
   }
   // add the nonblock
   fcntl(*from_client, F_SETFL, fcntl(*from_client, F_GETFL) | O_NONBLOCK);
