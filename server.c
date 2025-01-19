@@ -280,10 +280,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     char channelName[MESSAGE_SIZE];
     int x = read(*from_client, channelName, sizeof(channelName));
 
-    int i = 0;
-    while(strcmp(channelNames[i], ) == 0){
-
+    int channel_index = 0;
+    while(strcmp(channelNames[channel_index], channelName) == 0){
+      channel_index++;
     }
+
+    // currChannels[this client] = channel_index;
+    if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
 
   }
   else if(flag == CLOSE_CHANNEL){
