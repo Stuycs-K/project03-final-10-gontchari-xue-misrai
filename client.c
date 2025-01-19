@@ -8,33 +8,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  // for memset()
+#include <string.h>
 #include <sys/select.h>
 #include <unistd.h>  // for usleep()
 
 #include "colors.h"
 #include "universal.h"
 
-// ! min height: 10
-// ! min width: 50
-
-int min_height = 30, min_width = 60;
+// just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
 char signature[256] = {0};
 char header_signature[256] = {0};
 char header[512] = {0};
-
-int chat_open = 1;
-
 char *terminal_resize_prompt = "Resize your terminal";
-
-WINDOW *win_input, *win_chat, *win_people, *win_channel;
-fd_set to_server_fd_set, from_server_fd_set;
-
-// just to head off any strcat issues
 char buffer[MESSAGE_SIZE - 256 - 1] = {0};
+char displayed_buffer[MESSAGE_SIZE - 256 - 1] = {0};
+int idx = 0;
+int ch;
+int col_shift = 4;
 
+int min_height = 30, min_width = 60;
+int chat_open = 1;
+WINDOW *win_input, *win_chat, *win_people, *win_channel;
 int ROWS, COLS;
+
+fd_set to_server_fd_set, from_server_fd_set;
 int from_server, to_server;
+
+int boosted_input_height = 0;
 
 int main() {
   setlocale(LC_ALL, "");
@@ -63,9 +64,9 @@ int main() {
   signal(SIGWINCH, handle_resize);
   signal(SIGINT, handle_sigint);
 
-  initscr();       // Start curses mode
-  cbreak();        // Disable line buffering
-  noecho();        // Don't echo() while we do getch
+  initscr();        // Start curses mode
+  cbreak();         // Disable line buffering
+  noecho();         // Don't echo() while we do getch
   curs_set(FALSE);  // Show the cursor (optional)
 
   start_color();
@@ -121,11 +122,10 @@ int main() {
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
 
-  // Prepare a small buffer to hold typed input
-  memset(buffer, 0, sizeof(buffer));
-  int idx = 0;
-
-  int ch;
+  scrollok(win_chat, TRUE);
+  scrollok(win_people, TRUE);
+  scrollok(win_channel, TRUE);
+  scrollok(win_input, TRUE);
 
   // Main loop
   while (1) {
@@ -220,13 +220,13 @@ int main() {
       wresize(win_input, 3, COLS);
       mvwin(win_input, ROWS - 3, 0);
       werase(win_input);
+      mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
       box(win_input, 0, 0);
       wattron(win_input, A_BOLD);
       wattron(win_input, COLOR_PAIR(2));
       mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
       wattroff(win_input, COLOR_PAIR(2));
       wattroff(win_input, A_BOLD);
-      mvwprintw(win_input, 1, 1, "%s", buffer);
       wrefresh(win_input);
 
       // poll for input from server
@@ -250,21 +250,43 @@ int main() {
           if (write(to_server, message, sizeof(message)) == -1) err();
           idx = 0;
 
-          memset(buffer, 0, sizeof(buffer));
-          memset(buffer, 0, sizeof(buffer));
+          buffer[0] = 0;
+          displayed_buffer[0] = 0;
         } else if (ch == 27) {
           // If ESC pressed, clear the buffer
           idx = 0;
           buffer[0] = '\0';
+          displayed_buffer[0] = '\0';
         } else if (ch == KEY_BACKSPACE || ch == 127) {
           // Handle backspace
           if (idx > 0) {
             buffer[--idx] = '\0';
           }
+          //   update the displayed buffer display the
+          // last number of characters in the buffer equal to the number of
+          // columns - col_shift
+          displayed_buffer[0] = '\0';
+          strcpy(displayed_buffer, buffer);
+          if (strlen(displayed_buffer) > COLS - col_shift) {
+            strncpy(displayed_buffer,
+                    buffer + strlen(buffer) - (COLS - col_shift),
+                    COLS - col_shift);
+            displayed_buffer[COLS - col_shift] = '\0';
+          }
+
         } else if (idx < (int)sizeof(buffer) - 1) {
           // Append typed character
           buffer[idx++] = ch;
           buffer[idx] = '\0';
+
+          displayed_buffer[0] = '\0';
+          strcpy(displayed_buffer, buffer);
+          if (strlen(displayed_buffer) > COLS - col_shift) {
+            strncpy(displayed_buffer,
+                    buffer + strlen(buffer) - (COLS - col_shift),
+                    COLS - col_shift);
+            displayed_buffer[COLS - col_shift] = '\0';
+          }
         }
       }
     } else {
@@ -329,11 +351,23 @@ void handle_resize(int sig) {
     chat_open = 1;
   }
 
+  if (strlen(displayed_buffer) > COLS - col_shift) {
+    strncpy(displayed_buffer, buffer + strlen(buffer) - (COLS - col_shift),
+            COLS - col_shift);
+    displayed_buffer[COLS - col_shift] = '\0';
+  }
+
   if (chat_open == 1) {
     endwin();
     refresh();
     clear();
     getmaxyx(stdscr, ROWS, COLS);
+
+    if (strlen(displayed_buffer) > COLS - col_shift) {
+      strncpy(displayed_buffer, buffer + strlen(buffer) - (COLS - col_shift),
+              COLS - col_shift);
+      displayed_buffer[COLS - col_shift] = '\0';
+    }
 
     attron(COLOR_PAIR(3));
     mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
@@ -377,15 +411,19 @@ void handle_resize(int sig) {
     wresize(win_input, 3, COLS);
     mvwin(win_input, ROWS - 3, 0);
     werase(win_input);
+    mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
     box(win_input, 0, 0);
     wattron(win_input, A_BOLD);
     wattron(win_input, COLOR_PAIR(2));
     mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
     wattroff(win_input, COLOR_PAIR(2));
     wattroff(win_input, A_BOLD);
-    mvwprintw(win_input, 1, 1, "%s", buffer);
     wrefresh(win_input);
     refresh();
+    scrollok(win_chat, TRUE);
+    scrollok(win_people, TRUE);
+    scrollok(win_channel, TRUE);
+    scrollok(win_input, TRUE);
   } else if (chat_open == 0) {
     endwin();
     refresh();
