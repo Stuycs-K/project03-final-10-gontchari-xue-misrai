@@ -32,7 +32,6 @@ int server_setup() {
   return from_client;
 }
 
-
 /*=========================
   client_handshake
   args: int * to_server
@@ -72,7 +71,8 @@ int client_handshake(int *to_server) {
 
   // attempt to read random number from parent pipe
   if (read(from_server, &pipe_buff, sizeof(pipe_buff)) == -1) err();
-  printf("[ " HCYN "CLIENT" reset " ]: Read the random int, got %d\n", pipe_buff);
+  printf("[ " HCYN "CLIENT" reset " ]: Read the random int, got %d\n",
+         pipe_buff);
 
   //   removing the client pipe
   if (remove(fifo_name) == -1) err();
@@ -99,15 +99,8 @@ int client_handshake(int *to_server) {
 int server_connect(int from_client) {
   char fifo_name_buff[PIPE_SIZING] = {"\0"};
   int ret = read(from_client, fifo_name_buff, sizeof(fifo_name_buff));
-  if (ret == -1) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      return NO_CLIENT;
-    }
-    err();
-  }
-  if (ret == 0) {
-    return NO_CLIENT;
-  }
+  if (ret == -1) err();
+  if (ret == 0) return NO_CLIENT;
   printf("[ " HMAG "SERVER" reset " ] Read from the WKP, got fifo name %s \n",
          fifo_name_buff);
   int to_client = open(fifo_name_buff, O_WRONLY, 0666);
