@@ -396,7 +396,15 @@ void handle_resize(int sig) {
   }
 }
 
-// TODO: ADD Documentaiton
+/*=========================
+  render_chat_box()
+    ARGS:
+        int sig, and  uses outside variables
+
+    ensures graceful
+
+  returns ABSOLUTELY NOTHING.
+  =========================*/
 void handle_sigint(int sig) {
   int flag = CLOSE_CLIENT;
   if (write(to_server, &flag, sizeof(flag)) == -1) err();
@@ -412,7 +420,15 @@ void handle_sigint(int sig) {
   exit(0);
 }
 
-// TODO: ADD Documentation
+/*=========================
+  render_chat_box()
+    ARGS:
+        none, but uses outside variables
+
+    renders the chat box
+
+  returns ABSOLUTELY NOTHING.
+  =========================*/
 void render_people_box() {
   box(win_people, 0, 0);
   wattron(win_people, A_BOLD);
@@ -423,6 +439,15 @@ void render_people_box() {
   wrefresh(win_people);
 }
 
+/*=========================
+  render_chat_box()
+      ARGS:
+        none, but uses outside variables
+
+    renders the chat box
+
+  returns ABSOLUTELY NOTHING.
+  =========================*/
 void render_channel_box() {
   box(win_channel, 0, 0);
   wattron(win_channel, A_BOLD);
@@ -433,6 +458,15 @@ void render_channel_box() {
   wrefresh(win_channel);
 }
 
+/*=========================
+  render_chat_box()
+      ARGS:
+        none, but uses outside variables
+
+    renders the input box
+
+  returns ABSOLUTELY NOTHING.
+  =========================*/
 void render_input_box() {
   mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
   box(win_input, 0, 0);
@@ -446,6 +480,14 @@ void render_input_box() {
   wrefresh(win_input);
 }
 
+/*=========================
+  render_chat_box()
+
+  creates the WKP and opens it, waiting for a  connection.
+  removes the WKP once a connection has been made
+
+  returns ABSOLUTELY NOTHING.
+  =========================*/
 void render_chat_box() {
   box(win_chat, 0, 0);
   wattron(win_chat, A_BOLD);
