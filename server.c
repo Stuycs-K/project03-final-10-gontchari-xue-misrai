@@ -309,9 +309,12 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     printf("Client trying to change to channel \"%s\".\n", channelName);
 
     int channel_index = 0;
-    while(strcmp(channelNames[channel_index], channelName) == 0){
+    // printf("Comparing \"%s\" with \"%s\"\n", );
+    while(strcmp(channelNames[channel_index], channelName) != 0){
       channel_index++;
     }
+
+    printf("Channel \"%s\" found at index %d \n", channelName, channel_index);
 
     *to_client = to_client_list[*index];
     currChannels[*index] = channel_index;
