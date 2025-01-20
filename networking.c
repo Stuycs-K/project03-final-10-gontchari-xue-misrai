@@ -49,7 +49,7 @@ int client_handshake(int *to_server) {
   strcat(fifo_name, fifo_ending);
 
   umask(0);
-  if (mkfifo(fifo_name, 0644) == -1) err();
+  if (mkfifo(fifo_name, 0) == -1) err();
   if (chmod(fifo_name, 0666) == -1) err();
 
   printf("[ " HCYN "CLIENT" reset
