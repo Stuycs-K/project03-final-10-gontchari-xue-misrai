@@ -15,6 +15,9 @@
 #define MAX_CHAT 3000
 #define MESSAGE_SIZE 1024
 
+#define NEW_CLIENT 5
+#define REMOVED_CLIENT 6
+
 #define NO_CLIENT -404
 
 #define MAX_NUM_CLIENTS 500
@@ -35,6 +38,8 @@
 #define KEEP_ALIVE 0
 
 #define ACKNOWLEDGE 4
+#define NEW_CLIENT 5
+#define REMOVED_CLIENT 6
 
 struct server {
   int num_channels;

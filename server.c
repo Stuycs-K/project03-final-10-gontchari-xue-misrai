@@ -18,6 +18,8 @@ fd_set fd_set_of_to_client, fd_set_of_from_client;
 // the list of file descrptors
 int to_client_list[MAX_NUM_CLIENTS], from_client_list[MAX_NUM_CLIENTS];
 
+char client_names[MAX_NUM_CLIENTS][256];
+
 char chatHistory[MAX_CHAT] = {0};
 
 int number_of_channels = 1;
@@ -185,12 +187,14 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     //    add the nonblock
     printf("[ " HYEL "SERVER" reset " ]: Client " HGRN "CONNECTED" reset "\n");
-    if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
-    // printf("Sent chat history to client\n");
+    if (write(*to_client, chatHistory, MAX_CHAT) == -1) err();
+    printf("Sent chat history to client\n");
 
     char *channelList = getChannelString(*index);
     if (write(*to_client, channelList, MAX_NUM_CLIENTS) == -1) err();
-    // printf("Sent this channel list to client:\n%s", channelList);
+
+    read(*from_client, &(client_names[*number_of_to_clients]), 256);
+    printf("%s\n", client_names[*number_of_to_clients]);
 
     // end the three way handshake
     // add the new file descriptors to the list (the fd_sets will be
@@ -200,6 +204,37 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       *max_fd = *to_client;
     }
     (*number_of_to_clients)++;
+
+    printf("%d\n", *number_of_to_clients);
+    write(*to_client, number_of_to_clients, sizeof(int));
+
+    int user = 0;
+    while (user < *number_of_to_clients) {
+      printf("%d\n", user);
+      size_t len = strlen(client_names[user]);
+      write(*to_client, &len, sizeof(len));
+      write(*to_client, client_names[user], len);
+      printf("%s\n", client_names[user]);
+      user += 1;
+    }
+
+    int client_flag = NEW_CLIENT;
+    for (int current_client_index = 0;
+         current_client_index < *number_of_to_clients - 1;
+         current_client_index++) {
+      if (write(to_client_list[current_client_index], &client_flag,
+                sizeof(flag)) == -1)
+        err();
+      // printf("New client detected:%s\n",
+      // client_names[*number_of_to_clients-1]); if
+      // (write(to_client_list[current_client_index],
+      // client_names[*number_of_to_clients-1],
+      // strlen(client_names[current_client_index-1])) == -1) err();
+      if (write(to_client_list[current_client_index],
+                client_names[*number_of_to_clients - 1],
+                strlen(client_names[*number_of_to_clients - 1])) == -1)
+        err();
+    }
 
     umask(0);
     if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
@@ -222,6 +257,19 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     // printf("PRE CLOSES\n");
     close(from_client_list[*index]);
     close(to_client_list[*index]);
+    // send disconnect message
+    /*
+    int client_flag = NEW_CLIENT;
+    for (int current_client_index = 0; current_client_index <
+    *number_of_to_clients; current_client_index++) { if (current_client_index !=
+    *index) { if (write(to_client_list[current_client_index], &client_flag,
+    sizeof(flag)) == -1) err(); if (write(to_client_list[current_client_index],
+    client_names[current_client_index],
+    strlen(client_names[current_client_index])) == -1) err();
+        }
+    }
+    */
+
     // printf("POST CLOSES\n");
     for (int i = *index + 1; i <= *number_of_to_clients; i++) {
       // printf("START OF FOR LOOP\n");
