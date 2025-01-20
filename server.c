@@ -299,12 +299,17 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
     printf("WROTE BACK TO CLIENT\n");
 
-    for(int i = 0; i < number_of_to_clients; i++){
-      char * channelList = getChannelString(*index);
-      int flag = UPDATE_CHANNELS;
-      if (write(to_client_list[*index], &flag, sizeof(flag)) == -1) err();
-    }
-    printf("UPDATED CHANNEL LIST HERE:\n%s", channelList);
+
+    // CHANNEL DISPLAY IMPLEMENTATION
+    // for(int i = 0; i < number_of_to_clients; i++){
+    //   char * channelList = getChannelString(i);
+    //   int flag = UPDATE_CHANNELS;
+    //   if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
+    //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+    // }
+
+
+    // printf("UPDATED CHANNEL LIST HERE:\n%s", channelList);
   }
   else if(flag == CHANGE_CHANNEL){
     int flag = CHANGE_CHANNEL;
@@ -341,6 +346,15 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       // currChannels[*index] = channel_index;
       if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
     }
+
+    // CHANNEL DISPLAY IMPLEMENTATION
+    // for(int i = 0; i < number_of_to_clients; i++){
+    //   char * channelList = getChannelString(i);
+    //   int flag = UPDATE_CHANNELS;
+    //   if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
+    //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+    // }
+
     printf("Done with trying to change");
   }
   else if(flag == CLOSE_CHANNEL){
@@ -416,9 +430,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       }
     }
 
-    // char * chatHistories[MAX_NUM_CHANNELS];
-    // int currChannels[MAX_NUM_CLIENTS];
-    // char * channelNames[MAX_NUM_CHANNELS];
+    // CHANNEL DISPLAY IMPLEMENTATION
+    // for(int i = 0; i < number_of_to_clients; i++){
+    //   char * channelList = getChannelString(i);
+    //   int flag = UPDATE_CHANNELS;
+    //   if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
+    //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+    // }
 
   }
   // add the nonblock
