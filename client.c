@@ -232,7 +232,7 @@ int main() {
           strcpy(chat, new_chat);
         } else if (flag == NEW_CLIENT) {
           if (read(from_server, &(client_names[num_users]), 256) == -1) err();
-          printf("New client detected: %s\n", client_names[num_users]);
+          // printf("New client detected: %s\n", client_names[num_users]);
           num_users += 1;
         } else if (flag == CLOSE_SERVER) {
           endwin();

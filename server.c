@@ -193,7 +193,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     int client_flag = NEW_CLIENT;
     for (int current_client_index = 0; current_client_index < *number_of_to_clients - 1; current_client_index++) {
         if (write(to_client_list[current_client_index], &client_flag, sizeof(flag)) == -1) err();
-        printf("New client detected:%s\n", client_names[*number_of_to_clients-1]);
+        // printf("New client detected:%s\n", client_names[*number_of_to_clients-1]);
         if (write(to_client_list[current_client_index], client_names[*number_of_to_clients-1], strlen(client_names[current_client_index-1])) == -1) err();
     }
 
