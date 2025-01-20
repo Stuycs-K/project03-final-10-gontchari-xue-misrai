@@ -161,6 +161,9 @@ int main() {
       if (FD_ISSET(from_server, &from_server_fd_set)) {
         int flag = 0;
         if (read(from_server, &flag, sizeof(flag)) == -1) err();
+        if(messedUp){
+          sleep(2);
+        }
         if (flag == SEND_MESSAGE || flag == CHANGE_CHANNEL) {
           char new_chat[MAX_CHAT];
           if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
