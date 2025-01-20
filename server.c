@@ -388,12 +388,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
           else if(currChannels[i] > channel_index){
             printf("SHIFTING INDEX IN STORAGE OF CHANNEL\n");
             currChannels[i] = (currChannels[i] - 1);
-            printf("currChannels[i] is now %d which is \"%s\" \n", currChannels[i], channelNames[currChannels[i]]);
+            printf("currChannels[i] is now %d which is \"%s\" with history: %s \n", currChannels[i], channelNames[currChannels[i]], chatHistories[currChannels[i]]);
             if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
             if (write(to_client_list[i], chatHistories[currChannels[i]], MAX_CHAT) == -1) err();
           }
           else{
             printf("OTHERWISE WE UPDATE I GUESS\n");
+            int flag = CHANGE_CHANNEL;
             if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
             if (write(to_client_list[i], chatHistories[currChannels[i]], MAX_CHAT) == -1) err();
           }
