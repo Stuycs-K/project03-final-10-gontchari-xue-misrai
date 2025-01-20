@@ -308,7 +308,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       char * channelList = getChannelString(i);
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
-      if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+      if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
       printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
@@ -356,7 +356,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       char * channelList = getChannelString(i);
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
-      if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+      if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
       printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
@@ -440,7 +440,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       char * channelList = getChannelString(i);
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
-      if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+      if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
       printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
