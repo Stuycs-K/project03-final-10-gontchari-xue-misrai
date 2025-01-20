@@ -29,6 +29,7 @@ int idx = 0;
 int ch;
 int col_shift = 4;
 
+int messedUp = 0;
 int min_height = 30, min_width = 60;
 int chat_open = 1;
 WINDOW *win_input, *win_chat, *win_people, *win_channel;
@@ -259,6 +260,7 @@ int main() {
       if (ch != ERR) {
         // Handle character
         if (ch == '\n') {
+          messedUp = 0;
           int flag;
           // For example, you could "submit" the buffer here
           // We'll just clear it
@@ -276,6 +278,8 @@ int main() {
             // printf(" post parse args\n");
             // Does this actually work?
             if(sizeof(args) < 2){
+              messedUp = 1;
+              // printf("In error\n");
               // printf("\nNOT ENOUGH ARGS\n\n");
               // \"channel_name\"
               // strcat(chat, "Did not provide a channel name for a second argument.\n");
@@ -284,10 +288,12 @@ int main() {
               // printf("Did not provide a channel name for a second argument.\n");
             }
             else if(sizeof(args) > 2 && args[2] != NULL){
+              messedUp = 1;
               // printf("0: %s\n", args[0]);
               // printf("1: %s\n", args[1]);
               // printf("2: %s\n", args[2]);
               // printf("3: %s\n", args[3]);
+              // printf("In error\n");
               strcat(chat, "That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
               strcat(chat, "  ");
               // strcat(chat, "You must provide only 2 arguments: the command, and the channel name to be used for the command.\n");
@@ -310,8 +316,10 @@ int main() {
                  strcat(message, channelName);
                }
                else{
+                 messedUp = 1;
               	  // TODO: what happens here if a command is not valid
               	  // This is a placeholder print because I don't know the implications of putting this here
+                  // printf("In error\n");
                   strcat(chat, "That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
                   strcat(chat, "  ");
                   // printf("That is not a valid command please use one of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
@@ -325,12 +333,16 @@ int main() {
             strcat(message, buffer);
           }
 
-          if (write(to_server, &flag, sizeof(flag)) == -1) err();
-          if (write(to_server, message, sizeof(message)) == -1) err();
+          if(!messedUp){
+            if (write(to_server, &flag, sizeof(flag)) == -1) err();
+            if (write(to_server, message, sizeof(message)) == -1) err();
+          }
+
           idx = 0;
 
           buffer[0] = 0;
           displayed_buffer[0] = 0;
+
         } else if (ch == 27) {
           // If ESC pressed, clear the buffer
           idx = 0;
