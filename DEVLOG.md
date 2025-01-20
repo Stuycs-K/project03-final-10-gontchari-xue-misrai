@@ -69,24 +69,24 @@ This document must be updated daily by EACH group member.
 - Added documentation for basically all functions in all .c files we have
 - Updated Devlog for all future dates
 
-## 2025-01-09 - ___
+## 2025-01-09 - General review and documentation day
 - README draft in progress
 - reviewed with elias, his rendering code and how it worked
 
-## 2025-01-10 to 2025-01-12 - ___
+## 2025-01-10 to 2025-01-12 - Cleaning up readme
 - Finished README first draft that we can keep for now
 
-## 2025-01-13 - ___
+## 2025-01-13 - Planning for channels which will be a lot
 - Reviewed and read through all the code elias wrote, for clarity. Trying to best understand the logic so I can work with it.
 - Wrote my implementation of the server-end recieving client messages and processing them
 - I need to talk with my group mates about log history and other messaging logistics so when can deal with that.
 
-## 2025-01-14 - ___
+## 2025-01-14 - Messaging between clients omg
 - Cleaned up server side messaging setup
 - Server writes chat history to a client, and incoming client messages are appended to chatHistory
 - Server side messaging done i think
 
-## 2025-01-15 - ___
+## 2025-01-15 - Functionalities and niceties
 - Discussed and planned in class how to use ncurses and other functionalities to load user input and chat updates at the same time.
 - Wrote code that generates a signature for the start of every message that looks like "username@pid"
 - idk why but client.c has almost nothing, so I can't really add the signature to user messages, but that's quick so we'll see tomorrow
@@ -104,11 +104,11 @@ This document must be updated daily by EACH group member.
 - All channel commands work with user input
 - All that's left is to display channels in the chatbox
 
-## 2025-01-20 - ___
-- ___
-- ___
-- ___
-
+## 2025-01-20 - final day wrapping up everything
+- kept working on all channel functionality in general, making it work with user interface
+- errors in chat if someone misuses a command
+- overall cleaning up code and diagnostic prints
+- everything channel related now seems to work on my end, so i am really happy!!!
 
 
 
