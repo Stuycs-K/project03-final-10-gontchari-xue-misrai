@@ -209,6 +209,20 @@ int main() {
         if (read(from_server, &(client_names[num_users]), 256) == -1) err();
         // printf("New client detected: %s\n", client_names[num_users]);
         num_users += 1;
+      } else if (flag == REMOVED_CLIENT) {
+        char name_buffer[256];
+        if (read(from_server, name_buffer, 256) == -1) err();
+        int remove_index;
+        for (int i = 0; i < num_users; i++) {
+            if (strcmp(client_names[i], name_buffer) == 0) {
+                remove_index = i;
+                break;
+            }
+        }
+        for (int j = remove_index; j < num_users-1; j++) {
+            strcpy(client_names[j], client_names[j+1]);
+        }
+        num_users -= 1;
       } else if (flag == CLOSE_SERVER) {
         delwin(win_chat);
         delwin(win_input);
