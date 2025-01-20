@@ -188,6 +188,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
     printf("Sent chat history to client\n");
 
+    char * channelList = getChannelString(*index);
+    if (write(*to_client, channelList, MAX_NUM_CLIENTS) == -1) err();
+    printf("Sent this channel list to client:\n%s", channelList);
+
     // end the three way handshake
     // add the new file descriptors to the list (the fd_sets will be
     // reinitialized at the beginning of the next loop)
@@ -259,8 +263,8 @@ void handle_from_client(int *from_client, int *to_client, int *index,
                       MAX_CHAT) == -1)
               err();
           }
-
         }
+
       }
       printf("[" HMAG " SERVER " reset "]: Sent message to all clients\n");
     } else if (x <= 0) {
@@ -300,12 +304,12 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     printf("WROTE BACK TO CLIENT\n");
 
     // CHANNEL DISPLAY IMPLEMENTATION
-    // for(int i = 0; i < number_of_to_clients; i++){
-    //   char * channelList = getChannelString(i);
-    //   int flag = UPDATE_CHANNELS;
-    //   if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
-    //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
-    // }
+    for(int i = 0; i < *number_of_to_clients; i++){
+      char * channelList = getChannelString(i);
+      int flag = UPDATE_CHANNELS;
+      if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
+      if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+    }
 
     // char * channelList = getChannelString(*index);
     // printf("UPDATED CHANNEL LIST HERE:\n%s", channelList);
@@ -347,12 +351,12 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
 
     // CHANNEL DISPLAY IMPLEMENTATION
-    // for(int i = 0; i < number_of_to_clients; i++){
-    //   char * channelList = getChannelString(i);
-    //   int flag = UPDATE_CHANNELS;
-    //   if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
-    //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
-    // }
+    for(int i = 0; i < *number_of_to_clients; i++){
+      char * channelList = getChannelString(i);
+      int flag = UPDATE_CHANNELS;
+      if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
+      if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+    }
 
     printf("Done with trying to change");
   }
@@ -430,12 +434,12 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
 
     // CHANNEL DISPLAY IMPLEMENTATION
-    // for(int i = 0; i < number_of_to_clients; i++){
-    //   char * channelList = getChannelString(i);
-    //   int flag = UPDATE_CHANNELS;
-    //   if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
-    //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
-    // }
+    for(int i = 0; i < *number_of_to_clients; i++){
+      char * channelList = getChannelString(i);
+      int flag = UPDATE_CHANNELS;
+      if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
+      if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+    }
 
   }
   // add the nonblock

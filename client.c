@@ -17,6 +17,8 @@
 
 // just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
+// I set it to max num clients, cause it doesn't have to be big and that macro is only 500, so whatever
+char channelList[MAX_NUM_CLIENTS] = {0};
 char signature[256] = {0};
 char header_signature[256] = {0};
 char header[512] = {0};
@@ -57,6 +59,8 @@ int main() {
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
+  if (read(from_server, &channelList, sizeof(channelList)) == -1) err();
+  printf("Read this channel list:\n %s", channelList);
 
   FD_ZERO(&to_server_fd_set);
   FD_ZERO(&from_server_fd_set);
@@ -162,6 +166,13 @@ int main() {
           // set the chat to the new chat
           chat[0] = 0;
           strcpy(chat, new_chat);
+        }
+        else if (flag == UPDATE_CHANNELS){
+          char new_channelList[MAX_NUM_CLIENTS];
+          if (read(from_server, new_channelList, sizeof(new_channelList)) == -1) err();
+          // set the chat to the new chat
+          new_channelList[0] = 0;
+          strcpy(channelList, new_channelList);
         } else if (flag == CLOSE_SERVER) {
           endwin();
           printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
@@ -189,7 +200,7 @@ int main() {
       mvwin(win_channel, 1, 0);
       werase(win_channel);
       // MODIFIED
-      mvwprintw(win_channel, 1, 2, "%s", chat);
+      mvwprintw(win_channel, 1, 2, "%s", channelList);
       box(win_channel, 0, 0);
       wattron(win_channel, A_BOLD);
       wattron(win_channel, COLOR_PAIR(4));
@@ -435,7 +446,7 @@ void handle_resize(int sig) {
     mvwin(win_channel, 1, 0);
     werase(win_channel);
     //MODIFIED
-    mvwprintw(win_channel, 1, 2, "%s", chat);
+    mvwprintw(win_channel, 1, 2, "%s", channelList);
     box(win_channel, 0, 0);
     wattron(win_channel, A_BOLD);
     wattron(win_channel, COLOR_PAIR(4));
