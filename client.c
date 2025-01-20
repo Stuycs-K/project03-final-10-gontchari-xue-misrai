@@ -279,7 +279,8 @@ int main() {
               // printf("\nNOT ENOUGH ARGS\n\n");
               // \"channel_name\"
               // strcat(chat, "Did not provide a channel name for a second argument.\n");
-              strcat(chat, " That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
+              strcat(chat, "That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
+              strcat(chat, "  ");
               // printf("Did not provide a channel name for a second argument.\n");
             }
             else if(sizeof(args) > 2 && args[2] != NULL){
@@ -287,7 +288,8 @@ int main() {
               // printf("1: %s\n", args[1]);
               // printf("2: %s\n", args[2]);
               // printf("3: %s\n", args[3]);
-              strcat(chat, " That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
+              strcat(chat, "That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
+              strcat(chat, "  ");
               // strcat(chat, "You must provide only 2 arguments: the command, and the channel name to be used for the command.\n");
               // printf("You must provide only 2 arguments: the command, and the channel name to be used for the command.\n");
             }else{
@@ -311,7 +313,8 @@ int main() {
               	  // TODO: what happens here if a command is not valid
               	  // This is a placeholder print because I don't know the implications of putting this here
                   strcat(chat, "That is not a valid command please use one of:\n\t/createChannel \"channel_name\"\n\t/changeChannel \"channel_name\"\n\t/closeChannel \"channel_name\"\n");
-                // printf("That is not a valid command please use one of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
+                  strcat(chat, "  ");
+                  // printf("That is not a valid command please use one of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
               }
             }
 
