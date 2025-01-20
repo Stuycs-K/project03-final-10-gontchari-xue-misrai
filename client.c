@@ -297,7 +297,7 @@ int main() {
                char * channelName = args[1];
 
                if(strcmp(command, "/create") == 0){
-              	              // printf("MADE IT TO CREATE\n");
+                 // printf("MADE IT TO CREATE\n");
                  flag = CREATE_CHANNEL;
                  strcat(message, channelName);
                }
@@ -306,7 +306,7 @@ int main() {
                  strcat(message, channelName);
                }
                else if(strcmp(command, "/remove") == 0){
-              	              flag = CLOSE_CHANNEL;
+              	 flag = CLOSE_CHANNEL;
                  strcat(message, channelName);
                }
                else{
