@@ -256,7 +256,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
               err();
 
             if (write(to_client_list[current_client_index], chatHistories[currChannels[*index]],
-                      sizeof(MAX_CHAT)) == -1)
+                      MAX_CHAT) == -1)
               err();
           }
 
@@ -288,7 +288,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
     char channelName[MESSAGE_SIZE];
     int x = read(*from_client, channelName, sizeof(channelName));
-    chatHistories[number_of_channels - 1] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
+    // chatHistories[number_of_channels - 1] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
     strcpy(channelNames[number_of_channels - 1], channelName);
 
     printf("Client trying to create channel \"%s\".\n", channelName);
@@ -308,18 +308,25 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
     printf("Client trying to change to channel \"%s\".\n", channelName);
 
+    int found = 1;
     int channel_index = 0;
-    // printf("Comparing \"%s\" with \"%s\"\n", );
     while(strcmp(channelNames[channel_index], channelName) != 0){
+      // printf("Comparing \"%s\" with \"%s\"\n", channelNames[channel_index], channelName);
       channel_index++;
+      if(strcmp(channelName,"") == 0){
+        printf("Entered uncharted territory\n");
+        found = 0;
+        break;
+      }
     }
 
-    printf("Channel \"%s\" found at index %d \n", channelName, channel_index);
+    if(found){
+      printf("Channel \"%s\" found at index %d \n", channelName, channel_index);
 
-    *to_client = to_client_list[*index];
-    currChannels[*index] = channel_index;
-    if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
-
+      *to_client = to_client_list[*index];
+      currChannels[*index] = channel_index;
+      if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
+    }
   }
   else if(flag == CLOSE_CHANNEL){
     char channelName[MESSAGE_SIZE];
