@@ -299,7 +299,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
     printf("WROTE BACK TO CLIENT\n");
 
-
     // CHANNEL DISPLAY IMPLEMENTATION
     // for(int i = 0; i < number_of_to_clients; i++){
     //   char * channelList = getChannelString(i);
@@ -308,7 +307,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     //   if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
     // }
 
-
+    // char * channelList = getChannelString(*index);
     // printf("UPDATED CHANNEL LIST HERE:\n%s", channelList);
   }
   else if(flag == CHANGE_CHANNEL){
@@ -497,14 +496,17 @@ void handle_sigint(int sig) {
 }
 
 char * getChannelString(int index){
-  int curr = currChannels[index];
   char * returner = (char *)calloc(MAX_CHAT, sizeof(char));
+
+  int curr = currChannels[index];
+  strcat(returner, channelNames[curr]);
+  strcat(returner, " *\n");
+
   for(int i = 0; i < number_of_channels; i++){
-    strcat(returner, channelNames[i]);
-    if(curr == i){
-      strcat(returner, " *");
+    if(curr != i){
+      strcat(returner, channelNames[i]);
+      strcat(returner, "\n");
     }
-    strcat(returner, "\n");
   }
   strcat(returner, "\0");
   return returner;
