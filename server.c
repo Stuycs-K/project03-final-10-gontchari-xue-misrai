@@ -1,8 +1,8 @@
 #include "server.h"
 
 #include <signal.h>
-
 #include <sys/select.h>
+
 #include "colors.h"
 #include "universal.h"
 
@@ -50,7 +50,7 @@ int main() {
   }
 
   // printf("POST CHANNEL SETUP\n");
-
+  umask(0);
   if (mkfifo(WKP, 0666) == -1) err();
   if (chmod(WKP, 0666) == -1) err();
 
@@ -163,7 +163,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     // printf("NUM CLIENTS: %d\n", *number_of_to_clients);
     // adds the clients and creates the server
     // three way handshake
-    int random_number = random_random();
+    int random_number = random_urandom();
     *to_client = server_connect(*from_client);
 
     if (write(*to_client, &random_number, sizeof(random_number)) == -1) err();
@@ -201,6 +201,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     (*number_of_to_clients)++;
 
+    umask(0);
     if (unlink(WKP) == -1 || mkfifo(WKP, 0666) == -1) err();
     if (chmod(WKP, 0666) == -1) err();
 
@@ -273,7 +274,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
       }
       printf("[" HMAG " SERVER " reset "]: Sent message to all clients\n");
-    } else if (x <= 0) {
+    } else {
       printf("Error reading message, client disconnected.\n");
       close(from_client_list[*index]);
       close(to_client_list[*index]);
@@ -481,8 +482,8 @@ void handle_sigpipe(int sig) {
   returns ABSOLUTELY NOTHING
   =========================*/
 void handle_sigint(int sig) {
-  printf("[ " HRED "SERVER" reset
-         " ]: Caught "HRED"SIGINT"reset", closing server, number of clients to close: %d\n",
+  printf("[ " HRED "SERVER" reset " ]: Caught " HRED "SIGINT" reset
+         ", closing server, number of clients to close: %d\n",
          number_of_to_clients);
   for (int i = 0; i < number_of_to_clients; i++) {
     int close_server_flag = CLOSE_SERVER;  // server flag defined in universal.h

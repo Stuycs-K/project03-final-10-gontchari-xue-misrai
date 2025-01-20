@@ -43,6 +43,7 @@ This document must be updated daily by EACH group member.
 - Finished the initial chat stuff, added boxes, fixed bugs
 - Make it so that sizing works
 - Make sure the text continually updates
+- Edited out unessary code
 
 
 ## 2025-01-20 - ___

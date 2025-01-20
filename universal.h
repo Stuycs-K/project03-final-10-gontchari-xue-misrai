@@ -53,7 +53,6 @@ int server_setup();
 int err();
 
 // for generating random numbers
-int random_random();
 int random_urandom();
 
 #endif

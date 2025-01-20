@@ -32,7 +32,6 @@ int server_setup() {
   return from_client;
 }
 
-
 /*=========================
   client_handshake
   args: int * to_server
@@ -46,9 +45,11 @@ int client_handshake(int *to_server) {
   printf("[ " HCYN "CLIENT" reset " ]: Creating fifo\n");
   char fifo_name[PIPE_SIZING] = {"\0"};
   sprintf(fifo_name, "%d", getpid());
-  char *fifo_ending = ".fifo";
+  const char *fifo_ending = ".fifo";
   strcat(fifo_name, fifo_ending);
-  if (mkfifo(fifo_name, 0666) == -1) err();
+
+  umask(0);
+  if (mkfifo(fifo_name, 0) == -1) err();
   if (chmod(fifo_name, 0666) == -1) err();
 
   printf("[ " HCYN "CLIENT" reset
@@ -72,7 +73,8 @@ int client_handshake(int *to_server) {
 
   // attempt to read random number from parent pipe
   if (read(from_server, &pipe_buff, sizeof(pipe_buff)) == -1) err();
-  printf("[ " HCYN "CLIENT" reset " ]: Read the random int, got %d\n", pipe_buff);
+  printf("[ " HCYN "CLIENT" reset " ]: Read the random int, got %d\n",
+         pipe_buff);
 
   //   removing the client pipe
   if (remove(fifo_name) == -1) err();
@@ -99,15 +101,8 @@ int client_handshake(int *to_server) {
 int server_connect(int from_client) {
   char fifo_name_buff[PIPE_SIZING] = {"\0"};
   int ret = read(from_client, fifo_name_buff, sizeof(fifo_name_buff));
-  if (ret == -1) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      return NO_CLIENT;
-    }
-    err();
-  }
-  if (ret == 0) {
-    return NO_CLIENT;
-  }
+  if (ret == -1) err();
+  if (ret == 0) return NO_CLIENT;
   printf("[ " HMAG "SERVER" reset " ] Read from the WKP, got fifo name %s \n",
          fifo_name_buff);
   int to_client = open(fifo_name_buff, O_WRONLY, 0666);
@@ -126,24 +121,6 @@ int err() {
   printf("\x1b[31m errno %d\x1b[0m ", errno);
   printf("%s\n", strerror(errno));
   exit(1);
-}
-
-/*=========================
-  random_random()
-  args: none
-
-  gets a random integer from dev/random to be used in code
-
-  returns random int
-  =========================*/
-int random_random() {
-  int r_file = open("/dev/random", O_RDONLY, 0);
-  if (r_file == -1) err();
-  int bytes;
-  int read_result = read(r_file, &bytes, sizeof(bytes));
-  if (read_result == -1) err();
-  close(r_file);
-  return bytes;
 }
 
 /*=========================
