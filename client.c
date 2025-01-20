@@ -16,6 +16,9 @@
 
 // just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
+// I set it to max num clients, cause it doesn't have to be big and that macro
+// is only 500, so whatever
+char channelList[MAX_NUM_CLIENTS] = {0};
 char signature[256] = {0};
 char header_signature[256] = {0};
 char header[512] = {0};
@@ -26,10 +29,13 @@ int idx = 0;
 int ch;
 int col_shift = 4;
 
+int messedUp = 0;
 int min_height = 30, min_width = 60;
 int chat_open = 1;
 WINDOW *win_input, *win_chat, *win_people, *win_channel;
 int ROWS, COLS;
+
+// TODO: Changing channels and other channel functionalities
 
 fd_set to_server_fd_set, from_server_fd_set;
 int from_server, to_server;
@@ -58,6 +64,10 @@ int main() {
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
+  printf("read chat\n");
+  if (read(from_server, &channelList, sizeof(channelList)) == -1) err();
+  printf("read channel list\n");
+  // printf("Read this channel list:\n %s", channelList);
   write(to_server, &header_signature, strlen(header_signature));
 
   // receive list of current clients
@@ -177,12 +187,24 @@ int main() {
     if (FD_ISSET(from_server, &from_server_fd_set)) {
       int flag = 0;
       if (read(from_server, &flag, sizeof(flag)) == -1) err();
-      if (flag == SEND_MESSAGE) {
+      if (messedUp) {
+        sleep(2);
+      }
+      if (flag == SEND_MESSAGE || flag == CHANGE_CHANNEL) {
         char new_chat[MAX_CHAT];
         if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
         // set the chat to the new chat
         chat[0] = 0;
         strcpy(chat, new_chat);
+      } else if (flag == UPDATE_CHANNELS) {
+        char new_channelList[MAX_NUM_CLIENTS];
+        if (read(from_server, new_channelList, sizeof(new_channelList)) == -1)
+          err();
+        // printf("READ CHANNEL LIST:\n%s", new_channelList);
+        // set the chat to the new chat
+        channelList[0] = 0;
+        strcpy(channelList, new_channelList);
+        // printf("RECIEVED CHANNEL LIST:\n%s\n", channelList);
       } else if (flag == NEW_CLIENT) {
         if (read(from_server, &(client_names[num_users]), 256) == -1) err();
         // printf("New client detected: %s\n", client_names[num_users]);
@@ -225,35 +247,6 @@ int main() {
         err();
       }
 
-      if (FD_ISSET(from_server, &from_server_fd_set)) {
-        int flag = 0;
-        if (read(from_server, &flag, sizeof(flag)) == -1) err();
-        if (flag == SEND_MESSAGE) {
-          char new_chat[MAX_CHAT];
-          if (read(from_server, new_chat, sizeof(new_chat)) == -1) err();
-          // set the chat to the new chat
-          chat[0] = 0;
-          strcpy(chat, new_chat);
-        } else if (flag == NEW_CLIENT) {
-          if (read(from_server, &(client_names[num_users]), 256) == -1) err();
-          // printf("New client detected: %s\n", client_names[num_users]);
-          num_users += 1;
-        } else if (flag == CLOSE_SERVER) {
-          endwin();
-          printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
-                 "CLOSURE" reset " by server; closing down\n");
-          close(to_server);
-          close(from_server);
-          exit(0);
-        } else {
-          endwin();
-          printf("Recieved Unknown flag: %d\n", flag);
-          close(to_server);
-          close(from_server);
-          exit(0);
-        }
-      }
-
       refresh();
       // 3) Continuously update the other box
       // ! Order matters here! the rendering is very skibidi in this area
@@ -264,6 +257,8 @@ int main() {
       wresize(win_channel, (ROWS - 4) / 2, COLS / 4 - 1);
       mvwin(win_channel, 1, 0);
       werase(win_channel);
+      // MODIFIED
+      mvwprintw(win_channel, 1, 2, "%s", channelList);
       box(win_channel, 0, 0);
       wattron(win_channel, A_BOLD);
       wattron(win_channel, COLOR_PAIR(4));
@@ -280,7 +275,7 @@ int main() {
       wattron(win_people, COLOR_PAIR(5));
       mvwprintw(win_people, 0, 1, " Users ");
       for (int i = 0; i <= num_users; i++) {
-        mvwprintw(win_people, i+1, 1, "%s", client_names[i]);
+        mvwprintw(win_people, i + 1, 1, "%s", client_names[i]);
       }
       wattroff(win_people, COLOR_PAIR(5));
       wattroff(win_people, A_BOLD);
@@ -306,7 +301,8 @@ int main() {
       box(win_input, 0, 0);
       wattron(win_input, A_BOLD);
       wattron(win_input, COLOR_PAIR(2));
-      mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
+      mvwprintw(win_input, 0, 1,
+                " Input (ESC to clear) (Commands: /create; /switch; /remove)");
       wattroff(win_input, COLOR_PAIR(2));
       wattroff(win_input, A_BOLD);
       wmove(win_input, 1, 1 + strlen(displayed_buffer));
@@ -321,19 +317,98 @@ int main() {
         }
 
         if (ch == '\n') {
+          messedUp = 0;
+          int flag;
           // For example, you could "submit" the buffer here
           // We'll just clear it
           // TODO send message to server
-          int flag = SEND_MESSAGE;
           char message[MESSAGE_SIZE] = {0};
-          strcat(message, signature);
-          strcat(message, buffer);
-          if (write(to_server, &flag, sizeof(flag)) == -1) err();
-          if (write(to_server, message, sizeof(message)) == -1) err();
+
+          // printf("USER DID INPUT STARTING WITH: %c : THIS\n", buffer[0]);
+          // if the user is trying to use a command
+          if (buffer[0] == '/') {
+            // printf("HERE!!!\n");
+            char *line = buffer;
+            char *args[5];
+            // printf("Pre parse args\n");
+            parse_args(buffer, args);
+            // printf(" post parse args\n");
+            // Does this actually work?
+            if (sizeof(args) < 2) {
+              messedUp = 1;
+              // printf("In error\n");
+              // printf("\nNOT ENOUGH ARGS\n\n");
+              // \"channel_name\"
+              // strcat(chat, "Did not provide a channel name for a second
+              // argument.\n");
+              strcat(chat,
+                     "That is not a valid command please use one "
+                     "of:\n\t/create \"channel_name\"\n\t/switch "
+                     "\"channel_name\"\n\t/remove \"channel_name\"\n");
+              strcat(chat, "  ");
+              // printf("Did not provide a channel name for a second
+              // argument.\n");
+            } else if (sizeof(args) > 2 && args[2] != NULL) {
+              messedUp = 1;
+              // printf("0: %s\n", args[0]);
+              // printf("1: %s\n", args[1]);
+              // printf("2: %s\n", args[2]);
+              // printf("3: %s\n", args[3]);
+              // printf("In error\n");
+              strcat(chat,
+                     "That is not a valid command please use one "
+                     "of:\n\t/create \"channel_name\"\n\t/switch "
+                     "\"channel_name\"\n\t/remove \"channel_name\"\n");
+              strcat(chat, "  ");
+              // strcat(chat, "You must provide only 2 arguments: the command,
+              // and the channel name to be used for the command.\n");
+              // printf("You must provide only 2 arguments: the command, and the
+              // channel name to be used for the command.\n");
+            } else {
+              char *command = args[0];
+              char *channelName = args[1];
+
+              if (strcmp(command, "/create") == 0) {
+                // printf("MADE IT TO CREATE\n");
+                flag = CREATE_CHANNEL;
+                strcat(message, channelName);
+              } else if (strcmp(command, "/switch") == 0) {
+                flag = CHANGE_CHANNEL;
+                strcat(message, channelName);
+              } else if (strcmp(command, "/remove") == 0) {
+                flag = CLOSE_CHANNEL;
+                strcat(message, channelName);
+              } else {
+                messedUp = 1;
+                // TODO: what happens here if a command is not valid
+                // This is a placeholder print because I don't know the
+                // implications of putting this here printf("In error\n");
+                strcat(chat,
+                       "That is not a valid command please use one "
+                       "of:\n\t/create \"channel_name\"\n\t/switch "
+                       "\"channel_name\"\n\t/remove \"channel_name\"\n");
+                strcat(chat, "  ");
+                // printf("That is not a valid command please use one
+                // of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
+              }
+            }
+
+          } else {
+            flag = SEND_MESSAGE;
+            strcat(message, signature);
+            strcat(message, buffer);
+          }
+
+          if (!messedUp) {
+            if (write(to_server, &flag, sizeof(flag)) == -1) err();
+            if (write(to_server, message, sizeof(message)) == -1) err();
+          }
+
           idx = 0;
 
           buffer[0] = 0;
           displayed_buffer[0] = 0;
+
         } else if (ch == 27) {
           // If ESC pressed, clear the buffer
           idx = 0;
@@ -570,4 +645,18 @@ void handle_sigint(int sig) {
 
   endwin();
   exit(0);
+}
+
+void parse_args(char *line, char **arg_ary) {
+  // printf("STARTING PARGSE ARGS BTW\n");
+  char *curr = line;
+  int i = 0;
+  // printf("PRE PARSE ARGS WHILE LOOP\n");
+  while (curr) {
+    arg_ary[i] = strsep(&curr, " ");
+    i++;
+  }
+  // printf("POST PARSE ARGS WHILE LOOP\n");
+  arg_ary[i] = NULL;
+  // printf("POST PARSE ARGS WHILE LOOP\n");
 }

@@ -15,6 +15,9 @@
 #define MAX_CHAT 3000
 #define MESSAGE_SIZE 1024
 
+#define NEW_CLIENT 5
+#define REMOVED_CLIENT 6
+
 #define NO_CLIENT -404
 
 #define MAX_NUM_CLIENTS 500
@@ -26,8 +29,12 @@
 #define CLOSE_SERVER -2
 
 // for part 2
+#define MAX_NUM_CHANNELS 5000
+#define MAX_SIZE_CHANNEL_NAME 1024
 #define CREATE_CHANNEL 3
+#define CHANGE_CHANNEL 16
 #define CLOSE_CHANNEL -3
+#define UPDATE_CHANNELS 24
 #define KEEP_ALIVE 0
 
 #define ACKNOWLEDGE 4

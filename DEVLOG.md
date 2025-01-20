@@ -32,7 +32,7 @@ This document must be updated daily by EACH group member.
 - TODO: change the text box so that it increases sizes with input
 - Did not do TODO, but I did start excalidraw drawing on protocols and deleted all of Ivan's comments
 
-## 2025-01-15 
+## 2025-01-15
 - Created renderer example so that gathering of characters can be nonblocking
 - Work with groupmates and teachers to brainstorm ways for ncurses to work without waiting for user input.
 
@@ -75,8 +75,6 @@ This document must be updated daily by EACH group member.
 
 ## 2025-01-10 to 2025-01-12 - ___
 - Finished README first draft that we can keep for now
-- ___
-- ___
 
 ## 2025-01-13 - ___
 - Reviewed and read through all the code elias wrote, for clarity. Trying to best understand the logic so I can work with it.
@@ -93,15 +91,18 @@ This document must be updated daily by EACH group member.
 - Wrote code that generates a signature for the start of every message that looks like "username@pid"
 - idk why but client.c has almost nothing, so I can't really add the signature to user messages, but that's quick so we'll see tomorrow
 
-## 2025-01-16 - ___
-- ___
-- ___
-- ___
+## 2025-01-16 - Absent
+- Looking at the image Elias made for clarity of channel code to be written
+- Trying to create a general idea of how to best approach this portion of the coding
 
-## 2025-01-17 to 2025-01-19 - ___
-- ___
-- ___
-- ___
+## 2025-01-17 to 2025-01-19 - Channels
+- Set up code in server.c that works with the different channel flags and what they should do
+- Did code in client.c that can parse if a client is trying to execute a "/" command and which one
+- Accompanying bug fixing and general cleaning to help make channels work
+- Made channels work with user input and rendered chatbox
+- Parse user args and redirecting to channel commands
+- All channel commands work with user input
+- All that's left is to display channels in the chatbox
 
 ## 2025-01-20 - ___
 - ___
