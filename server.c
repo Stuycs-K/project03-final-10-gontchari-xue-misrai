@@ -310,15 +310,15 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
     int found = 1;
     int channel_index = 0;
-    while(strcmp(channelNames[channel_index], channelName) != 0){
-      // printf("Comparing \"%s\" with \"%s\"\n", channelNames[channel_index], channelName);
+    while((strcmp(channelNames[channel_index], channelName) != 0) && (found != 0)){
+      printf("Comparing \"%s\" with \"%s\"\n", channelNames[channel_index], channelName);
       channel_index++;
-      if(strcmp(channelName,"") == 0){
+      if(strcmp(channelNames[channel_index],"") == 0){
         printf("Entered uncharted territory\n");
         found = 0;
-        break;
       }
     }
+    printf("Exited the while\n");
 
     if(found){
       printf("Channel \"%s\" found at index %d \n", channelName, channel_index);
@@ -327,6 +327,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       currChannels[*index] = channel_index;
       if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
     }
+    else{
+      printf("ELSE...\n");
+      *to_client = to_client_list[*index];
+      // currChannels[*index] = channel_index;
+      if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
+    }
+    printf("Done with trying to change");
   }
   else if(flag == CLOSE_CHANNEL){
     char channelName[MESSAGE_SIZE];
