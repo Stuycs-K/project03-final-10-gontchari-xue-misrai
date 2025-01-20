@@ -31,6 +31,7 @@
 #define CREATE_CHANNEL 3
 #define CHANGE_CHANNEL 16
 #define CLOSE_CHANNEL -3
+#define UPDATE_CHANNELS 24
 #define KEEP_ALIVE 0
 
 #define ACKNOWLEDGE 4

@@ -299,7 +299,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
     printf("WROTE BACK TO CLIENT\n");
 
-    char * channelList = getChannelString(*index);
+    for(int i = 0; i < number_of_to_clients; i++){
+      char * channelList = getChannelString(*index);
+      int flag = UPDATE_CHANNELS;
+      if (write(to_client_list[*index], &flag, sizeof(flag)) == -1) err();
+    }
     printf("UPDATED CHANNEL LIST HERE:\n%s", channelList);
   }
   else if(flag == CHANGE_CHANNEL){
