@@ -309,7 +309,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
-      printf("WROTE CHANNEL LIST:\n%s", channelList);
+      printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
     // char * channelList = getChannelString(*index);
@@ -357,6 +357,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+      printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
     printf("Done with trying to change");
@@ -440,6 +441,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, sizeof(channelList)) == -1) err();
+      printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
   }
@@ -500,19 +502,24 @@ void handle_sigint(int sig) {
   exit(0);
 }
 
+// strcat(returner, "\n ");
+// strcat(returner, " ");
+
 char * getChannelString(int index){
   char * returner = (char *)calloc(MAX_CHAT, sizeof(char));
 
   int curr = currChannels[index];
   strcat(returner, channelNames[curr]);
-  strcat(returner, " *\n");
+  strcat(returner, " *\n ");
+  strcat(returner, " ");
 
   for(int i = 0; i < number_of_channels; i++){
     if(curr != i){
       strcat(returner, channelNames[i]);
-      strcat(returner, "\n");
+      strcat(returner, "\n ");
+      strcat(returner, " ");
     }
   }
-  strcat(returner, "\0");
+  // strcat(returner, "\0");
   return returner;
 }
