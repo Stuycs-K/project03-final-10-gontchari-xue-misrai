@@ -170,9 +170,11 @@ int main() {
         else if (flag == UPDATE_CHANNELS){
           char new_channelList[MAX_NUM_CLIENTS];
           if (read(from_server, new_channelList, sizeof(new_channelList)) == -1) err();
+          // printf("READ CHANNEL LIST:\n%s", new_channelList);
           // set the chat to the new chat
-          new_channelList[0] = 0;
+          channelList[0] = 0;
           strcpy(channelList, new_channelList);
+          // printf("RECIEVED CHANNEL LIST:\n%s\n", channelList);
         } else if (flag == CLOSE_SERVER) {
           endwin();
           printf("[ " HCYN "CLIENT" reset " ]: Detected pipe " HRED
