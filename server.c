@@ -240,7 +240,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     strcat(chatHistories[currChannels[*index]], message);
     strcat(chatHistories[currChannels[*index]], "\n ");
     strcat(chatHistories[currChannels[*index]], " ");
-    printf("UPDATED CHAT LOG HERE:\n %s\n", chatHistories[currChannels[*index]]);
+    printf("UPDATED CHAT LOG HERE:\n%s\n", chatHistories[currChannels[*index]]);
     // send the chat history to the client
     if (x > 0) {
       printf("[" HMAG " SERVER " reset "]: Client sent a message: %s!\n",
@@ -520,6 +520,6 @@ char * getChannelString(int index){
       strcat(returner, " ");
     }
   }
-  // strcat(returner, "\0");
+  strcat(returner, "\0");
   return returner;
 }
