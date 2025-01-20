@@ -470,3 +470,17 @@ void handle_sigint(int sig) {
   if (unlink(WKP) == -1) err();
   exit(0);
 }
+
+char * getChannelString(int index){
+  int curr = currChannels[index];
+  char * returner;
+  for(int i = 0; i < number_of_channels; i++){
+    strcat(returner, channelNames[i]);
+    if(curr == i){
+      strcat(returner, " *");
+    }
+    strcat(returner, "\n");
+  }
+  strcat(returner, "/0");
+  return returner;
+}
