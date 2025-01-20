@@ -98,6 +98,10 @@ This document must be updated daily by EACH group member.
 - Set up code in server.c that works with the different channel flags and what they should do
 - Did code in client.c that can parse if a client is trying to execute a "/" command and which one
 - Accompanying bug fixing and general cleaning to help make channels work
+- Made channels work with user input and rendered chatbox
+- Parse user args and redirecting to channel commands
+- All channel commands work with user input
+- All that's left is to display channels in the chatbox
 
 ## 2025-01-20 - ___
 - ___
