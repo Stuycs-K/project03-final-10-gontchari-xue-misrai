@@ -11,4 +11,5 @@ void handle_from_client(int *from_client, int *to_client, int *index,
                         int *to_client_list, int *from_client_list,
                         int *number_of_to_clients, int *number_of_from_clients,
                         int *new_number_of_from_clients, int *max_fd);
+char * getChannelString(int index);
 #endif
