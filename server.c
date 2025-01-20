@@ -186,11 +186,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     //    add the nonblock
     printf("[ " HYEL "SERVER" reset " ]: Client " HGRN "CONNECTED" reset "\n");
     if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
-    printf("Sent chat history to client\n");
+    // printf("Sent chat history to client\n");
 
     char * channelList = getChannelString(*index);
     if (write(*to_client, channelList, MAX_NUM_CLIENTS) == -1) err();
-    printf("Sent this channel list to client:\n%s", channelList);
+    // printf("Sent this channel list to client:\n%s", channelList);
 
     // end the three way handshake
     // add the new file descriptors to the list (the fd_sets will be
@@ -215,18 +215,18 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
 
   } else if (flag == CLOSE_CLIENT) {
-    printf("CLOSING CLIENT\n");
+    // printf("CLOSING CLIENT\n");
     // closes the client (both the to and from client descriptors) and downticks
     // the other trackers
     printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset "\n");
-    printf("PRE CLOSES\n");
+    // printf("PRE CLOSES\n");
     close(from_client_list[*index]);
     close(to_client_list[*index]);
-    printf("POST CLOSES\n");
+    // printf("POST CLOSES\n");
     for (int i = *index + 1; i <= *number_of_to_clients; i++) {
-      printf("START OF FOR LOOP\n");
+      // printf("START OF FOR LOOP\n");
       to_client_list[i - 1] = to_client_list[i];
-      printf("currChannels[i - 1] which was %d, will now be %d\n", currChannels[i-1], currChannels[i]);
+      // printf("currChannels[i - 1] which was %d, will now be %d\n", currChannels[i-1], currChannels[i]);
       currChannels[i - 1] = currChannels[i];
     }
     for (int i = *index + 1; i <= *number_of_from_clients; i++) {
@@ -246,7 +246,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     strcat(chatHistories[currChannels[*index]], message);
     strcat(chatHistories[currChannels[*index]], "\n ");
     strcat(chatHistories[currChannels[*index]], " ");
-    printf("UPDATED CHAT LOG HERE:\n%s\n", chatHistories[currChannels[*index]]);
+    // printf("UPDATED CHAT LOG HERE:\n%s\n", chatHistories[currChannels[*index]]);
     // send the chat history to the client
     if (x > 0) {
       printf("[" HMAG " SERVER " reset "]: Client sent a message: %s!\n",
@@ -301,13 +301,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     // chatHistories[number_of_channels - 1] = (char *)calloc(MAX_SIZE_CHANNEL_NAME, sizeof(char));
     strcpy(channelNames[number_of_channels - 1], channelName);
 
-    printf("Client trying to create channel \"%s\".\n", channelName);
-    printf("Channel \"%s\" created at index %d \n", channelNames[number_of_channels - 1], number_of_channels - 1);
+    // printf("Client trying to create channel \"%s\".\n", channelName);
+    // printf("Channel \"%s\" created at index %d \n", channelNames[number_of_channels - 1], number_of_channels - 1);
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
     currChannels[*index] = number_of_channels - 1;
-    printf("TRYING TO WRITE BACK TO CLIENT\n");
+    // printf("TRYING TO WRITE BACK TO CLIENT\n");
     if (write(*to_client, chatHistories[number_of_channels - 1], MAX_CHAT) == -1) err();
-    printf("WROTE BACK TO CLIENT\n");
+    // printf("WROTE BACK TO CLIENT\n");
 
     // CHANNEL DISPLAY IMPLEMENTATION
     for(int i = 0; i < *number_of_to_clients; i++){
@@ -315,7 +315,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
-      printf("WROTE CHANNEL LIST:\n%s\n", channelList);
+      // printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
     // char * channelList = getChannelString(*index);
@@ -328,30 +328,30 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     char channelName[MESSAGE_SIZE];
     int x = read(*from_client, channelName, sizeof(channelName));
 
-    printf("Client trying to change to channel \"%s\".\n", channelName);
+    // printf("Client trying to change to channel \"%s\".\n", channelName);
 
     int found = 1;
     int channel_index = 0;
     while((strcmp(channelNames[channel_index], channelName) != 0) && (found != 0)){
-      printf("Comparing \"%s\" with \"%s\"\n", channelNames[channel_index], channelName);
+      // printf("Comparing \"%s\" with \"%s\"\n", channelNames[channel_index], channelName);
       channel_index++;
       if(strcmp(channelNames[channel_index],"") == 0){
-        printf("Entered uncharted territory\n");
+        // printf("Entered uncharted territory\n");
         found = 0;
       }
     }
-    printf("Exited the while\n");
+    // printf("Exited the while\n");
 
     if(found){
-      printf("Channel \"%s\" found at index %d \n", channelName, channel_index);
+      // printf("Channel \"%s\" found at index %d \n", channelName, channel_index);
 
       *to_client = to_client_list[*index];
       currChannels[*index] = channel_index;
       if (write(*to_client, chatHistories[channel_index], MAX_CHAT) == -1) err();
     }
     else{
-      printf("ELSE...\n");
-      printf("currChannels[i] is %d which is \"%s\" with history: %s \n", currChannels[*index], channelNames[currChannels[*index]], chatHistories[currChannels[*index]]);
+      // printf("ELSE...\n");
+      // printf("currChannels[i] is %d which is \"%s\" with history: %s \n", currChannels[*index], channelNames[currChannels[*index]], chatHistories[currChannels[*index]]);
       *to_client = to_client_list[*index];
       // currChannels[*index] = channel_index;
       if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
@@ -363,10 +363,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
-      printf("WROTE CHANNEL LIST:\n%s\n", channelList);
+      // printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
-    printf("Done with trying to change");
+    // printf("Done with trying to change");
   }
   else if(flag == CLOSE_CHANNEL){
     int flag = CHANGE_CHANNEL;
@@ -377,7 +377,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
     int channel_index = 0;
     if(strcmp("general", channelName) == 0){
-      printf("Client trying to close the general channel, this is NOT ALLOWED.\n");
+      // printf("Client trying to close the general channel, this is NOT ALLOWED.\n");
 
       *to_client = to_client_list[*index];
       // currChannels[*index] = channel_index;
@@ -385,12 +385,12 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     else{
       *to_client = to_client_list[*index];
-      printf("Client trying to close \"%s\" channel.\n", channelName);
+      // printf("Client trying to close \"%s\" channel.\n", channelName);
       int found = 1;
       while((strcmp(channelNames[channel_index], channelName) != 0) && (found != 0)){
         channel_index++;
         if(strcmp(channelNames[channel_index],"") == 0){
-          printf("Entered uncharted territory\n");
+          // printf("Entered uncharted territory\n");
           found = 0;
         }
       }
@@ -414,19 +414,19 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
         for(int i = 0; i < *number_of_to_clients; i++){
           if(currChannels[i] == channel_index){
-            printf("TRYING TO KICK OFF CLIENT WHO IS ON THIS CHANNEL\n");
+            // printf("TRYING TO KICK OFF CLIENT WHO IS ON THIS CHANNEL\n");
             if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
             if (write(to_client_list[i], chatHistories[0], MAX_CHAT) == -1) err();
           }
           else if(currChannels[i] > channel_index){
-            printf("SHIFTING INDEX IN STORAGE OF CHANNEL\n");
+            // printf("SHIFTING INDEX IN STORAGE OF CHANNEL\n");
             currChannels[i] = (currChannels[i] - 1);
-            printf("currChannels[i] is now %d which is \"%s\" with history: %s \n", currChannels[i], channelNames[currChannels[i]], chatHistories[currChannels[i]]);
+            // printf("currChannels[i] is now %d which is \"%s\" with history: %s \n", currChannels[i], channelNames[currChannels[i]], chatHistories[currChannels[i]]);
             if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
             if (write(to_client_list[i], chatHistories[currChannels[i]], MAX_CHAT) == -1) err();
           }
           else{
-            printf("OTHERWISE WE UPDATE I GUESS\n");
+            // printf("OTHERWISE WE UPDATE I GUESS\n");
             int flag = CHANGE_CHANNEL;
             if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
             if (write(to_client_list[i], chatHistories[currChannels[i]], MAX_CHAT) == -1) err();
@@ -434,7 +434,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         }
       }
       else{
-        printf("ELSE...\n");
+        // printf("ELSE...\n");
         *to_client = to_client_list[*index];
         // currChannels[*index] = channel_index;
         if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
@@ -447,7 +447,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
-      printf("WROTE CHANNEL LIST:\n%s\n", channelList);
+      // printf("WROTE CHANNEL LIST:\n%s\n", channelList);
     }
 
   }

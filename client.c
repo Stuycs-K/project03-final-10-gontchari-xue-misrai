@@ -61,7 +61,7 @@ int main() {
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
   if (read(from_server, &channelList, sizeof(channelList)) == -1) err();
-  printf("Read this channel list:\n %s", channelList);
+  // printf("Read this channel list:\n %s", channelList);
 
   FD_ZERO(&to_server_fd_set);
   FD_ZERO(&from_server_fd_set);
