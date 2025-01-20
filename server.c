@@ -414,9 +414,11 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
         for(int i = 0; i < *number_of_to_clients; i++){
           if(currChannels[i] == channel_index){
-            // printf("TRYING TO KICK OFF CLIENT WHO IS ON THIS CHANNEL\n");
+            printf("TRYING TO KICK OFF CLIENT #%d WHO IS ON THIS CHANNEL\n", i);
             if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
             if (write(to_client_list[i], chatHistories[0], MAX_CHAT) == -1) err();
+
+            currChannels[i] = 0;
           }
           else if(currChannels[i] > channel_index){
             // printf("SHIFTING INDEX IN STORAGE OF CHANNEL\n");
@@ -445,6 +447,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     for(int i = 0; i < *number_of_to_clients; i++){
       char * channelList = getChannelString(i);
       int flag = UPDATE_CHANNELS;
+      printf("Updated client #%d with new channel info:\n%s\n", i, channelList);
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
       // printf("WROTE CHANNEL LIST:\n%s\n", channelList);
