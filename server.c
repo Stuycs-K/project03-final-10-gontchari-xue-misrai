@@ -506,7 +506,7 @@ void handle_sigint(int sig) {
 // strcat(returner, " ");
 
 char * getChannelString(int index){
-  char * returner = (char *)calloc(MAX_CHAT, sizeof(char));
+  char * returner = (char *)calloc(MAX_NUM_CLIENTS, sizeof(char));
 
   int curr = currChannels[index];
   strcat(returner, channelNames[curr]);
