@@ -215,15 +215,21 @@ void handle_from_client(int *from_client, int *to_client, int *index,
 
 
   } else if (flag == CLOSE_CLIENT) {
+    printf("CLOSING CLIENT\n");
     // closes the client (both the to and from client descriptors) and downticks
     // the other trackers
     printf("[ " HYEL "SERVER" reset " ]: Client " HRED "DISCONNECT" reset "\n");
+    printf("PRE CLOSES\n");
     close(from_client_list[*index]);
     close(to_client_list[*index]);
-    for (int i = *index + 1; i < *number_of_to_clients; i++) {
+    printf("POST CLOSES\n");
+    for (int i = *index + 1; i <= *number_of_to_clients; i++) {
+      printf("START OF FOR LOOP\n");
       to_client_list[i - 1] = to_client_list[i];
+      printf("currChannels[i - 1] which was %d, will now be %d\n", currChannels[i-1], currChannels[i]);
+      currChannels[i - 1] = currChannels[i];
     }
-    for (int i = *index + 1; i < *number_of_from_clients; i++) {
+    for (int i = *index + 1; i <= *number_of_from_clients; i++) {
       from_client_list[i - 1] = from_client_list[i];
     }
     *number_of_from_clients -= 1;
