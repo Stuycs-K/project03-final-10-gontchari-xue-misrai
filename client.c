@@ -275,7 +275,7 @@ int main() {
       wattron(win_people, A_BOLD);
       wattron(win_people, COLOR_PAIR(5));
       mvwprintw(win_people, 0, 1, " Users ");
-      for (int i = 1; i <= num_users; i++) {
+      for (int i = 0; i <= num_users; i++) {
         mvwprintw(win_people, i+1, 1, "%s", client_names[i]);
       }
       wattroff(win_people, COLOR_PAIR(5));
