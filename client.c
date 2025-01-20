@@ -17,25 +17,38 @@
 // just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
 // I set it to max num clients, cause it doesn't have to be big and that macro
-// is only 500, so whatever
-char channelList[MAX_NUM_CLIENTS] = {0};
-char signature[256] = {0};
-char header_signature[256] = {0};
-char header[512] = {0};
-char *terminal_resize_prompt = "Resize your terminal";
+// is only 500, so whatever (THIS WAS IVANS COMMENT)
+char channelList[MAX_NUM_CLIENTS] = {0};  // the list of channels
+char signature[256] = {0};         // the signature used to header each message
+char header_signature[256] = {0};  // to signature used by the renderer
+char header[512] = {0};            // the header that is shown
+char *terminal_resize_prompt =
+    "Resize your terminal";  // the prompt used to help resize the terminal
+
+// these two are used to both store message sizes
 char buffer[MESSAGE_SIZE - 256 - 1] = {0};
 char displayed_buffer[MESSAGE_SIZE - 256 - 1] = {0};
+
+// the current index of the string
 int idx = 0;
+
+//  used to capture column input
 int ch;
+
+// how far to truncate to get the displayed buffer
 int col_shift = 4;
 
-int messedUp = 0;
-int min_height = 30, min_width = 60;
-int chat_open = 1;
-WINDOW *win_input, *win_chat, *win_people, *win_channel;
-int ROWS, COLS;
+int messedUp = 0;  // checking for
 
-// TODO: Changing channels and other channel functionalities
+// the min width and height for the screen
+int min_height = 20, min_width = 60;
+
+// this keeps track whether the resize or normal screen is on
+int chat_open = 1;
+
+// the windows
+WINDOW *win_input, *win_chat, *win_people, *win_channel;
+int ROWS, COLS;  // rows/ columns
 
 fd_set to_server_fd_set, from_server_fd_set;
 int from_server, to_server;
@@ -64,14 +77,13 @@ int main() {
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
-  printf("read chat\n");
   if (read(from_server, &channelList, sizeof(channelList)) == -1) err();
-  printf("read channel list\n");
+
   // printf("Read this channel list:\n %s", channelList);
-  write(to_server, &header_signature, strlen(header_signature));
+  if(write(to_server, &header_signature, strlen(header_signature)) == -1) err();
 
   // receive list of current clients
-  read(from_server, &num_users, sizeof(int));
+  if (read(from_server, &num_users, sizeof(int)) == -1) err();
 
   int current_user = 0;
   printf("%d\n", num_users);
@@ -292,7 +304,7 @@ int main() {
         }
 
         if (ch == '\n') {
-            // handles both commands and and 
+          // handles both commands and and
 
           messedUp = 0;
           int flag;
@@ -327,19 +339,13 @@ int main() {
                 strcat(message, channelName);
               } else {
                 messedUp = 1;
-                // TODO: what happens here if a command is not valid
-                // This is a placeholder print because I don't know the
-                // implications of putting this here printf("In error\n");
                 strcat(chat,
                        "That is not a valid command please use one "
                        "of:\n\t/create \"channel_name\"\n\t/switch "
                        "\"channel_name\"\n\t/remove \"channel_name\"\n");
                 strcat(chat, "  ");
-                // printf("That is not a valid command please use one
-                // of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
               }
             }
-
           } else {
             flag = SEND_MESSAGE;
             strcat(message, signature);
@@ -352,10 +358,8 @@ int main() {
           }
 
           idx = 0;
-
           buffer[0] = 0;
           displayed_buffer[0] = 0;
-
         } else if (ch == 27) {
           // If ESC pressed, clear the buffer
           idx = 0;
