@@ -329,6 +329,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     else{
       printf("ELSE...\n");
+      printf("currChannels[i] is %d which is \"%s\" with history: %s \n", currChannels[*index], channelNames[currChannels[*index]], chatHistories[currChannels[*index]]);
       *to_client = to_client_list[*index];
       // currChannels[*index] = channel_index;
       if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
@@ -371,13 +372,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         }
         number_of_channels -= 1;
 
-        // if(channel_index == currChannels[*index]){
-        //   currChannels[*index] = 0;
-        //   if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
-        // }
-        // else{
-        //   if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
-        // }
+        if(channel_index == currChannels[*index]){
+          currChannels[*index] = 0;
+          if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
+        }
+        else{
+          if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) == -1) err();
+        }
 
         for(int i = 0; i < *number_of_to_clients; i++){
           if(currChannels[i] == channel_index){
