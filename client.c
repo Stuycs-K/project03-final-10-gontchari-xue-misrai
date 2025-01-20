@@ -121,7 +121,7 @@ int main() {
   box(win_input, 0, 0);
   wattron(win_input, A_BOLD);
   wattron(win_input, COLOR_PAIR(2));
-  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
+  mvwprintw(win_input, 0, 1, " Input (ESC to clear) (Commands: /create; /switch; /remove)");
   wattroff(win_input, COLOR_PAIR(2));
   wattroff(win_input, A_BOLD);
   wmove(win_input, 1, 1 + strlen(displayed_buffer));
@@ -246,7 +246,7 @@ int main() {
       box(win_input, 0, 0);
       wattron(win_input, A_BOLD);
       wattron(win_input, COLOR_PAIR(2));
-      mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
+      mvwprintw(win_input, 0, 1, " Input (ESC to clear) (Commands: /create; /switch; /remove)");
       wattroff(win_input, COLOR_PAIR(2));
       wattroff(win_input, A_BOLD);
       wmove(win_input, 1, 1 + strlen(displayed_buffer));
@@ -511,7 +511,7 @@ void handle_resize(int sig) {
     box(win_input, 0, 0);
     wattron(win_input, A_BOLD);
     wattron(win_input, COLOR_PAIR(2));
-    mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
+    mvwprintw(win_input, 0, 1, " Input (ESC to clear) (Commands: /create; /switch; /remove)");
     wattroff(win_input, COLOR_PAIR(2));
     wattroff(win_input, A_BOLD);
     wmove(win_input, 1, 1 + strlen(displayed_buffer));
