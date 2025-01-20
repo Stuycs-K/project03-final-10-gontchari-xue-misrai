@@ -269,6 +269,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         }
     }
     */
+    int client_flag = REMOVED_CLIENT;
+    for (int current_client_index = 0; current_client_index < *number_of_to_clients; current_client_index++) {
+        if (current_client_index != *index) {
+            if (write(to_client_list[current_client_index], &client_flag, sizeof(client_flag)) == -1) err();
+            if (write(to_client_list[current_client_index], client_names[*index], strlen(client_names[*index])) == -1) err();
+        }
+    }
 
     // printf("POST CLOSES\n");
     for (int i = *index + 1; i <= *number_of_to_clients; i++) {
