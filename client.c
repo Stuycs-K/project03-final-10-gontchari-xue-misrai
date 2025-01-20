@@ -188,6 +188,8 @@ int main() {
       wresize(win_channel, (ROWS - 4) / 2, COLS / 4 - 1);
       mvwin(win_channel, 1, 0);
       werase(win_channel);
+      // MODIFIED
+      mvwprintw(win_channel, 1, 2, "%s", chat);
       box(win_channel, 0, 0);
       wattron(win_channel, A_BOLD);
       wattron(win_channel, COLOR_PAIR(4));
@@ -432,6 +434,8 @@ void handle_resize(int sig) {
     wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
     mvwin(win_channel, 1, 0);
     werase(win_channel);
+    //MODIFIED
+    mvwprintw(win_channel, 1, 2, "%s", chat);
     box(win_channel, 0, 0);
     wattron(win_channel, A_BOLD);
     wattron(win_channel, COLOR_PAIR(4));
