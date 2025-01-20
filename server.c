@@ -292,6 +292,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     strcpy(channelNames[number_of_channels - 1], channelName);
 
     printf("Client trying to create channel \"%s\".\n", channelName);
+    printf("Channel \"%s\" created at index %d \n", channelNames[number_of_channels - 1], number_of_channels - 1);
     // LINE TO CHANGE CURRENT CHANNEL OF THIS CLIENT TO BE THE ONE THEY CREATED???
     currChannels[*index] = number_of_channels - 1;
     printf("TRYING TO WRITE BACK TO CLIENT\n");
