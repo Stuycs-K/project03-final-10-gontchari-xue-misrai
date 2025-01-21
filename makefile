@@ -3,11 +3,12 @@ compile serv cli: server.o client.o networking.o colors.h
 	@gcc -o serv server.o networking.o -lncurses
 
 server: serv
+    @umask 0000
 	@./serv
 	@chmod -R 777 *
 
 client: cli
-	chmod -R 777 cli
+	@chmod -R 777 cli
 	@./cli
 
 client.o: client.c universal.h colors.h client.h
