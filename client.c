@@ -17,25 +17,38 @@
 // just to head off any strcat issues
 char chat[MAX_CHAT] = {0};
 // I set it to max num clients, cause it doesn't have to be big and that macro
-// is only 500, so whatever
-char channelList[MAX_NUM_CLIENTS] = {0};
-char signature[256] = {0};
-char header_signature[256] = {0};
-char header[512] = {0};
-char *terminal_resize_prompt = "Resize your terminal";
+// is only 500, so whatever (THIS WAS IVANS COMMENT)
+char channelList[MAX_NUM_CLIENTS] = {0};  // the list of channels
+char signature[256] = {0};         // the signature used to header each message
+char header_signature[256] = {0};  // to signature used by the renderer
+char header[512] = {0};            // the header that is shown
+char *terminal_resize_prompt =
+    "Resize your terminal";  // the prompt used to help resize the terminal
+
+// these two are used to both store message sizes
 char buffer[MESSAGE_SIZE - 256 - 1] = {0};
 char displayed_buffer[MESSAGE_SIZE - 256 - 1] = {0};
+
+// the current index of the string
 int idx = 0;
+
+//  used to capture column input
 int ch;
+
+// how far to truncate to get the displayed buffer
 int col_shift = 4;
 
-int messedUp = 0;
-int min_height = 30, min_width = 60;
-int chat_open = 1;
-WINDOW *win_input, *win_chat, *win_people, *win_channel;
-int ROWS, COLS;
+int messedUp = 0;  // checking for
 
-// TODO: Changing channels and other channel functionalities
+// the min width and height for the screen
+int min_height = 20, min_width = 60;
+
+// this keeps track whether the resize or normal screen is on
+int chat_open = 1;
+
+// the windows
+WINDOW *win_input, *win_chat, *win_people, *win_channel;
+int ROWS, COLS;  // rows/ columns
 
 fd_set to_server_fd_set, from_server_fd_set;
 int from_server, to_server;
@@ -64,14 +77,14 @@ int main() {
   printf("[ " HCYN "CLIENT" reset " ]: Client side done\n");
 
   if (read(from_server, &chat, sizeof(chat)) == -1) err();
-  printf("read chat\n");
   if (read(from_server, &channelList, sizeof(channelList)) == -1) err();
-  printf("read channel list\n");
+
   // printf("Read this channel list:\n %s", channelList);
-  write(to_server, &header_signature, strlen(header_signature));
+  if (write(to_server, &header_signature, strlen(header_signature)) == -1)
+    err();
 
   // receive list of current clients
-  read(from_server, &num_users, sizeof(int));
+  if (read(from_server, &num_users, sizeof(int)) == -1) err();
 
   int current_user = 0;
   printf("%d\n", num_users);
@@ -106,51 +119,12 @@ int main() {
 
   getmaxyx(stdscr, ROWS, COLS);
 
-  // Create two windows
+  // Create four windows
   //   the arguements are height, width, starty, startx
   win_chat = newwin(ROWS - 4, 3 * COLS / 4 + 1, 1, COLS / 4);
   win_channel = newwin((ROWS - 4) / 2, COLS / 4 - 1, 1, 0);
   win_people = newwin((ROWS - 4) / 2 + 1, COLS / 4 - 1, (ROWS - 4) / 2, 0);
   win_input = newwin(3, COLS, ROWS - 3, 0);
-
-  // Draw initial boxes
-  mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
-
-  box(win_channel, 0, 0);
-  wattron(win_channel, A_BOLD);
-  wattron(win_channel, COLOR_PAIR(4));
-  mvwprintw(win_channel, 0, 1, " Channels ");
-  wattroff(win_channel, COLOR_PAIR(4));
-  wattroff(win_channel, A_BOLD);
-  wrefresh(win_channel);
-
-  box(win_people, 0, 0);
-  wattron(win_people, A_BOLD);
-  wattron(win_people, COLOR_PAIR(5));
-  mvwprintw(win_people, 0, 1, " Users ");
-  for (int i = 0; i < num_users; i++) {
-    mvwprintw(win_people, i, 1, "%s", client_names[i]);
-  }
-  wattroff(win_people, COLOR_PAIR(5));
-  wattroff(win_people, A_BOLD);
-  wrefresh(win_people);
-
-  box(win_chat, 0, 0);
-  wattron(win_chat, A_BOLD);
-  wattron(win_chat, COLOR_PAIR(1));
-  mvwprintw(win_chat, 0, 1, " Chat ");
-  wattroff(win_chat, COLOR_PAIR(1));
-  wattroff(win_chat, A_BOLD);
-  wrefresh(win_chat);
-
-  box(win_input, 0, 0);
-  wattron(win_input, A_BOLD);
-  wattron(win_input, COLOR_PAIR(2));
-  mvwprintw(win_input, 0, 1, " Input (ESC to clear) ");
-  wattroff(win_input, COLOR_PAIR(2));
-  wattroff(win_input, A_BOLD);
-  wmove(win_input, 1, 1 + strlen(displayed_buffer));
-  wrefresh(win_input);
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
@@ -214,13 +188,13 @@ int main() {
         if (read(from_server, name_buffer, 256) == -1) err();
         int remove_index;
         for (int i = 0; i < num_users; i++) {
-            if (strcmp(client_names[i], name_buffer) == 0) {
-                remove_index = i;
-                break;
-            }
+          if (strcmp(client_names[i], name_buffer) == 0) {
+            remove_index = i;
+            break;
+          }
         }
-        for (int j = remove_index; j < num_users-1; j++) {
-            strcpy(client_names[j], client_names[j+1]);
+        for (int j = remove_index; j < num_users - 1; j++) {
+          strcpy(client_names[j], client_names[j + 1]);
         }
         num_users -= 1;
       } else if (flag == CLOSE_SERVER) {
@@ -289,7 +263,7 @@ int main() {
       wattron(win_people, COLOR_PAIR(5));
       mvwprintw(win_people, 0, 1, " Users ");
       for (int i = 0; i < num_users; i++) {
-        mvwprintw(win_people, i, 1, "%s", client_names[i]);
+        mvwprintw(win_people, i + 1, 1, "%s", client_names[i]);
       }
       wattroff(win_people, COLOR_PAIR(5));
       wattroff(win_people, A_BOLD);
@@ -331,53 +305,25 @@ int main() {
         }
 
         if (ch == '\n') {
+          // handles both commands and and
+
           messedUp = 0;
           int flag;
-          // For example, you could "submit" the buffer here
-          // We'll just clear it
-          // TODO send message to server
-          char message[MESSAGE_SIZE] = {0};
 
-          // printf("USER DID INPUT STARTING WITH: %c : THIS\n", buffer[0]);
-          // if the user is trying to use a command
+          char message[MESSAGE_SIZE] = {0};
           if (buffer[0] == '/') {
-            // printf("HERE!!!\n");
             char *line = buffer;
             char *args[5];
-            // printf("Pre parse args\n");
             parse_args(buffer, args);
-            // printf(" post parse args\n");
-            // Does this actually work?
-            if (sizeof(args) < 2) {
+
+            if (sizeof(args) < 2 || (sizeof(args) > 2 && args[2] != NULL)) {
               messedUp = 1;
-              // printf("In error\n");
-              // printf("\nNOT ENOUGH ARGS\n\n");
-              // \"channel_name\"
-              // strcat(chat, "Did not provide a channel name for a second
-              // argument.\n");
               strcat(chat,
                      "That is not a valid command please use one "
                      "of:\n\t/create \"channel_name\"\n\t/switch "
                      "\"channel_name\"\n\t/remove \"channel_name\"\n");
               strcat(chat, "  ");
-              // printf("Did not provide a channel name for a second
-              // argument.\n");
-            } else if (sizeof(args) > 2 && args[2] != NULL) {
-              messedUp = 1;
-              // printf("0: %s\n", args[0]);
-              // printf("1: %s\n", args[1]);
-              // printf("2: %s\n", args[2]);
-              // printf("3: %s\n", args[3]);
-              // printf("In error\n");
-              strcat(chat,
-                     "That is not a valid command please use one "
-                     "of:\n\t/create \"channel_name\"\n\t/switch "
-                     "\"channel_name\"\n\t/remove \"channel_name\"\n");
-              strcat(chat, "  ");
-              // strcat(chat, "You must provide only 2 arguments: the command,
-              // and the channel name to be used for the command.\n");
-              // printf("You must provide only 2 arguments: the command, and the
-              // channel name to be used for the command.\n");
+
             } else {
               char *command = args[0];
               char *channelName = args[1];
@@ -394,19 +340,13 @@ int main() {
                 strcat(message, channelName);
               } else {
                 messedUp = 1;
-                // TODO: what happens here if a command is not valid
-                // This is a placeholder print because I don't know the
-                // implications of putting this here printf("In error\n");
                 strcat(chat,
                        "That is not a valid command please use one "
                        "of:\n\t/create \"channel_name\"\n\t/switch "
                        "\"channel_name\"\n\t/remove \"channel_name\"\n");
                 strcat(chat, "  ");
-                // printf("That is not a valid command please use one
-                // of:\n\t/createChannel\n\t/changeChannel\n\t/closeChannel\n");
               }
             }
-
           } else {
             flag = SEND_MESSAGE;
             strcat(message, signature);
@@ -419,10 +359,8 @@ int main() {
           }
 
           idx = 0;
-
           buffer[0] = 0;
           displayed_buffer[0] = 0;
-
         } else if (ch == 27) {
           // If ESC pressed, clear the buffer
           idx = 0;
@@ -433,7 +371,7 @@ int main() {
           if (idx > 0) {
             buffer[--idx] = '\0';
           }
-          //   update the displayed buffer display the
+          /// update the displayed buffer display the
           // last number of characters in the buffer equal to the number of
           // columns - col_shift
           displayed_buffer[0] = '\0';
@@ -532,79 +470,11 @@ void handle_resize(int sig) {
     displayed_buffer[COLS - col_shift] = '\0';
   }
 
-  if (chat_open == 1) {
-    endwin();
-    refresh();
-    clear();
-    getmaxyx(stdscr, ROWS, COLS);
+  endwin();
+  refresh();
+  clear();
 
-    if (strlen(displayed_buffer) > COLS - col_shift) {
-      strncpy(displayed_buffer, buffer + strlen(buffer) - (COLS - col_shift),
-              COLS - col_shift);
-      displayed_buffer[COLS - col_shift] = '\0';
-    }
-
-    attron(COLOR_PAIR(3));
-    mvprintw(0, (COLS - strlen(header)) / 2, "%s", header);
-    attroff(COLOR_PAIR(3));
-
-    wresize(win_channel, (ROWS - 4) / 2, COLS / 4);
-    mvwin(win_channel, 1, 0);
-    werase(win_channel);
-    box(win_channel, 0, 0);
-    wattron(win_channel, A_BOLD);
-    wattron(win_channel, COLOR_PAIR(4));
-    mvwprintw(win_channel, 0, 1, " Channels ");
-    wattroff(win_channel, COLOR_PAIR(4));
-    wattroff(win_channel, A_BOLD);
-    wrefresh(win_channel);
-
-    wresize(win_people, (ROWS - 4) / 2, COLS / 4);
-    mvwin(win_people, (ROWS - 4) / 2 + 1, 0);
-    werase(win_people);
-    box(win_people, 0, 0);
-    wattron(win_people, A_BOLD);
-    wattron(win_people, COLOR_PAIR(5));
-    mvwprintw(win_people, 0, 1, " Users ");
-    for (int i = 0; i < num_users; i++) {
-      mvwprintw(win_people, i, 1, "%s", client_names[i]);
-    }
-    wattroff(win_people, COLOR_PAIR(5));
-    wattroff(win_people, A_BOLD);
-    wrefresh(win_people);
-
-    wresize(win_chat, ROWS - 4, 3 * COLS / 4 + 1);
-    mvwin(win_chat, 1, COLS / 4);
-    werase(win_chat);
-    mvwprintw(win_chat, 1, 2, "%s", chat);
-    box(win_chat, 0, 0);
-    wattron(win_chat, A_BOLD);
-    wattron(win_chat, COLOR_PAIR(1));
-    mvwprintw(win_chat, 0, 1, " Chat ");
-    wattroff(win_chat, COLOR_PAIR(1));
-    wattroff(win_chat, A_BOLD);
-    wrefresh(win_chat);
-
-    // 2) Update the input window
-    wresize(win_input, 3, COLS);
-    mvwin(win_input, ROWS - 3, 0);
-    werase(win_input);
-    mvwprintw(win_input, 1, 1, "%s", displayed_buffer);
-    box(win_input, 0, 0);
-    wattron(win_input, A_BOLD);
-    wattron(win_input, COLOR_PAIR(2));
-    mvwprintw(win_input, 0, 2, " Input (ESC to clear) ");
-    wattroff(win_input, COLOR_PAIR(2));
-    wattroff(win_input, A_BOLD);
-    wmove(win_input, 1, 1 + strlen(displayed_buffer));
-    wrefresh(win_input);
-
-    refresh();
-    scrollok(win_chat, TRUE);
-    scrollok(win_people, TRUE);
-    scrollok(win_channel, TRUE);
-    scrollok(win_input, TRUE);
-  } else if (chat_open == 0) {
+  if (chat_open == 0) {
     endwin();
     refresh();
     clear();
