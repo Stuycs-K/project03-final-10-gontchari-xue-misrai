@@ -28,9 +28,8 @@ int number_of_channels = 1;
 char *chatHistories[MAX_NUM_CHANNELS];
 // the lost of channel names
 char *channelNames[MAX_NUM_CHANNELS];
-// the list of channme;ls 
+// the list of channme;ls
 int currChannels[MAX_NUM_CLIENTS];
-
 
 int main() {
   // handle the sigpipe and signit signals
@@ -194,12 +193,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     // write the chat history of the general chat to the client
     printf("[ " HYEL "SERVER" reset " ]: Client " HGRN "CONNECTED" reset "\n");
     if (write(*to_client, chatHistories[0], MAX_CHAT) == -1) err();
-    
+
     // write the list of current channels to the client
     char *channelList = getChannelString(*index);
     if (write(*to_client, channelList, MAX_NUM_CLIENTS) == -1) err();
 
-    if (read(*from_client, &(client_names[*number_of_to_clients]), 256) == -1) err();
+    if (read(*from_client, &(client_names[*number_of_to_clients]), 256) == -1)
+      err();
 
     // end the THREE WAY HANDSHAKE
     // add the new file descriptors to the list (the fd_sets will be
@@ -210,7 +210,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     (*number_of_to_clients)++;
 
-   if( write(*to_client, number_of_to_clients, sizeof(int)) == -1) err();
+    if (write(*to_client, number_of_to_clients, sizeof(int)) == -1) err();
 
     // write the client names to the user
     int user = 0;
@@ -228,7 +228,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       if (write(to_client_list[current_client_index], &client_flag,
                 sizeof(flag)) == -1)
         err();
-
 
       if (write(to_client_list[current_client_index],
                 client_names[*number_of_to_clients - 1],
@@ -258,15 +257,20 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     close(to_client_list[*index]);
     // send disconnect message
     int client_flag = REMOVED_CLIENT;
-    for (int current_client_index = 0; current_client_index < *number_of_to_clients; current_client_index++) {
-        if (current_client_index != *index) {
-            if (write(to_client_list[current_client_index], &client_flag, sizeof(client_flag)) == -1) err();
-            if (write(to_client_list[current_client_index], client_names[*index], strlen(client_names[*index])) == -1) err();
-        }
+    for (int current_client_index = 0;
+         current_client_index < *number_of_to_clients; current_client_index++) {
+      if (current_client_index != *index) {
+        if (write(to_client_list[current_client_index], &client_flag,
+                  sizeof(client_flag)) == -1)
+          err();
+        if (write(to_client_list[current_client_index], client_names[*index],
+                  strlen(client_names[*index])) == -1)
+          err();
+      }
     }
 
-    for (int j = *index; j<*number_of_to_clients; j++) {
-        strcpy(client_names[j], client_names[j+1]);
+    for (int j = *index; j < *number_of_to_clients; j++) {
+      strcpy(client_names[j], client_names[j + 1]);
     }
 
     // update the number of clients
@@ -293,7 +297,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     strcat(chatHistories[currChannels[*index]], message);
     strcat(chatHistories[currChannels[*index]], "\n ");
     strcat(chatHistories[currChannels[*index]], " ");
-
 
     if (x > 0) {
       printf("[" HMAG " SERVER " reset "]: Client sent a message: %s!\n",
@@ -485,7 +488,7 @@ void handle_from_client(int *from_client, int *to_client, int *index,
           }
         }
       } else {
-        // 
+        //
         *to_client = to_client_list[*index];
         if (write(*to_client, chatHistories[currChannels[*index]], MAX_CHAT) ==
             -1)
@@ -493,13 +496,13 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       }
     }
 
-    // CHANNEL DISPLAY IMPLEMENTATION; will update the client on the number of channels
+    // CHANNEL DISPLAY IMPLEMENTATION; will update the client on the number of
+    // channels
     for (int i = 0; i < *number_of_to_clients; i++) {
       char *channelList = getChannelString(i);
       int flag = UPDATE_CHANNELS;
       if (write(to_client_list[i], &flag, sizeof(flag)) == -1) err();
       if (write(to_client_list[i], channelList, MAX_NUM_CLIENTS) == -1) err();
-
     }
   }
   // add the nonblock
@@ -559,15 +562,16 @@ void handle_sigint(int sig) {
   exit(0);
 }
 
-
 /*=========================
   getChannelString
-  args: 
+  args:
     int index
 
-    generates a string that will be sent over to the client to be rendered
+    generates a string that will be sent over to the client to be rendered;
+  contains the formatted "channel string"
 
-  returns a (char *) with the channel string that will be rendered for each client
+  returns a (char *) with the channel string that will be rendered for each
+  client
   =========================*/
 char *getChannelString(int index) {
   char *returner = (char *)calloc(MAX_NUM_CLIENTS, sizeof(char));

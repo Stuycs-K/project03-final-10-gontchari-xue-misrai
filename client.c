@@ -458,6 +458,16 @@ int main() {
   return 0;
 }
 
+/*=========================
+  handle_resize
+  args:
+    int sig
+
+    handles resizes through rerendering the windows, also does some sizing
+  checks
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void handle_resize(int sig) {
   getmaxyx(stdscr, ROWS, COLS);
 
@@ -520,6 +530,16 @@ void handle_resize(int sig) {
   }
 }
 
+/*=========================
+  handle_sigint
+  args:
+    int sig
+
+    handles sigints through notifying server and also closes file descriptors
+  and the ncurses window
+
+  returns ABSOLUTELY NOTHING, exits the program
+  =========================*/
 void handle_sigint(int sig) {
   int flag = CLOSE_CLIENT;
   if (write(to_server, &flag, sizeof(flag)) == -1) err();
