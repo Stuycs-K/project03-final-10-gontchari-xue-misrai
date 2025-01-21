@@ -87,13 +87,11 @@ int main() {
   if (read(from_server, &num_users, sizeof(int)) == -1) err();
 
   int current_user = 0;
-  printf("%d\n", num_users);
   while (current_user < num_users) {
     printf("%d\n", current_user);
     size_t len;
     read(from_server, &len, sizeof(len));
     read(from_server, &(client_names[current_user]), len);
-    printf("%s\n", client_names[current_user]);
     current_user += 1;
   }
 
@@ -181,7 +179,6 @@ int main() {
         // printf("RECIEVED CHANNEL LIST:\n%s\n", channelList);
       } else if (flag == NEW_CLIENT) {
         if (read(from_server, &(client_names[num_users]), 256) == -1) err();
-        // printf("New client detected: %s\n", client_names[num_users]);
         num_users += 1;
       } else if (flag == REMOVED_CLIENT) {
         char name_buffer[256];

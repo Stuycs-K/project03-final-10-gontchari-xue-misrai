@@ -215,11 +215,9 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     // write the client names to the user
     int user = 0;
     while (user < *number_of_to_clients) {
-    //   printf("%d\n", user);
       size_t len = strlen(client_names[user]);
       if (write(*to_client, &len, sizeof(len)) == -1) err();
       if (write(*to_client, client_names[user], len) == -1) err();
-    //   printf("%s\n", client_names[user]);
       user += 1;
     }
 
