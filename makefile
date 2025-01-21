@@ -3,7 +3,6 @@ compile serv cli: server.o client.o networking.o colors.h
 	@gcc -o serv server.o networking.o -lncurses
 
 server: serv
-    @umask 0000
 	@chmod -R 777 *
 	@./serv
 
