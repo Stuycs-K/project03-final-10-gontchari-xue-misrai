@@ -1,10 +1,10 @@
 compile serv cli: server.o client.o networking.o colors.h
 	@gcc -o cli client.o networking.o -lncurses
 	@gcc -o serv server.o networking.o -lncurses
-	@chmod -R 777 *.o
 
 server: serv
 	@./serv
+	@chmod -R 777 *.o
 
 client: cli
 	chmod -R 777 cli
