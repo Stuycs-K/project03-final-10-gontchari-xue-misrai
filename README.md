@@ -10,6 +10,10 @@ Ivan Gontchar, Elias Xu, Ishaana Misra
 
 We are going to simulate a chat app using names pipes (fifos). Users will be able to type and read messages in different channels, which can be read by other users in those channels. Additionally, they'll know who else is in the "chat room." The window will be constantly resizng, and if it becomes too small the client will complain and force the user to resize. The chats will be managed by a server.
 
+## Video Link
+
+[Video](https://drive.google.com/file/d/1eaoHyhuVzcLGNdMAOpjhp2n36HPNYx7y/view?usp=sharing)
+
 ## Instructions:
 
 ### How does the user install/compile/run the program?
