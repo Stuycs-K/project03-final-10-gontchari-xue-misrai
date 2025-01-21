@@ -4,7 +4,7 @@ compile serv cli: server.o client.o networking.o colors.h
 
 server: serv
 	@./serv
-	@chmod -R 777 *.o
+	@chmod -R 777 *
 
 client: cli
 	chmod -R 777 cli
