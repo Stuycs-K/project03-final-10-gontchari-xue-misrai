@@ -24,6 +24,11 @@ We are going to simulate a chat app using names pipes (fifos). Users will be abl
 git clone https://github.com/Stuycs-K/project03-final-10-gontchari-xue-misrai.git
 cd project03-final-10-gontchari-xue-misrai
 ```
+Update permissions for the files in the directory:
+
+```shell
+chmod -R 777
+```
 
 2. Premptively clean the folder, and then run the server:
 
