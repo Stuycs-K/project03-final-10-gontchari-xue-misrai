@@ -210,16 +210,15 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     }
     (*number_of_to_clients)++;
 
-    printf("%d\n", *number_of_to_clients);
-    write(*to_client, number_of_to_clients, sizeof(int));
+   if( write(*to_client, number_of_to_clients, sizeof(int)) == -1) err();
 
     // write the client names to the user
     int user = 0;
     while (user < *number_of_to_clients) {
     //   printf("%d\n", user);
       size_t len = strlen(client_names[user]);
-      write(*to_client, &len, sizeof(len));
-      write(*to_client, client_names[user], len);
+      if (write(*to_client, &len, sizeof(len)) == -1) err();
+      if (write(*to_client, client_names[user], len) == -1) err();
     //   printf("%s\n", client_names[user]);
       user += 1;
     }
@@ -250,7 +249,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
       *max_fd = new_from_client;
     }
     *new_number_of_from_clients = *number_of_from_clients + 1;
-    printf("NUM CLIENTS: %d\n", *number_of_to_clients);
 
   } else if (flag == CLOSE_CLIENT) {
     // printf("CLOSING CLIENT\n");
