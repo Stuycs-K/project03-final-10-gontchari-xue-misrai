@@ -316,7 +316,15 @@ int main() {
             char *args[5];
             parse_args(buffer, args);
 
-            if (sizeof(args) < 2 || (sizeof(args) > 2 && args[2] != NULL)) {
+            if (sizeof(args) < 2) {
+              messedUp = 1;
+              strcat(chat,
+                     "That is not a valid command please use one "
+                     "of:\n\t/create \"channel_name\"\n\t/switch "
+                     "\"channel_name\"\n\t/remove \"channel_name\"\n");
+              strcat(chat, "  ");
+
+            } else if (sizeof(args) > 2 && args[2] != NULL) {
               messedUp = 1;
               strcat(chat,
                      "That is not a valid command please use one "
