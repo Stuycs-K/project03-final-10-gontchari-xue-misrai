@@ -267,6 +267,10 @@ void handle_from_client(int *from_client, int *to_client, int *index,
         }
     }
 
+    for (int j = *index; j<*number_of_to_clients; j++) {
+        strcpy(client_names[j], client_names[j+1]);
+    }
+
     // update the number of clients
     for (int i = *index + 1; i <= *number_of_to_clients; i++) {
       to_client_list[i - 1] = to_client_list[i];
