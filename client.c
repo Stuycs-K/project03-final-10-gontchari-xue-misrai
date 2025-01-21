@@ -80,7 +80,8 @@ int main() {
   if (read(from_server, &channelList, sizeof(channelList)) == -1) err();
 
   // printf("Read this channel list:\n %s", channelList);
-  if(write(to_server, &header_signature, strlen(header_signature)) == -1) err();
+  if (write(to_server, &header_signature, strlen(header_signature)) == -1)
+    err();
 
   // receive list of current clients
   if (read(from_server, &num_users, sizeof(int)) == -1) err();
@@ -187,13 +188,13 @@ int main() {
         if (read(from_server, name_buffer, 256) == -1) err();
         int remove_index;
         for (int i = 0; i < num_users; i++) {
-            if (strcmp(client_names[i], name_buffer) == 0) {
-                remove_index = i;
-                break;
-            }
+          if (strcmp(client_names[i], name_buffer) == 0) {
+            remove_index = i;
+            break;
+          }
         }
-        for (int j = remove_index; j < num_users-1; j++) {
-            strcpy(client_names[j], client_names[j+1]);
+        for (int j = remove_index; j < num_users - 1; j++) {
+          strcpy(client_names[j], client_names[j + 1]);
         }
         num_users -= 1;
       } else if (flag == CLOSE_SERVER) {
@@ -262,7 +263,7 @@ int main() {
       wattron(win_people, COLOR_PAIR(5));
       mvwprintw(win_people, 0, 1, " Users ");
       for (int i = 0; i < num_users; i++) {
-        mvwprintw(win_people, i, 1, "%s", client_names[i]);
+        mvwprintw(win_people, i + 1, 1, "%s", client_names[i]);
       }
       wattroff(win_people, COLOR_PAIR(5));
       wattroff(win_people, A_BOLD);

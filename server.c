@@ -261,18 +261,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
     close(from_client_list[*index]);
     close(to_client_list[*index]);
     // send disconnect message
-<<<<<<< HEAD
-    /*
-    int client_flag = NEW_CLIENT;
-    for (int current_client_index = 0; current_client_index <
-    *number_of_to_clients; current_client_index++) { if (current_client_index !=
-    *index) { if (write(to_client_list[current_client_index], &client_flag,
-    sizeof(flag)) == -1) err(); if (write(to_client_list[current_client_index],
-    client_names[current_client_index],
-    strlen(client_names[current_client_index])) == -1) err();
-        }
-    }
-    */
     int client_flag = REMOVED_CLIENT;
     for (int current_client_index = 0; current_client_index < *number_of_to_clients; current_client_index++) {
         if (current_client_index != *index) {
@@ -280,8 +268,6 @@ void handle_from_client(int *from_client, int *to_client, int *index,
             if (write(to_client_list[current_client_index], client_names[*index], strlen(client_names[*index])) == -1) err();
         }
     }
-=======
->>>>>>> a42694e (add more documentation and error checking)
 
     // update the number of clients
     for (int i = *index + 1; i <= *number_of_to_clients; i++) {
