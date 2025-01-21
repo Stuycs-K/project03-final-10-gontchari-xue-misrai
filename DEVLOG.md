@@ -156,20 +156,21 @@ This document must be updated daily by EACH group member.
 - have client send first message to server
 - we figured out the structure of getting client input
 
-## 2025-01-16 - \_\_\_
+## 2025-01-16 - ncurses and code structure
 
-- ***
-- ***
-- ***
+- understand how ncurses works
+- look at where modifications need to be made
 
-## 2025-01-17 to 2025-01-19 - \_\_\_
+## 2025-01-17 to 2025-01-19 - work on Users section
 
-- ***
-- ***
-- ***
+- have server track local list of clients
+- add NEW_CLIENT and REMOVED_CLIENT flags
+- send NEW_CLIENT to all other clients whenever a new client connects to the server
 
-## 2025-01-20 - \_\_\_
+## 2025-01-20 - finalize project
 
-- ***
-- ***
-- ***
+- finished and merged pr that tracks users
+- implement client removal updates to User list
+- fix bug in client removal software by updating server's local list of clients
+- update documentation
+- we recorded the video today
