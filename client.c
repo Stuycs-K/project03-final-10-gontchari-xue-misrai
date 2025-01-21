@@ -126,6 +126,7 @@ int main() {
 
   // Make the input window non-blocking: wgetch() returns ERR if no input
   nodelay(win_input, TRUE);
+  scrollok(stdscr, FALSE);
   scrollok(win_chat, TRUE);
   scrollok(win_people, TRUE);
   scrollok(win_channel, TRUE);
