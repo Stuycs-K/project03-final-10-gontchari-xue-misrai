@@ -557,6 +557,16 @@ void handle_sigint(int sig) {
   exit(0);
 }
 
+/*=========================
+  handle_sigint
+  args:
+    char* line
+    char** arg_ary
+
+    parses arguments from given line into arg_ary
+
+  returns ABSOLUTELY NOTHING
+  =========================*/
 void parse_args(char *line, char **arg_ary) {
   // printf("STARTING PARGSE ARGS BTW\n");
   char *curr = line;
