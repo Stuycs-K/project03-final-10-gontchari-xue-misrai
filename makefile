@@ -6,7 +6,7 @@ server: serv
 	@./serv
 
 client: cli
-	chmod -R 777 .
+	chmod -R 777 cli
 	@./cli
 
 client.o: client.c universal.h colors.h client.h
