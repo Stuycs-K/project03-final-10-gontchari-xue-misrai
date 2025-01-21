@@ -316,7 +316,7 @@ int main() {
             char *args[5];
             parse_args(buffer, args);
 
-            if (sizeof(args) < 2) {
+            if (sizeof(args) < 2 || args[1] == NULL) {
               messedUp = 1;
               strcat(chat,
                      "That is not a valid command please use one "
