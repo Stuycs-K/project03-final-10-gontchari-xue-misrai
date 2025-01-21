@@ -128,7 +128,7 @@ int main() {
   wattron(win_people, A_BOLD);
   wattron(win_people, COLOR_PAIR(5));
   mvwprintw(win_people, 0, 1, " Users ");
-  for (int i = 0; i <= num_users; i++) {
+  for (int i = 0; i < num_users; i++) {
     mvwprintw(win_people, i, 1, "%s", client_names[i]);
   }
   wattroff(win_people, COLOR_PAIR(5));
@@ -209,6 +209,20 @@ int main() {
         if (read(from_server, &(client_names[num_users]), 256) == -1) err();
         // printf("New client detected: %s\n", client_names[num_users]);
         num_users += 1;
+      } else if (flag == REMOVED_CLIENT) {
+        char name_buffer[256];
+        if (read(from_server, name_buffer, 256) == -1) err();
+        int remove_index;
+        for (int i = 0; i < num_users; i++) {
+            if (strcmp(client_names[i], name_buffer) == 0) {
+                remove_index = i;
+                break;
+            }
+        }
+        for (int j = remove_index; j < num_users-1; j++) {
+            strcpy(client_names[j], client_names[j+1]);
+        }
+        num_users -= 1;
       } else if (flag == CLOSE_SERVER) {
         delwin(win_chat);
         delwin(win_input);
@@ -274,8 +288,8 @@ int main() {
       wattron(win_people, A_BOLD);
       wattron(win_people, COLOR_PAIR(5));
       mvwprintw(win_people, 0, 1, " Users ");
-      for (int i = 0; i <= num_users; i++) {
-        mvwprintw(win_people, i + 1, 1, "%s", client_names[i]);
+      for (int i = 0; i < num_users; i++) {
+        mvwprintw(win_people, i, 1, "%s", client_names[i]);
       }
       wattroff(win_people, COLOR_PAIR(5));
       wattroff(win_people, A_BOLD);
@@ -552,7 +566,7 @@ void handle_resize(int sig) {
     wattron(win_people, A_BOLD);
     wattron(win_people, COLOR_PAIR(5));
     mvwprintw(win_people, 0, 1, " Users ");
-    for (int i = 1; i <= num_users; i++) {
+    for (int i = 0; i < num_users; i++) {
       mvwprintw(win_people, i, 1, "%s", client_names[i]);
     }
     wattroff(win_people, COLOR_PAIR(5));
