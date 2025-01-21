@@ -4,8 +4,8 @@ compile serv cli: server.o client.o networking.o colors.h
 
 server: serv
     @umask 0000
-	@./serv
 	@chmod -R 777 *
+	@./serv
 
 client: cli
 	@chmod -R 777 cli
